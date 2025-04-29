@@ -1,0 +1,3 @@
+com\ufms\eventos\controller\EventoController.class
+com\ufms\eventos\model\Evento.class
+com\ufms\eventos\view\MainView.class
