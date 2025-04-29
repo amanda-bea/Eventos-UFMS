@@ -1,11 +1,10 @@
-CODEWONERS @amanda-bea
+CODEWONERS @amanda-bea @MaduGoncalves @anaottoni
 
 # Frontend
-/src/frontend/ @user
-
-# Backend
-/src/backend/ @user
+\src\main\java\com\ufms\eventos\view @anaottoni @MaduGoncalves
 
 # Documentação
 /docs/ @user
- * @amanda-bea
+
+# all
+ * @user
