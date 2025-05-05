@@ -27,7 +27,7 @@ public class MainView extends Application {
         adicionarButton.setOnAction(e -> {
             String nome = nomeField.getText();
             String data = dataField.getText();
-            controller.adicionarEvento(new Evento(nome, data));
+            //controller.adicionarEvento(new Evento(nome, data));
             nomeField.clear();
             dataField.clear();
         });
