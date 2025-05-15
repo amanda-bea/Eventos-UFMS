@@ -50,6 +50,7 @@ public class Admin extends Usuario {
         // Rejeitar o evento
         evento.setStatus("Rejeitado");
         System.out.println("O evento foi rejeitado.");
+        //talvez colocar um motivo de rejeição aqui para ser enviado ao organizador
     }
 
 
