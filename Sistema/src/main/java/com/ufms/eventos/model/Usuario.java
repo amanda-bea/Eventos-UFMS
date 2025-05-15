@@ -26,6 +26,15 @@ public class Usuario {
         // Construtor padrão
     }
 
+    @Override
+    public String toString() {
+        return "Usuário{" +
+                "nome='" + nome + '\'' +
+                "telefone='" + telefone + '\'' +
+                ", email='" + email + '\'' +
+                ", senha='" + senha + '\'' +
+                '}';
+    }
     // Métodos para Organizador de Eventos
 
     // Mostrar todos os eventos do sistema

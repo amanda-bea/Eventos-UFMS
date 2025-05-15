@@ -1,7 +1,9 @@
 package com.ufms.eventos.model;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = true) //tenho que ver oq é isso depois
 public class Admin extends Usuario {
     private String cargo; // só pra exemplo
 

@@ -1,10 +1,11 @@
-package com.ufms.eventos.model;
+package com.ufms.eventos.dto;
+
 import lombok.Data;
 import java.util.HashMap;
 import java.util.Map;
 
 @Data
-public class FormularioInscricao {
+public class FormularioDTO {
     // Atributos padrão
     private String nome;
     private String email;
@@ -12,18 +13,18 @@ public class FormularioInscricao {
     private String cpf;
     private Map<String, String> camposExtras = new HashMap<>(); // Campos dinâmicos do formulário
 
-    public FormularioInscricao(String nome, String email, String telefone, String cpf) {
+    public FormularioDTO(String nome, String email, String telefone, String cpf) {
         this.nome = nome;
         this.email = email;
         this.telefone = telefone;
         this.cpf = cpf;
     }
 
-    public FormularioInscricao() {
+    public FormularioDTO() {
         // Construtor padrão
     }
 
-    // Método para adicionar campos dinâmicos ao formulário
+    // Método para adicionar campos dinâmicos ao formulário ISSO NÃO VAI FICAR NESSA CAMADA
     public void adicionarCampo(String campo, String valor) {
         camposExtras.put(campo, valor);
         System.out.println("Campo adicionado: " + campo + " com valor: " + valor);

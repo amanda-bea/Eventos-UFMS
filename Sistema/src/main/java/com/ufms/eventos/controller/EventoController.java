@@ -1,10 +1,12 @@
 package com.ufms.eventos.controller;
 
 import com.ufms.eventos.model.Evento;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class EventoController {
+
     private List<Evento> eventos;
 
     public EventoController() {
@@ -16,6 +18,6 @@ public class EventoController {
     }
 
     public List<Evento> listarEventos() {
-        return eventos;
+        return new ArrayList<>(eventos);
     }
 }

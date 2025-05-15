@@ -57,6 +57,8 @@ public class Evento {
         this.status = status;
     }
 
+    public Evento(){}
+
     //status deve ser "Ativo", "Inativo", "Cancelado" de acordo com a data e se foi cancelado
     //pelo organizador ou não
     //ele também pode ser "aguardando aprovação", se foi aprovado também é ativo

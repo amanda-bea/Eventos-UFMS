@@ -58,7 +58,7 @@ public class Acao {
         this.imagem = imagem;
         this.link = link;
         this.status = status;
-        }
+    }
 
 }
 
