@@ -1,9 +1,13 @@
 package com.ufms.eventos.repository;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.time.LocalTime;
+import java.time.LocalDate;
 
 import com.ufms.eventos.model.Evento;
+import com.ufms.eventos.model.Organizador;
 
 public class EventoRepository {
     private HashSet<Evento> eventos;
@@ -17,6 +21,18 @@ public class EventoRepository {
     }
 
     public boolean addEvento(Evento evento) {
+        return this.eventos.add(evento);
+    }
+
+    public boolean addEvento(String nome, String data, String descricao, String local, String horarioInicio,
+                              String horarioFim, Organizador organizador, String departamento, String contato,
+                              String modalidade, String categoria, String imagem, String link, int capacidade) {
+        // tratar os dados de entrada
+        // converter data, horarioInicio e horarioFim para os tipos apropriados
+        LocalDate d = LocalDate.parse(data);
+        LocalTime hi = LocalTime.parse(horarioInicio);
+        LocalTime hf = LocalTime.parse(horarioFim);
+        Evento evento = new Evento(nome, d, descricao, local, hi, hf, organizador, departamento, contato, modalidade, categoria, imagem, link, capacidade);
         return this.eventos.add(evento);
     }
 

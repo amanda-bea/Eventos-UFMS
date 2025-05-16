@@ -18,6 +18,10 @@ public class Organizador extends Usuario {
         // Construtor padrão
     }
 
+    public Organizador(String nome) { //arrumar isso aqui
+        this.nome = nome;
+    }
+
     @Override
     public String toString() {
         return "Organizador{" +

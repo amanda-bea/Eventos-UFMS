@@ -12,7 +12,7 @@ public class Evento {
     private String local;
     private LocalTime horarioInicio; // Atualizado para LocalTime
     private LocalTime horarioFim; // Atualizado para LocalTime
-    private String organizador;
+    private Organizador organizador;
     private String departamento;
     private String contato; // Formato: telefone ou e-mail
     private String modalidade; // Presencial
@@ -22,15 +22,16 @@ public class Evento {
     private String status; // Ativo, Inativo, Cancelado, etc.
     private int capacidade; // Capacidade do evento (opcional)
 
-    public Evento(String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim, String organizador,
-                  String departamento, String contato, String modalidade, String categoria, String imagem, String link, int capacidade) {
+    public Evento(String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim, 
+                  Organizador organizador, String departamento, String contato, String modalidade, String categoria, String imagem, 
+                  String link, int capacidade) {
         this.nome = nome;
         this.data = data;
         this.descricao = descricao;
         this.local = local;
         this.horarioInicio = horarioInicio;
         this.horarioFim = horarioFim;
-        this.organizador = organizador;
+        this.organizador = organizador; // Presumindo que o organizador é um objeto do tipo Organizador, reeb nome do organzador como string
         this.departamento = departamento;
         this.contato = contato;
         this.modalidade = modalidade;
@@ -40,15 +41,15 @@ public class Evento {
         this.capacidade = capacidade;
     }
 
-    public Evento(String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim, String organizador, String contato,
-                  String modalidade, String categoria, String imagem, String link, String status) {
+    public Evento(String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim, 
+                  String organizador, String contato, String modalidade, String categoria, String imagem, String link, String status) {
         this.nome = nome;
         this.data = data;
         this.descricao = descricao;
         this.local = local;
         this.horarioInicio = horarioInicio;
         this.horarioFim = horarioFim;
-        this.organizador = organizador;
+        this.organizador = new Organizador(organizador);;
         this.contato = contato;
         this.modalidade = modalidade;
         this.categoria = categoria;
@@ -67,8 +68,5 @@ public class Evento {
     //confirmar inscrição/presença
     //cancelar inscrição/presença
 
-    public void Inscricao() {
-        // Lógica para inscrição no evento
-        System.out.println("Inscrição realizada com sucesso para o evento: " + nome);
-    }
+    
 }

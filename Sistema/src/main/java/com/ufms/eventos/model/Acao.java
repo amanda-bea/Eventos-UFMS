@@ -13,7 +13,7 @@ public class Acao {
     private String local;
     private LocalTime horarioInicio; // Atualizado para LocalTime
     private LocalTime horarioFim; // Atualizado para LocalTime
-    private String organizador;
+    private Organizador organizador;
     private String departamento;
     private String contato; // Formato: telefone ou e-mail
     private String modalidade; // Presencial
@@ -23,9 +23,10 @@ public class Acao {
     private String status; // Ativo, Inativo, Cancelado, etc.
     private int capacidade; // Capacidade do evento (opcional)
 
-    public Acao(Evento evento, String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim, String organizador,
+    public Acao(Evento evento, String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim, Organizador organizador,
                String departamento, String contato, String modalidade, String categoria, String imagem, String link, int capacidade) {
-    this.evento = evento;
+    this.evento = new Evento(nome, data, descricao, local, horarioInicio, horarioFim, organizador, departamento, contato, modalidade, categoria, imagem, link, capacidade);
+    // acima verficar se ação vai criar um evento com mesmos dados da ação
     this.nome = nome;
     this.data = data;
     this.descricao = descricao;
@@ -51,7 +52,7 @@ public class Acao {
         this.local = local;
         this.horarioInicio = horarioInicio;
         this.horarioFim = horarioFim;
-        this.organizador = organizador;
+        this.organizador = new Organizador(organizador);
         this.contato = contato;
         this.modalidade = modalidade;
         this.categoria = categoria;
