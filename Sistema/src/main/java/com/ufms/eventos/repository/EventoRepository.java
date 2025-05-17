@@ -24,17 +24,35 @@ public class EventoRepository {
         return this.eventos.add(evento);
     }
 
+    //unica função otimizada
     public boolean addEvento(String nome, String data, String descricao, String local, String horarioInicio,
-                              String horarioFim, Organizador organizador, String departamento, String contato,
-                              String modalidade, String categoria, String imagem, String link, int capacidade) {
-        // tratar os dados de entrada
-        // converter data, horarioInicio e horarioFim para os tipos apropriados
+                             String horarioFim, Organizador organizador, String departamento, String contato,
+                             String modalidade, String categoria, String imagem, String link, int capacidade) {
+    // Verifica se já existe evento com mesmo nome
+    boolean existe = eventos.stream()
+        .anyMatch(e -> e.getNome().equalsIgnoreCase(nome));
+    if (existe) {
+        System.out.println("Evento com esse nome já existe.");
+        return false;
+    }
+
+    try {
         LocalDate d = LocalDate.parse(data);
         LocalTime hi = LocalTime.parse(horarioInicio);
         LocalTime hf = LocalTime.parse(horarioFim);
-        Evento evento = new Evento(nome, d, descricao, local, hi, hf, organizador, departamento, contato, modalidade, categoria, imagem, link, capacidade);
+
+        Evento evento = new Evento(nome, d, descricao, local, hi, hf, organizador, departamento,
+                                   contato, modalidade, categoria, imagem, link, capacidade);
+
+        evento.setStatus("Aguardando aprovação"); // status inicial
+
         return this.eventos.add(evento);
+    } catch (Exception e) {
+        System.out.println("Erro ao adicionar evento: " + e.getMessage());
+        return false;
     }
+}
+
 
     public boolean removeEvento(Evento evento) {
         return this.eventos.remove(evento);

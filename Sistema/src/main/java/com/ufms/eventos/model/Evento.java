@@ -21,6 +21,7 @@ public class Evento {
     private String link; // Link para inscrição ou mais informações (opcional)
     private String status; // Ativo, Inativo, Cancelado, etc.
     private int capacidade; // Capacidade do evento (opcional)
+    private String mensagemRejeicao;
 
     public Evento(String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim, 
                   Organizador organizador, String departamento, String contato, String modalidade, String categoria, String imagem, 
@@ -60,9 +61,19 @@ public class Evento {
 
     public Evento(){}
 
-    //status deve ser "Ativo", "Inativo", "Cancelado" de acordo com a data e se foi cancelado
-    //pelo organizador ou não
-    //ele também pode ser "aguardando aprovação", se foi aprovado também é ativo
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Evento evento = (Evento) o;
+        return nome != null && nome.equalsIgnoreCase(evento.nome);
+    }
+
+    @Override
+    public int hashCode() {
+        return nome == null ? 0 : nome.toLowerCase().hashCode();
+    }
+
 
     //metodos de inscrrição
     //confirmar inscrição/presença

@@ -1,10 +1,21 @@
+//CAMADA QUE FAZ A INTERAÇÃO ENTRE O CONTROLLER E O REPOSITORY
+//CAMADA DE SERVIÇO
+//FAZ A REQUISIÇÃO DOS DADOS DO BANCO DE DADOS COM O REPOSITORY
+//CONTÉM A LÓGICA/CASOS DE USO
+
 package com.ufms.eventos.services;
 
+import com.ufms.eventos.model.Evento;
 import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.repository.AcaoRepository;
 import com.ufms.eventos.repository.EventoRepository;
 import com.ufms.eventos.repository.UsuarioRepository;
 import com.ufms.eventos.repository.OrganizadorRepository;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.HashSet;
+
 import com.ufms.eventos.dto.EventoDTO;
 
 public class EventoService {
@@ -51,5 +62,16 @@ public class EventoService {
             eventoDTO.getCapacidade()
         );
     }
+
+    // listar todos os eventios na tela inicial
+    public List<EventoDTO> buscarEventosAtivos() {
+        HashSet<Evento> eventos = er.getEventos();
+
+        return eventos.stream()
+                .filter(e -> "Ativo".equalsIgnoreCase(e.getStatus()))
+                .map(EventoDTO::new)
+                .collect(Collectors.toList());
+    }
+
 }
 

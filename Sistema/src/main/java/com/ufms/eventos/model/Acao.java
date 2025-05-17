@@ -61,6 +61,21 @@ public class Acao {
         this.status = status;
     }
 
+    public Acao(){}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Acao acao = (Acao) o;
+        return nome != null && nome.equalsIgnoreCase(acao.nome);
+    }
+
+    @Override
+    public int hashCode() {
+        return nome == null ? 0 : nome.toLowerCase().hashCode();
+    }
+
 }
 
 

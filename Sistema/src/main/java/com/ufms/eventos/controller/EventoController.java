@@ -1,3 +1,7 @@
+// CAMADA QUE FAZ A INTERAÇÃO COM A VIEW USANDO DTOS
+// CAMADA DE CONTROLE
+// AQUI FAZ A REQUISIÇÃO PRA SERVICE DE ACORDO COM O QUE O USUÁRIO SOLICITAR
+
 package com.ufms.eventos.controller;
 
 import com.ufms.eventos.model.Evento;
