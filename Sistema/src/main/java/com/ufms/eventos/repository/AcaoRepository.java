@@ -33,7 +33,7 @@ public class AcaoRepository {
         return false;
     }
 
-    public Acao geAcao(String nome) { // mudar ideia depois
+    public Acao getAcao(String nome) { // mudar ideia depois
         Iterator<Acao> iterator = this.acoes.iterator();
 
         Acao acao = null;
@@ -45,5 +45,17 @@ public class AcaoRepository {
             }
         }
         return acao;
+    }
+
+    public boolean deleteAcao(String nome) {
+        Iterator<Acao> iterator = this.acoes.iterator();
+        while (iterator.hasNext()) {
+            Acao acao = iterator.next();
+            if (acao.getNome() == nome) {
+                iterator.remove();
+                return true;
+            }
+        }
+        return false;
     }
 }

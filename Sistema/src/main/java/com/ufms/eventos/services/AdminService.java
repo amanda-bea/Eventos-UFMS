@@ -11,30 +11,33 @@ public class AdminService {
         this.er = er;
     }
 
-    public void aprovarEvento(String nomeEvento) {
+    public boolean aprovarEvento(String nomeEvento) {
         Evento evento = er.getEvento(nomeEvento);
         if (evento == null) {
             throw new RuntimeException("Evento não encontrado");
         }
         evento.setStatus("Ativo");
+        return true;
     }
 
-    public void rejeitarEvento(String nomeEvento, String motivo) {
+    public boolean rejeitarEvento(String nomeEvento, String motivo) {
         Evento evento = er.getEvento(nomeEvento);
         if (evento == null) {
             throw new RuntimeException("Evento não encontrado");
         }
         evento.setStatus("Rejeitado");
         evento.setMensagemRejeicao(motivo);
+        return true;
     }
 
-    public void cancelarEvento(String nomeEvento, String motivo) {
+    public boolean cancelarEvento(String nomeEvento, String motivo) {
         Evento evento = er.getEvento(nomeEvento);
         if (evento == null) {
             throw new RuntimeException("Evento não encontrado");
         }
         evento.setStatus("Cancelado");
         evento.setMensagemRejeicao(motivo);
+        return true;
     }
     
     public void listarEventosAguardando() {

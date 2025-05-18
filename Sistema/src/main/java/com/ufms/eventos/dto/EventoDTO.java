@@ -1,9 +1,7 @@
 package com.ufms.eventos.dto;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import com.ufms.eventos.model.Evento;
-import com.ufms.eventos.model.Organizador;
 import lombok.Data;
 
 @Data

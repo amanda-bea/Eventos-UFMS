@@ -1,37 +1,52 @@
-// CAMADA QUE FAZ A INTERAÇÃO COM A VIEW USANDO DTOS
-// CAMADA DE CONTROLE
-// AQUI FAZ A REQUISIÇÃO PRA SERVICE DE ACORDO COM O QUE O USUÁRIO SOLICITAR
-
 package com.ufms.eventos.controller;
 
-import com.ufms.eventos.model.Evento;
+import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.dto.EventoDTO;
-import com.ufms.eventos.model.Usuario;
+import com.ufms.eventos.services.AdminService;
 import com.ufms.eventos.services.EventoService;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class EventoController {
 
-    private List<Evento> eventos;
     private EventoService eventoService;
+    private AdminService adminService;
 
     public EventoController() {
-        this.eventos = new ArrayList<>();
         this.eventoService = new EventoService();
     }
 
-    public boolean addEvento(EventoDTO eventoDTO, Usuario usuario) {
-        String nomeOrganizador = usuario.getNome(); // ou getId()
-        return eventoService.addEvento(eventoDTO, nomeOrganizador);
+    // Solicita um novo evento (status: aguardando aprovação)
+    public boolean solicitarEvento(EventoDTO eventoDTO, Organizador organizador) {
+        return eventoService.solicitarEvento(eventoDTO, organizador);
     }
 
-    public void addEvento(Evento evento) {
-        eventos.add(evento);
+    // Aprova um evento (status: ativo)
+    public boolean aprovarEvento(String nomeEvento) {
+        return adminService.aprovarEvento(nomeEvento);
     }
 
-    public List<Evento> listarEventos() {
-        return new ArrayList<>(eventos);
+    // Rejeita um evento (status: rejeitado)
+    public boolean rejeitarEvento(String nomeEvento, String mensagemRejeicao) {
+        return adminService.rejeitarEvento(nomeEvento, mensagemRejeicao);
     }
+
+    // Edita uma solicitação de evento (apenas se ainda não aprovado)
+    //public boolean editarSolicitacaoEvento(String nomeEvento, EventoDTO eventoDTO, Usuario usuario) {
+    //    return eventoService.editarSolicitacaoEvento(nomeEvento, eventoDTO, usuario);
+    //}
+
+    // Exclui uma solicitação de evento (apenas se ainda não aprovado)
+    //public boolean excluirSolicitacaoEvento(String nomeEvento, Usuario usuario) {
+    //    return eventoService.excluirSolicitacaoEvento(nomeEvento, usuario);
+    //}
+
+    // Lista todos os eventos aguardando aprovação
+    public void listarEventosAguardando() {
+        adminService.listarEventosAguardando();
+    }
+
+    // Lista todas os eventos aprovados
+    public void listarEventosAtivos() {
+        adminService.listarEventosAtivos();
+    }
+    
 }
