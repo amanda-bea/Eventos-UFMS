@@ -1,6 +1,9 @@
+C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\controller\AdminController.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\controller\EventoController.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\controller\FormularioController.java
+C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\dto\EventoDTO.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\dto\FormularioDTO.java
+C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\dto\SolicitacaoEventoDTO.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\model\Acao.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\model\Admin.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\model\Evento.java
@@ -9,9 +12,12 @@ C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eve
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\model\Participante.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\model\Usuario.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\repository\AcaoRepository.java
+C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\repository\AdminRepository.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\repository\EventoRepository.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\repository\FormularioRepository.java
+C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\repository\OrganizadorRepository.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\repository\UsuarioRepository.java
-C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\services\EventoServico.java
+C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\services\AdminService.java
+C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\services\EventoService.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\services\FormularioService.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\view\FormularioView.java
