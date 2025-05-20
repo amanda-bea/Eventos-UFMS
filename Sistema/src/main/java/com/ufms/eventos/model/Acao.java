@@ -23,44 +23,27 @@ public class Acao {
     private String status; // Ativo, Inativo, Cancelado, etc.
     private int capacidade; // Capacidade do evento (opcional)
 
-    public Acao(Evento evento, String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim, Organizador organizador,
-               String departamento, String contato, String modalidade, String categoria, String imagem, String link, int capacidade) {
-    this.evento = new Evento(nome, data, descricao, local, horarioInicio, horarioFim, organizador, departamento, contato, modalidade, categoria, imagem, link, capacidade);
-    // acima verficar se ação vai criar um evento com mesmos dados da ação
-    this.nome = nome;
-    this.data = data;
-    this.descricao = descricao;
-    this.local = local;
-    this.horarioInicio = horarioInicio;
-    this.horarioFim = horarioFim;
-    this.organizador = organizador;
-    this.departamento = departamento;
-    this.contato = contato;
-    this.modalidade = modalidade;
-    this.categoria = categoria;
-    this.imagem = imagem;
-    this.link = link;
-    this.capacidade = capacidade;
-    }
-
-    public Acao(Evento evento, String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim, String organizador, String contato,
-               String modalidade, String categoria, String imagem, String link, String status) {
+    //arrumar isso aqui depois
+    public Acao(Evento evento, String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim,
+                Organizador organizador, String departamento, String contato, String modalidade, String categoria, String imagem, 
+                String link, int capacidade, String status, String mensagemRejeicao) {
         this.evento = evento;
+        // acima verficar se ação vai criar um evento com mesmos dados da ação
         this.nome = nome;
         this.data = data;
         this.descricao = descricao;
         this.local = local;
         this.horarioInicio = horarioInicio;
         this.horarioFim = horarioFim;
-        this.organizador = new Organizador(organizador);
+        this.organizador = organizador;
+        this.departamento = departamento;
         this.contato = contato;
         this.modalidade = modalidade;
         this.categoria = categoria;
         this.imagem = imagem;
         this.link = link;
-        this.status = status;
+        this.capacidade = capacidade;
     }
-
     public Acao(){}
 
     @Override

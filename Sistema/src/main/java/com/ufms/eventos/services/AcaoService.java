@@ -5,6 +5,10 @@ import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.repository.AcaoRepository;
 import com.ufms.eventos.repository.EventoRepository;
 import com.ufms.eventos.repository.OrganizadorRepository;
+import com.ufms.eventos.model.Evento;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashSet;
 
 public class AcaoService {
@@ -23,30 +27,14 @@ public class AcaoService {
         return acaoRepository.addAcao(acao);
     }
 
-    public boolean addAcao(String nome, String data, String descricao, String local, String horarioInicio,
-                      String horarioFim, Organizador organizador, String departamento, String contato,
-                      String modalidade, String categoria, String imagem, String link, int capacidade) {
-    organizadorRepository.addOrganizador(organizador);
-    return acaoRepository.addAcao(
-        new Acao(
-            null, // evento, se necessário
-            nome,
-            java.time.LocalDate.parse(data),
-            descricao,
-            local,
-            java.time.LocalTime.parse(horarioInicio),
-            java.time.LocalTime.parse(horarioFim),
-            organizador,
-            departamento,
-            contato,
-            modalidade,
-            categoria,
-            imagem,
-            link,
-            capacidade
-        )
-    );
-}
+    public boolean addAcao(Evento evento, String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio,
+            LocalTime horarioFim, Organizador organizador, String departamento, String contato, String modalidade,
+            String categoria, String imagem, String link, int capacidade, String status, String mensagemRejeicao) {
+        // Adiciona a ação ao repositório
+        Acao acao = new Acao(evento, nome, data, descricao, local, horarioInicio, horarioFim, organizador, departamento,
+                             contato, modalidade, categoria, imagem, link, capacidade, status, mensagemRejeicao);
+        return acaoRepository.addAcao(acao);
+    }
 
     public HashSet<Acao> getAcoes() {
         // Retorna todas as ações do repositório

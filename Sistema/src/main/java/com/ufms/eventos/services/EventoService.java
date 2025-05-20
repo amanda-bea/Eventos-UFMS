@@ -59,31 +59,26 @@ public class EventoService {
     }
 
     public boolean solicitarEvento(EventoDTO eventoDTO, Organizador organizador) {
-    // Adiciona o organizador ao repositório, se necessário
-    this.or.addOrganizador(organizador);
+        // Adiciona o organizador ao repositório, se necessário
+        this.or.addOrganizador(organizador);
 
-    // Converte os campos de String para os tipos corretos
-    java.time.LocalDate data = java.time.LocalDate.parse(eventoDTO.getData());
-    java.time.LocalTime horarioInicio = java.time.LocalTime.parse(eventoDTO.getHorarioInicio());
-    java.time.LocalTime horarioFim = java.time.LocalTime.parse(eventoDTO.getHorarioFim());
+        // Converte os campos de String para os tipos corretos
+        java.time.LocalDate dataInicio = java.time.LocalDate.parse(eventoDTO.getDataInicio());
+        java.time.LocalDate dataFim = java.time.LocalDate.parse(eventoDTO.getDataFim());
 
-    // Adiciona o evento ao repositório, incluindo o organizador
-    return this.er.addEvento(
-        eventoDTO.getNome(),
-        data,
-        eventoDTO.getDescricao(),
-        eventoDTO.getLocal(),
-        horarioInicio,
-        horarioFim,
-        organizador,
-        eventoDTO.getDepartamento(),
-        eventoDTO.getContato(),
-        eventoDTO.getModalidade(),
-        eventoDTO.getCategoria(),
-        eventoDTO.getImagem(),
-        eventoDTO.getLink(),
-        eventoDTO.getCapacidade()
-    );
+        // Adiciona o evento ao repositório, incluindo o organizador
+        return this.er.addEvento(
+            eventoDTO.getNome(),
+            dataInicio,
+            dataFim,
+            eventoDTO.getDescricao(),
+            organizador,
+            eventoDTO.getDepartamento(),
+            eventoDTO.getCategoria(),
+            eventoDTO.getImagem(),
+            eventoDTO.getLink()
+            
+        );
     }
 
 }

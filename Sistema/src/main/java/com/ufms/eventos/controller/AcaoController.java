@@ -1,5 +1,7 @@
 package com.ufms.eventos.controller;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashSet;
 import com.ufms.eventos.model.Acao;
 import com.ufms.eventos.model.Organizador;
@@ -16,23 +18,35 @@ public class AcaoController {
     }
 
     public boolean addAcao(AcaoDTO acaoDTO, Organizador organizador) {
+    // Converte os campos do DTO para os tipos corretos
+    LocalDate data = LocalDate.parse(acaoDTO.getData());
+    LocalTime horarioInicio = LocalTime.parse(acaoDTO.getHorarioInicio());
+    LocalTime horarioFim = LocalTime.parse(acaoDTO.getHorarioFim());
+
+    // Define status e mensagem de rejeição iniciais
+    String status = "Aguardando aprovação";
+    String mensagemRejeicao = null;
+
     return acaoService.addAcao(
+        null, // ou passe um Evento se necessário
         acaoDTO.getNome(),
-        acaoDTO.getData(),
+        data,
         acaoDTO.getDescricao(),
         acaoDTO.getLocal(),
-        acaoDTO.getHorarioInicio(),
-        acaoDTO.getHorarioFim(),
-        organizador, // passa o objeto organizador
+        horarioInicio,
+        horarioFim,
+        organizador,
         acaoDTO.getDepartamento(),
         acaoDTO.getContato(),
         acaoDTO.getModalidade(),
         acaoDTO.getCategoria(),
         acaoDTO.getImagem(),
         acaoDTO.getLink(),
-        Integer.parseInt(acaoDTO.getCapacidade())
+        Integer.parseInt(acaoDTO.getCapacidade()),
+        status,
+        mensagemRejeicao
     );
-    }
+}
 
     public HashSet<Acao> getAcoes() {
         return acaoService.getAcoes();

@@ -16,16 +16,11 @@ public class Admin extends Usuario {
         // Exibir informações do evento
         System.out.println("Detalhes do evento:");
         System.out.println("Nome: " + evento.getNome());
-        System.out.println("Data: " + evento.getData());
+        System.out.println("Data de Início: " + evento.getDataInicio());
+        System.out.println("Data de Fim: " + evento.getDataFim());
         System.out.println("Descrição: " + evento.getDescricao());
-        System.out.println("Local: " + evento.getLocal());
-        System.out.println("Horário de Início: " + evento.getHorarioInicio());
-        System.out.println("Horário de Fim: " + evento.getHorarioFim());
         System.out.println("Organizador: " + evento.getOrganizador());
-        System.out.println("Contato: " + evento.getContato());
-        System.out.println("Modalidade: " + evento.getModalidade());
         System.out.println("Categoria: " + evento.getCategoria());
-        System.out.println("Capacidade: " + evento.getCapacidade());
         System.out.println("Status Atual: " + evento.getStatus());
     
         // Confirmar o evento
@@ -37,22 +32,19 @@ public class Admin extends Usuario {
         // Exibir informações do evento
         System.out.println("Detalhes do evento:");
         System.out.println("Nome: " + evento.getNome());
-        System.out.println("Data: " + evento.getData());
+        System.out.println("Data de Início: " + evento.getDataInicio());
+        System.out.println("Data de Fim: " + evento.getDataFim());
         System.out.println("Descrição: " + evento.getDescricao());
-        System.out.println("Local: " + evento.getLocal());
-        System.out.println("Horário de Início: " + evento.getHorarioInicio());
-        System.out.println("Horário de Fim: " + evento.getHorarioFim());
         System.out.println("Organizador: " + evento.getOrganizador());
-        System.out.println("Contato: " + evento.getContato());
-        System.out.println("Modalidade: " + evento.getModalidade());
         System.out.println("Categoria: " + evento.getCategoria());
-        System.out.println("Capacidade: " + evento.getCapacidade());
         System.out.println("Status Atual: " + evento.getStatus());
     
         // Rejeitar o evento
         evento.setStatus("Rejeitado");
         System.out.println("O evento foi rejeitado.");
-        //talvez colocar um motivo de rejeição aqui para ser enviado ao organizador
+        // Perguntar o motivo da rejeição
+        
+        System.out.println("Motivo da rejeição: " + evento.getMensagemRejeicao());
     }
 
 

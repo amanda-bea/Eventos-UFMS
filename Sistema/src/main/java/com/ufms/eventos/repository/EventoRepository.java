@@ -2,7 +2,6 @@ package com.ufms.eventos.repository;
 
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.time.LocalTime;
 
 import com.ufms.eventos.model.Evento;
 import com.ufms.eventos.model.Organizador;
@@ -19,12 +18,16 @@ public class EventoRepository {
         return this.eventos.add(evento);
     }
 
-    public boolean addEvento(String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio,
-        LocalTime horarioFim, Organizador organizador, String departamento, String contato, String modalidade,
-        String categoria, String imagem, String link, int capacidade) {
-    Evento evento = new Evento(nome, data, descricao, local, horarioInicio, horarioFim, organizador,
-            departamento, contato, modalidade, categoria, imagem, link, capacidade);
-    return this.eventos.add(evento);
+    public boolean addEvento(String nome, LocalDate dataInicio, LocalDate dataFim, String descricao, Organizador organizador, 
+                             String departamento, String categoria, String imagem, String link, String status, String mensagemRejeicao) {
+        Evento evento = new Evento(nome, dataInicio, dataFim, descricao, organizador, departamento, categoria, imagem, link, status, mensagemRejeicao);
+        return this.eventos.add(evento);
+    }
+
+    public boolean addEvento(String nome, LocalDate dataInicio, LocalDate dataFim, String descricao, Organizador organizador, 
+                             String departamento, String categoria, String imagem, String link) {
+        Evento evento = new Evento(nome, dataInicio, dataFim, descricao, organizador, departamento, categoria, imagem, link);
+        return this.eventos.add(evento);
     }
 
     // Remove evento ou solicitação
