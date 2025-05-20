@@ -1,23 +1,43 @@
 package com.ufms.eventos.repository;
 
-import com.ufms.eventos.model.Formulario; //ideia do chat, vou estudar isso aqui ainda
-
+import com.ufms.eventos.model.Formulario; //nadaaa a ver isso aqui ainda não sei o fazer
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class FormularioRepository {
 
-    private final List<Formulario> banco = new ArrayList<>();
-    private final AtomicLong idGenerator = new AtomicLong(1);
+    private List<Formulario> formularios;
 
-    public Formulario salvar(Formulario inscricao) {
-        inscricao.setId(idGenerator.getAndIncrement());
-        banco.add(inscricao);
-        return inscricao;
+    public FormularioRepository() {
+        this.formularios = new ArrayList<>();
     }
 
-    public List<Formulario> listarTodas() {
-        return banco;
+    public Formulario addFormulario(Formulario formulario) {
+        formularios.add(formulario);
+        return formulario;
     }
+
+    public Formulario updateFormulario(Long id, Formulario formularioAtualizado) {
+        for (int i = 0; i < formularios.size(); i++) {
+            if (formularios.get(i).getId() == id) {
+                formularios.set(i, formularioAtualizado);
+                return formularioAtualizado;
+            }
+        }
+        return null;
+    }
+
+    public Formulario getFormulario(Long id) {
+        for (Formulario formulario : formularios) {
+            if (formulario.getId() == id) {
+                return formulario;
+            }
+        }
+        return null;
+    }
+
+    public List<Formulario> getFormularios() {
+        return formularios;
+    }
+
 }

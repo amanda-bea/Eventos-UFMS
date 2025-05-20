@@ -2,7 +2,6 @@ package com.ufms.eventos.model;
 
 import lombok.Data;
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Data
 public class Evento {
@@ -11,8 +10,8 @@ public class Evento {
     private LocalDate dataFim;
     private String descricao;
     private Organizador organizador;
-    private String departamento;
-    private String categoria; // Ex: Cultura, Educação, Saúde, etc.
+    private Departamento departamento;
+    private Categoria categoria; // Ex: Cultura, Educação, Saúde, etc.
     private String imagem; // URL da imagem do evento
     private String link; // Link para inscrição ou mais informações (opcional)
     private String status; // Ativo, Inativo, Cancelado, etc.
@@ -20,8 +19,8 @@ public class Evento {
 
     public Evento(){}
 
-    public Evento(String nome, LocalDate dataInicio, LocalDate dataFim, String descricao, Organizador organizador, String departamento, 
-                  String categoria, String imagem, String link, String status, String mensagemRejeicao) {
+    public Evento(String nome, LocalDate dataInicio, LocalDate dataFim, String descricao, Organizador organizador, Departamento departamento, 
+                  Categoria categoria, String imagem, String link, String status, String mensagemRejeicao) {
         this.nome = nome;
         this.dataInicio = dataInicio;
         this.dataFim = dataFim;
@@ -35,8 +34,8 @@ public class Evento {
         this.mensagemRejeicao = mensagemRejeicao;
     }
 
-    public Evento(String nome, LocalDate dataInicio, LocalDate dataFim, String descricao, Organizador organizador, String departamento, 
-                  String categoria, String imagem, String link) {
+    public Evento(String nome, LocalDate dataInicio, LocalDate dataFim, String descricao, Organizador organizador, 
+                  Departamento departamento, Categoria categoria, String imagem, String link) {
         this.nome = nome;
         this.dataInicio = dataInicio;
         this.dataFim = dataFim;

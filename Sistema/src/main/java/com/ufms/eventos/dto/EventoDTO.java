@@ -40,20 +40,17 @@ public class EventoDTO {
         this.link = evento.getLink();
     }
 
-    public EventoDTO(Evento evento) { // construtor de cópia
+    public EventoDTO(Evento evento) {
         this.nome = evento.getNome();
         this.descricao = evento.getDescricao();
-        //tratar data e horarioInicio e horarioFim
-        this.dataInicio = evento.getDataInicio().toString(); // converter LocalDate para String
-        this.dataFim = evento.getDataFim().toString(); // converter LocalDate para String
-        //this.organizador = evento.getOrganizador(); não sei se precisa
-        this.departamento = evento.getDepartamento();
-        this.categoria = evento.getCategoria();
+        this.dataInicio = evento.getDataInicio().toString();
+        this.dataFim = evento.getDataFim().toString();
+        // Converte enums para String usando .name()
+        this.departamento = evento.getDepartamento().name();
+        this.categoria = evento.getCategoria().name();
         this.imagem = evento.getImagem();
         this.link = evento.getLink();
-        //this.status = evento.getStatus();
     }
-
     public EventoDTO(){}
 
     public boolean validate() {

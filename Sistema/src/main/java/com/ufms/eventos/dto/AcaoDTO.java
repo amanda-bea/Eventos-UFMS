@@ -92,10 +92,10 @@ public class AcaoDTO {
         this.local = acao.getLocal();
         this.horarioInicio = acao.getHorarioInicio().toString();
         this.horarioFim = acao.getHorarioFim().toString();
-        this.departamento = acao.getDepartamento();
+        this.departamento = acao.getDepartamento().name();
         this.contato = acao.getContato();
         this.modalidade = acao.getModalidade();
-        this.categoria = acao.getCategoria();
+        this.categoria = acao.getCategoria().name();
         this.imagem = acao.getImagem();
         this.link = acao.getLink();
         this.status = acao.getStatus();

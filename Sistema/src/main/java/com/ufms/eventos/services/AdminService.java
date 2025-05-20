@@ -1,5 +1,10 @@
 package com.ufms.eventos.services;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.model.Evento;
 import com.ufms.eventos.repository.EventoRepository;
 
@@ -7,8 +12,8 @@ public class AdminService {
 
     private EventoRepository er;
 
-    public AdminService(EventoRepository er) {
-        this.er = er;
+    public AdminService() {
+        this.er = new EventoRepository();
     }
 
     public boolean aprovarEvento(String nomeEvento) {
@@ -40,20 +45,20 @@ public class AdminService {
         return true;
     }
     
-    public void listarEventosAguardando() {
-        for (Evento evento : er.getEventos()) {
-            if (evento.getStatus().equals("Aguardando Aprovação")) {
-                System.out.println(evento);
-            }
-        }
+    public List<EventoDTO> listarEventosAguardando() {
+        HashSet<Evento> eventos = er.getEventos();
+        return eventos.stream()
+                .filter(e -> "Aguardando aprovação".equalsIgnoreCase(e.getStatus()))
+                .map(EventoDTO::new)
+                .collect(Collectors.toList());
     }
 
-    public void listarEventosAtivos() {
-        for (Evento evento : er.getEventos()) {
-            if (evento.getStatus().equals("Ativo")) {
-                System.out.println(evento);
-            }
-        }
+    public List<EventoDTO> listarEventosAtivos() {
+        HashSet<Evento> eventos = er.getEventos();
+        return eventos.stream()
+                .filter(e -> "Ativo".equalsIgnoreCase(e.getStatus()))
+                .map(EventoDTO::new)
+                .collect(Collectors.toList());
     }
 
 }
