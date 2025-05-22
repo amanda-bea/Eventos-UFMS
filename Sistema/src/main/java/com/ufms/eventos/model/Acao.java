@@ -4,6 +4,8 @@ import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import com.ufms.eventos.dto.AcaoDTO;
+
 @Data
 public class Acao {
     private Evento evento;
@@ -18,15 +20,15 @@ public class Acao {
     private String modalidade; // Presencial
     private String imagem; // URL da imagem do evento
     private String link; // Link para mais informações (opcional)
-    private String status; // Ativo, Inativo, Cancelado, etc.
+    private String status; // Ativo, Inativo, Cancelado, Aguardando aprovação, Lotado, Rejeitado.
     private int capacidade; // Capacidade do evento (opcional)
+    private String mensagemRejeicao; // Mensagem de rejeição (opcional)
 
     //arrumar isso aqui depois
     public Acao(Evento evento, String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim,
                 Departamento departamento, String contato, String modalidade, String imagem, 
                 String link, int capacidade, String status, String mensagemRejeicao) {
         this.evento = evento;
-        // acima verficar se ação vai criar um evento com mesmos dados da ação
         this.nome = nome;
         this.data = data;
         this.descricao = descricao;
@@ -39,8 +41,27 @@ public class Acao {
         this.imagem = imagem;
         this.link = link;
         this.capacidade = capacidade;
+        this.status = status;
+        this.mensagemRejeicao = mensagemRejeicao;
     }
-    public Acao(){}
+
+    public Acao(){
+    }
+
+    public Acao(AcaoDTO acaoDTO){
+        this.nome = acaoDTO.getNome();
+        this.data = LocalDate.parse(acaoDTO.getData());
+        this.descricao = acaoDTO.getDescricao();
+        this.local = acaoDTO.getLocal();
+        this.horarioInicio = LocalTime.parse(acaoDTO.getHorarioInicio());
+        this.horarioFim = LocalTime.parse(acaoDTO.getHorarioFim());
+        this.departamento = Departamento.valueOf(acaoDTO.getDepartamento());
+        this.contato = acaoDTO.getContato();
+        this.modalidade = acaoDTO.getModalidade();
+        this.imagem = acaoDTO.getImagem();
+        this.link = acaoDTO.getLink();
+        this.capacidade = Integer.parseInt(acaoDTO.getCapacidade());
+    }
 
     @Override
     public boolean equals(Object o) {

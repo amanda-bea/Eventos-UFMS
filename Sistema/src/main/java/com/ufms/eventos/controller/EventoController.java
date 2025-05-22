@@ -1,51 +1,52 @@
 package com.ufms.eventos.controller;
 
-import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.dto.EditarEventoDTO;
 import com.ufms.eventos.dto.EventoDTO;
-import com.ufms.eventos.services.AdminService;
+import com.ufms.eventos.dto.EventoMinDTO;
+
+import com.ufms.eventos.model.Organizador;
+
 import com.ufms.eventos.services.EventoService;
+
 import java.util.List;
 
 public class EventoController {
 
     private EventoService eventoService;
-    private AdminService adminService;
 
     public EventoController() {
         this.eventoService = new EventoService();
     }
 
-    // Solicita um novo evento (status: aguardando aprovação)
     public boolean solicitarEvento(EventoDTO eventoDTO, Organizador organizador) {
         return eventoService.solicitarEvento(eventoDTO, organizador);
-    }
-
-    // Aprova um evento (status: ativo)
-    public boolean aprovarEvento(String nomeEvento) {
-        return adminService.aprovarEvento(nomeEvento);
-    }
-
-    // Rejeita um evento (status: rejeitado)
-    public boolean rejeitarEvento(String nomeEvento, String mensagemRejeicao) {
-        return adminService.rejeitarEvento(nomeEvento, mensagemRejeicao);
-    }
-
-    public boolean editarEvento(EditarEventoDTO dto, Organizador organizador) {
-        return eventoService.editarEvento(dto, organizador);
     }
 
     public boolean excluirSolicitacaoEvento(String nomeEvento, Organizador organizador) {
         return eventoService.excluirSolicitacaoEvento(nomeEvento, organizador);
     }
 
-    // Lista todos os eventos aguardando aprovação pro usuario tbm
-    public List<EventoDTO> listarEventosAguardando() {
-        return adminService.listarEventosAguardando();
+    public boolean editarEvento(EditarEventoDTO dto, Organizador organizador) {
+        return eventoService.editarEvento(dto, organizador);
     }
 
-    // Lista todos os eventos aprovados
-    public List<EventoDTO> listarEventosAtivos() {
-        return adminService.listarEventosAtivos();
+    public void atualizarEventosExpirados() {
+        eventoService.atualizarEventosExpirados();
     }
+
+    public boolean cancelarEvento(String nomeEvento, String motivo) {
+        return eventoService.cancelarEvento(nomeEvento, motivo);
+    }
+
+    public List<EventoDTO> listarEventosAtivos() {
+        return eventoService.listarEventosAtivos();
+    }
+
+    public List<EventoMinDTO> listarEventosAtivosMin() {
+        return eventoService.listarEventosAtivosMin();
+    }
+
+    //public EventoDTO buscarEventoPorId(Long id) {
+    //    return eventoService.buscarEventoPorId(id);
+    //}
 }

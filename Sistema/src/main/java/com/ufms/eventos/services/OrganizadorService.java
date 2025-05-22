@@ -1,5 +1,6 @@
 package com.ufms.eventos.services;
 
+import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.model.Evento;
 import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.repository.EventoRepository;
@@ -15,11 +16,36 @@ public class OrganizadorService {
         this.eventoRepository = new EventoRepository();
     }
 
-    // Lista todos os eventos criados por um organizador específico
-    public List<Evento> listarEventosPorOrganizador(Organizador organizador) {
+    public List<EventoDTO> listarEventosPorOrganizador(Organizador organizador) {
         HashSet<Evento> eventos = eventoRepository.getEventos();
         return eventos.stream()
                 .filter(e -> e.getOrganizador().equals(organizador))
+                .map(EventoDTO::new)
                 .collect(Collectors.toList());
+    }
+
+    public List<EventoDTO> listarEventosPorStatus(Organizador organizador, String status) {
+        HashSet<Evento> eventos = eventoRepository.getEventos();
+        return eventos.stream()
+                .filter(e -> e.getOrganizador().equals(organizador))
+                .filter(e -> e.getStatus().equalsIgnoreCase(status))
+                .map(EventoDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<EventoDTO> listarEventosAguardandoAprovacao(Organizador organizador) {
+        return listarEventosPorStatus(organizador, "Aguardando aprovação");
+    }
+
+    public List<EventoDTO> listarEventosCancelados(Organizador organizador) {
+        return listarEventosPorStatus(organizador, "Cancelado");
+    }
+
+    public List<EventoDTO> listarEventosAtivos(Organizador organizador) {
+        return listarEventosPorStatus(organizador, "Ativo");
+    }
+
+    public List<EventoDTO> listarEventosInativos(Organizador organizador) {
+        return listarEventosPorStatus(organizador, "Inativo");
     }
 }

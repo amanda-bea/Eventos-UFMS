@@ -1,6 +1,9 @@
 package com.ufms.eventos.dto;
 
+import com.ufms.eventos.model.Categoria;
+import com.ufms.eventos.model.Departamento;
 import com.ufms.eventos.model.Evento;
+
 import lombok.Data;
 
 @Data
@@ -9,12 +12,10 @@ public class EventoDTO {
     private String descricao;
     private String dataInicio;
     private String dataFim;
-    //private String  organizador; não deve aparecer no DTO
     private String departamento;
     private String categoria; // Ex: Cultura, Educação, Saúde, etc.
     private String imagem; // URL da imagem do evento
-    private String link; // Link para inscrição ou mais informações (opcional)
-    //private String status; // Ativo, Inativo, Cancelado, etc. //não deve aparecer no DTO
+    private String link;
 
     public EventoDTO(String nome, String dataInicio, String dataFim, String descricao,String departamento, String categoria, 
                      String imagem, String link) {
@@ -33,7 +34,6 @@ public class EventoDTO {
         this.dataInicio = evento.getDataInicio();
         this.dataFim = evento.getDataFim();
         this.descricao = evento.getDescricao();
-        //this.organizador = evento.getOrganizador(); //não deve aparecer no DTO
         this.departamento = evento.getDepartamento();
         this.categoria = evento.getCategoria();
         this.imagem = evento.getImagem();
@@ -52,6 +52,17 @@ public class EventoDTO {
         this.link = evento.getLink();
     }
     public EventoDTO(){}
+
+    public EventoDTO(SolicitacaoEventoDTO evento) {
+        this.nome = evento.getNome();
+        this.dataInicio = evento.getDataInicio();
+        this.dataFim = evento.getDataFim();
+        this.descricao = evento.getDescricao();
+        this.departamento = evento.getDepartamento().name();
+        this.categoria = evento.getCategoria().name();
+        this.imagem = evento.getImagem();
+        this.link = evento.getLink();
+    }
 
     public boolean validate() {
         // Implementar validações necessárias

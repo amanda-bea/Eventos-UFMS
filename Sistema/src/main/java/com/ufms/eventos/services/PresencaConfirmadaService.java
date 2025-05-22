@@ -19,7 +19,7 @@ public class PresencaConfirmadaService {
         List<PresencaConfirmada> presencas = pr.getPresencasConfirmadas()
             .stream()
             .filter(p -> p.getUsuario().getNome().equalsIgnoreCase(nomeUsuario))
-            .filter(p -> "Ativo".equalsIgnoreCase(p.getAcao().getStatus()))
+            .filter(p -> "Ativo".equalsIgnoreCase(p.getAcao().getStatus())) //adiconar aqui "lotado" depois
             .collect(Collectors.toList());
 
         // Mapeia para DTO mostrando as ações em que o usuário marcou presença

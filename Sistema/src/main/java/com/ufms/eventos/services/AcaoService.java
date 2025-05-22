@@ -5,8 +5,6 @@ import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.dto.EditarAcaoDTO;
 
 import com.ufms.eventos.model.Acao;
-import com.ufms.eventos.model.Categoria;
-import com.ufms.eventos.model.Departamento;
 import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.model.Evento;
 
@@ -17,6 +15,7 @@ import com.ufms.eventos.repository.OrganizadorRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 public class AcaoService {
     private AcaoRepository acaoRepository;
@@ -29,106 +28,47 @@ public class AcaoService {
         this.or = new OrganizadorRepository();
     }
 
-    //public boolean addAcao(Acao acao) {
-    //    // Adiciona a ação ao repositório
-    //   return acaoRepository.addAcao(acao);
-    //}
+    public boolean solicitarAcao(AcaoDTO acaoDTO, Organizador organizador, EventoDTO eventoDTO) {
 
-    public boolean addAcao(Evento evento, String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio,
-                           LocalTime horarioFim, Departamento departamento, String contato, String modalidade, String imagem, String link, 
-                           int capacidade, String status, String mensagemRejeicao) {
-        // Adiciona a ação ao repositório
-        Acao acao = new Acao(evento, nome, data, descricao, local, horarioInicio, horarioFim, departamento,
-                             contato, modalidade, imagem, link, capacidade, status, mensagemRejeicao);
-        return acaoRepository.addAcao(acao);
-    }
-
-    public boolean addAcao(AcaoDTO acaoDTO, Organizador organizador, EventoDTO eventoDTO) {
-        this.or.addOrganizador(organizador);
-
-        // Converte os campos do DTO para os tipos corretos
-        LocalDate data = LocalDate.parse(acaoDTO.getData());
-        LocalTime horarioInicio = LocalTime.parse(acaoDTO.getHorarioInicio());
-        LocalTime horarioFim = LocalTime.parse(acaoDTO.getHorarioFim());
-
-        Departamento departamento = Departamento.valueOf(acaoDTO.getDepartamento());
-
-        String status = "Aguardando aprovação";
-        String mensagemRejeicao = null;
-
-        // Converte EventoDTO para Evento
-        Evento evento = null;
-        if (eventoDTO != null) {
-            LocalDate dataInicio = LocalDate.parse(eventoDTO.getDataInicio());
-            LocalDate dataFim = LocalDate.parse(eventoDTO.getDataFim());
-            Departamento depEvento = Departamento.valueOf(eventoDTO.getDepartamento());
-            Categoria catEvento = Categoria.valueOf(eventoDTO.getCategoria());
-
-            evento = new Evento(
-                eventoDTO.getNome(),
-                dataInicio,
-                dataFim,
-                eventoDTO.getDescricao(),
-                organizador,
-                depEvento,
-                catEvento,
-                eventoDTO.getImagem(),
-                eventoDTO.getLink(),
-                status,
-                mensagemRejeicao
-            );
+        Evento evento = new Evento(eventoDTO);
+        evento.setStatus("Aguardando aprovação");
+        evento.setOrganizador(organizador);
+        evento.setMensagemRejeicao(null);
 
             // Se o evento ainda não existe no repositório, adiciona
-            if (eventoRepository.getEvento(evento.getNome()) == null) {
-                eventoRepository.addEvento(
-                    evento.getNome(),
-                    evento.getDataInicio(),
-                    evento.getDataFim(),
-                    evento.getDescricao(),
-                    evento.getOrganizador(),
-                    evento.getDepartamento(),
-                    evento.getCategoria(),
-                    evento.getImagem(),
-                    evento.getLink(),
-                    evento.getStatus(),
-                    evento.getMensagemRejeicao()
-                );
-            }
+        if (eventoRepository.getEvento(evento.getNome()) == null) {
+            eventoRepository.addEvento(evento);
+        } 
+        else {
         }
 
-        Acao acao = new Acao(
-            evento,
-            acaoDTO.getNome(),
-            data,
-            acaoDTO.getDescricao(),
-            acaoDTO.getLocal(),
-            horarioInicio,
-            horarioFim,
-            departamento,
-            acaoDTO.getContato(),
-            acaoDTO.getModalidade(),
-            acaoDTO.getImagem(),
-            acaoDTO.getLink(),
-            Integer.parseInt(acaoDTO.getCapacidade()),
-            status,
-            mensagemRejeicao
-        );
+        Acao acao = new Acao(acaoDTO);
+        acao.setEvento(evento);
+        acao.setStatus("Aguardando aprovação");
+        acao.setMensagemRejeicao(null);
+        
         return acaoRepository.addAcao(acao);
     }
 
-    public HashSet<Acao> getAcoes() {
-        // Retorna todas as ações do repositório
-        return acaoRepository.getAcoes();
+    public HashSet<AcaoDTO> listarAcoes() {
+        HashSet<Acao> acoes = acaoRepository.getAcoes();
+        HashSet<AcaoDTO> dto = acoes.stream()
+                               .map(x -> new AcaoDTO(x))
+                               .collect(Collectors.toCollection(HashSet::new));
+        return dto;
     }
 
-    public boolean deleteAcao(String nome) {
+    public boolean deletarAcao(String nome) {
         // Deleta a ação do repositório
         return acaoRepository.deleteAcao(nome);
     }
 
-    public Acao getAcao(String nome) {
-        // Retorna a ação pelo nome
-        return acaoRepository.getAcao(nome);
+    public AcaoDTO getAcao(String nome) {
+        Acao acao = acaoRepository.getAcao(nome);
+        if (acao != null) {
+            return new AcaoDTO(acao);
+        }
+        throw new IllegalArgumentException("Ação não existe.");
     }
 
     public boolean editarAcao(EditarAcaoDTO dto, Organizador organizador) {
@@ -157,36 +97,16 @@ public class AcaoService {
         }
         // Verifica se já existe uma ação com o mesmo nome neste evento
         boolean acaoJaExiste = acaoRepository.getAcoes().stream()
-            .anyMatch(a -> a.getEvento().equals(evento) && a.getNome().equalsIgnoreCase(acaoDTO.getNome()));
+                .anyMatch(a -> a.getEvento().equals(evento) && a.getNome().equalsIgnoreCase(acaoDTO.getNome()));
         if (acaoJaExiste) {
-            return false; // Já existe uma ação com esse nome neste evento
+            return false; // Já existe uma ação com esse nome neste evento MUDAR REGRA AQUI
         }
 
-        // Converte campos do DTO
-        LocalDate data = LocalDate.parse(acaoDTO.getData());
-        LocalTime horarioInicio = LocalTime.parse(acaoDTO.getHorarioInicio());
-        LocalTime horarioFim = LocalTime.parse(acaoDTO.getHorarioFim());
-        Departamento departamento = Departamento.valueOf(acaoDTO.getDepartamento());
-        String status = "Aguardando aprovação";
-        String mensagemRejeicao = null;
+        Acao novaAcao = new Acao(acaoDTO);
+        novaAcao.setEvento(evento);
+        novaAcao.setStatus("Aguardando aprovação");
+        novaAcao.setMensagemRejeicao(null);
 
-        Acao novaAcao = new Acao(
-            evento,
-            acaoDTO.getNome(),
-            data,
-            acaoDTO.getDescricao(),
-            acaoDTO.getLocal(),
-            horarioInicio,
-            horarioFim,
-            departamento,
-            acaoDTO.getContato(),
-            acaoDTO.getModalidade(),
-            acaoDTO.getImagem(),
-            acaoDTO.getLink(),
-            Integer.parseInt(acaoDTO.getCapacidade()),
-            status,
-            mensagemRejeicao
-        );
         return acaoRepository.addAcao(novaAcao);
     }
 

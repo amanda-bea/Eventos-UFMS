@@ -15,6 +15,7 @@ import com.ufms.eventos.repository.OrganizadorRepository;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -22,6 +23,7 @@ import java.util.HashSet;
 
 import com.ufms.eventos.dto.EditarEventoDTO;
 import com.ufms.eventos.dto.EventoDTO;
+import com.ufms.eventos.dto.EventoMinDTO;
 
 public class EventoService {
     private EventoRepository er;
@@ -32,47 +34,46 @@ public class EventoService {
         this.or = new OrganizadorRepository();
     }
 
-    // listar todos os eventios na tela inicial
-    public List<EventoDTO> buscarEventosAtivos() {
+    public List<EventoDTO> listarEventosAtivos() {
         HashSet<Evento> eventos = er.getEventos();
-
         return eventos.stream()
                 .filter(e -> "Ativo".equalsIgnoreCase(e.getStatus()))
                 .map(EventoDTO::new)
                 .collect(Collectors.toList());
     }
 
+    public List<EventoMinDTO> listarEventosAtivosMin() {
+        return er.getEventos().stream()
+                .filter(e -> "Ativo".equalsIgnoreCase(e.getStatus()))
+                .map(EventoMinDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    //public EventoDTO buscarEventoPorId(Long id) {
+    //    Evento evento = er.getEventos().stream()
+    //            .filter(e -> e.getId().equals(id))
+    //            .findFirst()
+    //            .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
+    //
+    //    return new EventoDTO(evento);
+    //}
+
     //Organizador deve ser recebido pelo controller obtendo o usuário logado
     public boolean solicitarEvento(EventoDTO eventoDTO, Organizador organizador) {
-        // Adiciona o organizador ao repositório, se necessário
+        Evento evento = new Evento(eventoDTO);
+        evento.setStatus("Aguardando aprovação");
+        evento.setOrganizador(organizador);
+        evento.setMensagemRejeicao(null);
+
+        // Se o evento ainda não existe no repositório, adiciona
+        if (er.getEvento(evento.getNome()) == null) {
+            er.addEvento(evento);
+        }
+
         this.or.addOrganizador(organizador);
 
-        // Converte os campos de String para os tipos corretos
-        java.time.LocalDate dataInicio = java.time.LocalDate.parse(eventoDTO.getDataInicio());
-        java.time.LocalDate dataFim = java.time.LocalDate.parse(eventoDTO.getDataFim());
-
-        // Converte enums de String para Enum
-        Departamento departamento = Departamento.valueOf(eventoDTO.getDepartamento());
-        Categoria categoria = Categoria.valueOf(eventoDTO.getCategoria());
-
-        // Define status e mensagem de rejeição iniciais
-        String status = "Aguardando aprovação";
-        String mensagemRejeicao = null;
-
-        // Adiciona o evento ao repositório, incluindo o organizador e os enums convertidos
-        return this.er.addEvento(
-            eventoDTO.getNome(),
-            dataInicio,
-            dataFim,
-            eventoDTO.getDescricao(),
-            organizador,
-            departamento,
-            categoria,
-            eventoDTO.getImagem(),
-            eventoDTO.getLink(),
-            status,
-            mensagemRejeicao
-        );
+        // Retorna true se o evento foi adicionado ou já existia
+        return true;
     }
 
     public boolean excluirSolicitacaoEvento(String nomeEvento, Organizador organizador) {
@@ -129,6 +130,16 @@ public class EventoService {
             return true;
         }
         return false;
+    }
+
+    public boolean cancelarEvento(String nomeEvento, String motivo) { //ver depois
+        Evento evento = er.getEvento(nomeEvento);
+        if (evento == null) {
+            throw new RuntimeException("Evento não encontrado");
+        }
+        evento.setStatus("Cancelado");
+        evento.setMensagemRejeicao(null);
+        return true;
     }
 
 }

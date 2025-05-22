@@ -3,6 +3,8 @@ package com.ufms.eventos.model;
 import lombok.Data;
 import java.time.LocalDate;
 
+import com.ufms.eventos.dto.EventoDTO;
+
 @Data
 public class Evento {
     private String nome;
@@ -45,6 +47,18 @@ public class Evento {
         this.categoria = categoria;
         this.imagem = imagem;
         this.link = link;
+    }
+
+    public Evento(EventoDTO evento) {
+        this.nome = evento.getNome();
+        this.dataInicio = LocalDate.parse(evento.getDataInicio());
+        this.dataFim = LocalDate.parse(evento.getDataFim());
+        this.descricao = evento.getDescricao();
+        //this.organizador = evento.getOrganizador(); //não deve aparecer no DTO
+        this.departamento = Departamento.valueOf(evento.getDepartamento());
+        this.categoria = Categoria.valueOf(evento.getCategoria());
+        this.imagem = evento.getImagem();
+        this.link = evento.getLink();
     }
 
     @Override

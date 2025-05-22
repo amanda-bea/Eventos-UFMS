@@ -2,6 +2,8 @@ package com.ufms.eventos.controller;
 
 import com.ufms.eventos.services.AdminService;
 import com.ufms.eventos.dto.EventoDTO;
+import com.ufms.eventos.dto.SolicitacaoEventoDTO;
+
 import java.util.List;
 
 public class AdminController {
@@ -11,12 +13,12 @@ public class AdminController {
         this.adminService = new AdminService();
     }
 
-    public boolean aprovarEvento(String nomeEvento) {
-        return adminService.aprovarEvento(nomeEvento);
+    public boolean aprovarEvento(SolicitacaoEventoDTO solicitacaoEventoDTO) {
+        return adminService.aprovarEvento(solicitacaoEventoDTO);
     }
 
-    public boolean rejeitarEvento(String nomeEvento, String mensagemRejeicao) {
-        return adminService.rejeitarEvento(nomeEvento, mensagemRejeicao);
+    public boolean rejeitarEvento(SolicitacaoEventoDTO solicitacaoEventoDTO, String mensagemRejeicao) {
+        return adminService.rejeitarEvento(solicitacaoEventoDTO, mensagemRejeicao);
     }
 
     public boolean cancelarEvento(String nomeEvento, String motivo) {

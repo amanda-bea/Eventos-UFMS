@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.ufms.eventos.dto.EventoDTO;
+import com.ufms.eventos.dto.SolicitacaoEventoDTO;
 import com.ufms.eventos.model.Evento;
+import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.repository.EventoRepository;
 
 public class AdminService {
@@ -16,20 +18,20 @@ public class AdminService {
         this.er = new EventoRepository();
     }
 
-    public boolean aprovarEvento(String nomeEvento) {
-        Evento evento = er.getEvento(nomeEvento);
-        if (evento == null) {
-            throw new RuntimeException("Evento não encontrado");
-        }
+    public boolean aprovarEvento(SolicitacaoEventoDTO solicitacaoEventoDTO) {
+        EventoDTO eventoDTO = new EventoDTO(solicitacaoEventoDTO);
+        Evento evento = new Evento(eventoDTO);
         evento.setStatus("Ativo");
+        evento.setMensagemRejeicao(null);
+
+        // Adiciona o evento ao repositório
+        er.addEvento(evento);
         return true;
     }
 
-    public boolean rejeitarEvento(String nomeEvento, String motivo) {
-        Evento evento = er.getEvento(nomeEvento);
-        if (evento == null) {
-            throw new RuntimeException("Evento não encontrado");
-        }
+    public boolean rejeitarEvento(SolicitacaoEventoDTO solicitacaoEventoDTO, String motivo) {
+        EventoDTO eventoDTO = new EventoDTO(solicitacaoEventoDTO);
+        Evento evento = new Evento(eventoDTO);
         evento.setStatus("Rejeitado");
         evento.setMensagemRejeicao(motivo);
         return true;
@@ -49,14 +51,6 @@ public class AdminService {
         HashSet<Evento> eventos = er.getEventos();
         return eventos.stream()
                 .filter(e -> "Aguardando aprovação".equalsIgnoreCase(e.getStatus()))
-                .map(EventoDTO::new)
-                .collect(Collectors.toList());
-    }
-
-    public List<EventoDTO> listarEventosAtivos() {
-        HashSet<Evento> eventos = er.getEventos();
-        return eventos.stream()
-                .filter(e -> "Ativo".equalsIgnoreCase(e.getStatus()))
                 .map(EventoDTO::new)
                 .collect(Collectors.toList());
     }
