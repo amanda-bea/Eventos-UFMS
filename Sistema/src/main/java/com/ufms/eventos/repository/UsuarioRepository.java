@@ -46,4 +46,13 @@ public class UsuarioRepository {
         return usuario;
     }
 
+    public Usuario getUsuarioPorNomeESenha(String nome, String senha) {
+        for (Usuario usuario : usuarios) {
+            if (usuario.getNome().equalsIgnoreCase(nome) && usuario.getSenha().equals(senha)) {
+                return usuario;
+            }
+        }
+        return null;
+    }
+
 }

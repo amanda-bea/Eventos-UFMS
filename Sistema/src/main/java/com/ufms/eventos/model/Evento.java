@@ -13,7 +13,7 @@ public class Evento {
     private Departamento departamento;
     private Categoria categoria; // Ex: Cultura, Educação, Saúde, etc.
     private String imagem; // URL da imagem do evento
-    private String link; // Link para inscrição ou mais informações (opcional)
+    private String link; // Link para mais informações (opcional)
     private String status; // Ativo, Inativo, Cancelado, etc.
     private String mensagemRejeicao;
 

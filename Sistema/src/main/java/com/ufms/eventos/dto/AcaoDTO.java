@@ -21,14 +21,13 @@ public class AcaoDTO {
     private String departamento;
     private String contato; // Formato: telefone ou e-mail
     private String modalidade;
-    private String categoria;
     private String imagem;
     private String link;
     private String status;
     private String capacidade;
 
     public AcaoDTO(String evento, String nome, String data, String descricao, String local, String horarioInicio,
-                   String horarioFim, String departamento, String contato, String modalidade, String categoria,
+                   String horarioFim, String departamento, String contato, String modalidade,
                    String imagem, String link, String status, String capacidade) {
         this.evento = evento;
         this.nome = nome;
@@ -40,7 +39,6 @@ public class AcaoDTO {
         this.departamento = departamento;
         this.contato = contato;
         this.modalidade = modalidade;
-        this.categoria = categoria;
         this.imagem = imagem;
         this.link = link;
         this.status = status;
@@ -48,8 +46,8 @@ public class AcaoDTO {
     }
 
     public AcaoDTO(Evento evento, String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio,
-                   LocalTime horarioFim, Organizador organizador, String departamento, String contato, String modalidade,
-                   String categoria, String imagem, String link, int capacidade) {
+                   LocalTime horarioFim, Organizador organizador, String departamento, String contato, String modalidade, 
+                   String imagem, String link, int capacidade) {
         this.evento = evento.getNome();
         this.nome = nome;
         this.data = data.toString();
@@ -60,7 +58,6 @@ public class AcaoDTO {
         this.departamento = departamento;
         this.contato = contato;
         this.modalidade = modalidade;
-        this.categoria = categoria;
         this.imagem = imagem;
         this.link = link;
         this.capacidade = Integer.toString(capacidade);
@@ -77,7 +74,6 @@ public class AcaoDTO {
         this.departamento = acao.getDepartamento();
         this.contato = acao.getContato();
         this.modalidade = acao.getModalidade();
-        this.categoria = acao.getCategoria();
         this.imagem = acao.getImagem();
         this.link = acao.getLink();
         this.status = acao.getStatus();
@@ -95,7 +91,6 @@ public class AcaoDTO {
         this.departamento = acao.getDepartamento().name();
         this.contato = acao.getContato();
         this.modalidade = acao.getModalidade();
-        this.categoria = acao.getCategoria().name();
         this.imagem = acao.getImagem();
         this.link = acao.getLink();
         this.status = acao.getStatus();
@@ -133,9 +128,6 @@ public class AcaoDTO {
             return false;
         }
         if (modalidade == null || modalidade.isEmpty()) {
-            return false;
-        }
-        if (categoria == null || categoria.isEmpty()) {
             return false;
         }
         if (imagem == null || imagem.isEmpty()) {

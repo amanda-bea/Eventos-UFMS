@@ -14,10 +14,13 @@ import com.ufms.eventos.repository.EventoRepository;
 import com.ufms.eventos.repository.OrganizadorRepository;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import com.ufms.eventos.dto.EditarEventoDTO;
 import com.ufms.eventos.dto.EventoDTO;
 
 public class EventoService {
@@ -39,6 +42,7 @@ public class EventoService {
                 .collect(Collectors.toList());
     }
 
+    //Organizador deve ser recebido pelo controller obtendo o usuário logado
     public boolean solicitarEvento(EventoDTO eventoDTO, Organizador organizador) {
         // Adiciona o organizador ao repositório, se necessário
         this.or.addOrganizador(organizador);
@@ -100,6 +104,31 @@ public class EventoService {
         }
         formulario.getCamposExtras().put(campo, "");
         return "Campo adicionado com sucesso!";
+    }
+
+    // Depois colocar esse metodo para rodar ao abrir o sistema
+    public void atualizarEventosExpirados() {
+        LocalDate hoje = LocalDate.now();
+        Set<Evento> eventos = er.getEventos();
+
+        for (Evento evento : eventos) {
+            if (evento.getDataFim().isBefore(hoje) && !"Inativo".equalsIgnoreCase(evento.getStatus())) {
+                evento.setStatus("Inativo");
+                er.updateEvento(evento); // Atualiza no repositório em memória
+            }
+        }
+    }
+
+    public boolean editarEvento(EditarEventoDTO dto, Organizador organizador) {
+        Evento evento = er.getEvento(dto.getNomeEvento());
+        if (evento != null && evento.getOrganizador().equals(organizador)) {
+            evento.setDataInicio(LocalDate.parse(dto.getNovaDataInicio()));
+            evento.setDataFim(LocalDate.parse(dto.getNovaDataFim()));
+            evento.setLink(dto.getNovoLink());
+            er.updateEvento(evento);
+            return true;
+        }
+        return false;
     }
 
 }

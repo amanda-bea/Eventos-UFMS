@@ -1,5 +1,7 @@
 package com.ufms.eventos.dto;
 
+import com.ufms.eventos.model.Formulario;
+
 import lombok.Data;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +35,15 @@ public class FormularioDTO {
         this.telefone = dto.telefone;
         this.cpf = dto.cpf;
         this.camposExtras = new HashMap<>(dto.camposExtras);
+    }
+
+    public FormularioDTO(Formulario formulario) {
+        this.id = formulario.getId();
+        this.nome = formulario.getNome();
+        this.email = formulario.getEmail();
+        this.telefone = formulario.getTelefone();
+        this.cpf = formulario.getCpf();
+        this.camposExtras = new HashMap<>(formulario.getCamposExtras());
     }
 
 }

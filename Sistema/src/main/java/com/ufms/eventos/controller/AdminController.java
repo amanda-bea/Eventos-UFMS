@@ -27,10 +27,6 @@ public class AdminController {
         return adminService.listarEventosAguardando();
     }
 
-    public List<EventoDTO> listarEventosAtivos() {
-        return adminService.listarEventosAtivos();
-    }
-
 
 
 

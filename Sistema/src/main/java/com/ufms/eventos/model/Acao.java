@@ -8,24 +8,22 @@ import java.time.LocalTime;
 public class Acao {
     private Evento evento;
     private String nome;
-    private LocalDate data; // Atualizado para LocalDate
+    private LocalDate data;
     private String descricao;
     private String local;
-    private LocalTime horarioInicio; // Atualizado para LocalTime
-    private LocalTime horarioFim; // Atualizado para LocalTime
-    private Organizador organizador;
+    private LocalTime horarioInicio;
+    private LocalTime horarioFim;
     private Departamento departamento;
     private String contato; // Formato: telefone ou e-mail
     private String modalidade; // Presencial
-    private Categoria categoria; // Ex: Cultura, Educação, Saúde, etc.
     private String imagem; // URL da imagem do evento
-    private String link; // Link para inscrição ou mais informações (opcional)
+    private String link; // Link para mais informações (opcional)
     private String status; // Ativo, Inativo, Cancelado, etc.
     private int capacidade; // Capacidade do evento (opcional)
 
     //arrumar isso aqui depois
     public Acao(Evento evento, String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim,
-                Organizador organizador, Departamento departamento, String contato, String modalidade, Categoria categoria, String imagem, 
+                Departamento departamento, String contato, String modalidade, String imagem, 
                 String link, int capacidade, String status, String mensagemRejeicao) {
         this.evento = evento;
         // acima verficar se ação vai criar um evento com mesmos dados da ação
@@ -35,11 +33,9 @@ public class Acao {
         this.local = local;
         this.horarioInicio = horarioInicio;
         this.horarioFim = horarioFim;
-        this.organizador = organizador;
         this.departamento = departamento;
         this.contato = contato;
         this.modalidade = modalidade;
-        this.categoria = categoria;
         this.imagem = imagem;
         this.link = link;
         this.capacidade = capacidade;

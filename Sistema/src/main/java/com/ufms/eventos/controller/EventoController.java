@@ -1,6 +1,7 @@
 package com.ufms.eventos.controller;
 
 import com.ufms.eventos.model.Organizador;
+import com.ufms.eventos.dto.EditarEventoDTO;
 import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.services.AdminService;
 import com.ufms.eventos.services.EventoService;
@@ -30,17 +31,15 @@ public class EventoController {
         return adminService.rejeitarEvento(nomeEvento, mensagemRejeicao);
     }
 
-    // Edita uma solicitação de evento (apenas se ainda não aprovado)
-    //public boolean editarSolicitacaoEvento(String nomeEvento, EventoDTO eventoDTO, Organizador organizador) {
-    //    return eventoService.editarSolicitacaoEvento(nomeEvento, eventoDTO, organizador);
-    //}
+    public boolean editarEvento(EditarEventoDTO dto, Organizador organizador) {
+        return eventoService.editarEvento(dto, organizador);
+    }
 
-    // Exclui uma solicitação de evento (apenas se ainda não aprovado)
-    //public boolean excluirSolicitacaoEvento(String nomeEvento, Organizador organizador) {
-    //    return eventoService.excluirSolicitacaoEvento(nomeEvento, organizador);
-    //}
+    public boolean excluirSolicitacaoEvento(String nomeEvento, Organizador organizador) {
+        return eventoService.excluirSolicitacaoEvento(nomeEvento, organizador);
+    }
 
-    // Lista todos os eventos aguardando aprovação
+    // Lista todos os eventos aguardando aprovação pro usuario tbm
     public List<EventoDTO> listarEventosAguardando() {
         return adminService.listarEventosAguardando();
     }
