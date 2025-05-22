@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.dto.SolicitacaoEventoDTO;
 import com.ufms.eventos.model.Evento;
-import com.ufms.eventos.model.Organizador;
+
 import com.ufms.eventos.repository.EventoRepository;
 
 public class AdminService {

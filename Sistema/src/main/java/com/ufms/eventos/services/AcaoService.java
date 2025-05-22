@@ -10,7 +10,6 @@ import com.ufms.eventos.model.Evento;
 
 import com.ufms.eventos.repository.AcaoRepository;
 import com.ufms.eventos.repository.EventoRepository;
-import com.ufms.eventos.repository.OrganizadorRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -20,12 +19,10 @@ import java.util.stream.Collectors;
 public class AcaoService {
     private AcaoRepository acaoRepository;
     private EventoRepository eventoRepository;
-    private OrganizadorRepository or;
 
     public AcaoService() {
         this.acaoRepository = new AcaoRepository();
         this.eventoRepository = new EventoRepository();
-        this.or = new OrganizadorRepository();
     }
 
     public boolean solicitarAcao(AcaoDTO acaoDTO, Organizador organizador, EventoDTO eventoDTO) {

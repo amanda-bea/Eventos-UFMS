@@ -15,7 +15,6 @@ import com.ufms.eventos.repository.OrganizadorRepository;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.util.Arrays;
