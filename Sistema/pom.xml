@@ -34,7 +34,7 @@
         <dependency>
             <groupId>com.gluonhq</groupId>
             <artifactId>charm-glisten</artifactId>
-            <version>6.2.3</version> <!-- substitua pela versão atual -->
+            <version>6.2.3</version> 
         </dependency>
     </dependencies>
     <build>

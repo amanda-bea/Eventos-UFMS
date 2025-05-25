@@ -1,8 +1,9 @@
 package com.ufms.eventos.ui;
 
+import com.ufms.eventos.model.Admin;
 import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.model.Usuario;
-// import javafx.application.Platform; // Não estritamente necessário para esta versão simplificada
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.PasswordField;
@@ -14,8 +15,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 
 public class LoginFXMLController {
-    private Usuario usuarioLogado;
-
     @FXML
     private TextField nomeField;
 
@@ -27,8 +26,8 @@ public class LoginFXMLController {
 
     @FXML
     private Button loginButton;
-
-    // ProgressIndicator e suas constantes de estilo foram removidos
+ 
+    private Usuario usuarioLogado;
 
     @FXML
     public void initialize() {
@@ -54,33 +53,38 @@ public class LoginFXMLController {
         hideMessageLabel();
         setControlsDisabled(true);
 
-        Organizador organizadorInstancia = new Organizador(); // Ou usando um construtor mais completo
-        organizadorInstancia.setNome(nome);    // 'nome' vindo do campo da tela de login
-        organizadorInstancia.setSenha(senha);
+        //autenticação fictícia
+        if (nome.equals("admin") && senha.equals("admin")) {
+            Admin admin = new Admin();
+            admin.setNome(nome);
+            admin.setSenha(senha);
+            this.usuarioLogado = admin;
+            
+        }
+        else{
+            Organizador organizadorInstancia = new Organizador();
+            organizadorInstancia.setNome(nome);    // 'nome' vindo do campo da tela de login
+            organizadorInstancia.setSenha(senha);
+        }
 
-        // 2. Lógica de Autenticação (seu código existente)
         Usuario usuario = new Usuario();
         usuario.setNome(nome);
         usuario.setSenha(senha);
-        this.usuarioLogado = organizadorInstancia;
 
-        // 3. Mensagem de sucesso e transição (seu código existente)
         showMessageText("Login realizado com sucesso!");
 
+        // Abrir proxima tela após 1 segundo
         javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(1));
         pause.setOnFinished(event -> {
             try {
-                // 1. Crie uma instância do FXMLLoader
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/TelaSolicitacaoEvento.fxml"));
                 
-                // 2. Carregue o Parent usando a instância do loader
                 Parent solicitacaoRoot = loader.load();
 
-                // 3. Obtenha a instância do controller DA TELA QUE VOCÊ ACABOU DE CARREGAR
+                // Obtem o controller da tela de solicitação
                 SolicitarEventoFXMLController solicitarEventoCtrl = loader.getController();
 
-                // 4. !! PONTO CRÍTICO: Passe a instância atual do LoginFXMLController ('this')
-                //    para o controller da tela de solicitação.
+                //  Passe a instância atual do LoginFXMLController ('this') para o controller da tela de solicitação.
                 if (solicitarEventoCtrl != null) {
                     solicitarEventoCtrl.setLoginFXMLController(this); // 'this' refere-se à instância atual de LoginFXMLController
                 } else {
@@ -90,9 +94,8 @@ public class LoginFXMLController {
                     setControlsDisabled(false); // Reabilita controles da tela de login
                     return; // Interrompe a transição
                 }
-
-                // 5. Prossiga com a configuração da cena e do stage
-                Stage stage = (Stage) nomeField.getScene().getWindow(); // Ou qualquer outro nó da cena atual
+                // Aqui mudar depois para abrir a tela cheia ou do jeito que estava antes
+                Stage stage = (Stage) nomeField.getScene().getWindow();
                 stage.setScene(new Scene(solicitacaoRoot));
                 stage.setTitle("Solicitação de Evento");
 
@@ -123,10 +126,7 @@ public class LoginFXMLController {
 
     private void showMessageText(String message) {
         if (mensagemLabel == null) return;
-
         mensagemLabel.setText(message);
-        // A cor do texto é definida estaticamente no FXML agora
-        // mensagemLabel.setStyle(...); // NÃO HÁ MAIS MUDANÇA DE ESTILO AQUI
         mensagemLabel.setVisible(true);
         mensagemLabel.setManaged(true);
     }
@@ -145,6 +145,16 @@ public class LoginFXMLController {
     public void logout() {
         this.usuarioLogado = null;
         System.out.println("Usuário deslogado.");
-        // Adicionar lógica para retornar à tela de login, se necessário
+        //aqui redicionamos para a tela de login
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/Login.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Login");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

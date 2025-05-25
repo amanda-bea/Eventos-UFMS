@@ -1,9 +1,12 @@
 package com.ufms.eventos.model;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Data
-@EqualsAndHashCode(callSuper = true) //tenho que ver oq é isso depois
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)      // Opcional, mas bom para incluir campos da superclasse no toString
 public class Admin extends Usuario {
     private String cargo; // só pra exemplo
 
@@ -12,39 +15,9 @@ public class Admin extends Usuario {
         this.cargo = "Admin"; // Definindo cargo como Admin por padrão
     }
 
-    public void confirmarEvento(Evento evento) {
-        // Exibir informações do evento
-        System.out.println("Detalhes do evento:");
-        System.out.println("Nome: " + evento.getNome());
-        System.out.println("Data de Início: " + evento.getDataInicio());
-        System.out.println("Data de Fim: " + evento.getDataFim());
-        System.out.println("Descrição: " + evento.getDescricao());
-        System.out.println("Organizador: " + evento.getOrganizador());
-        System.out.println("Categoria: " + evento.getCategoria());
-        System.out.println("Status Atual: " + evento.getStatus());
-    
-        // Confirmar o evento
-        evento.setStatus("Ativo");
-        System.out.println("O evento foi confirmado com sucesso!");
-    }
-    
-    public void rejeitarEvento(Evento evento) {
-        // Exibir informações do evento
-        System.out.println("Detalhes do evento:");
-        System.out.println("Nome: " + evento.getNome());
-        System.out.println("Data de Início: " + evento.getDataInicio());
-        System.out.println("Data de Fim: " + evento.getDataFim());
-        System.out.println("Descrição: " + evento.getDescricao());
-        System.out.println("Organizador: " + evento.getOrganizador());
-        System.out.println("Categoria: " + evento.getCategoria());
-        System.out.println("Status Atual: " + evento.getStatus());
-    
-        // Rejeitar o evento
-        evento.setStatus("Rejeitado");
-        System.out.println("O evento foi rejeitado.");
-        // Perguntar o motivo da rejeição
-        
-        System.out.println("Motivo da rejeição: " + evento.getMensagemRejeicao());
+    public Admin() {
+        super();
+        this.cargo = "Admin"; // Definindo cargo como Admin por padrão
     }
 
 

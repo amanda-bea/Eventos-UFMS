@@ -2,11 +2,8 @@ package com.ufms.eventos.ui;
 
 import com.ufms.eventos.controller.EventoController;
 import com.ufms.eventos.dto.EventoDTO;
-// Removida a importação direta de Organizador aqui, pois o usuário logado genérico será usado
-// import com.ufms.eventos.model.Organizador; 
 import com.ufms.eventos.model.Categoria;
 import com.ufms.eventos.model.Departamento;
-import com.ufms.eventos.model.Usuario; // Importar Usuario para clareza
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -27,12 +24,9 @@ public class SolicitarEventoFXMLController {
     @FXML private TextArea descricaoArea;
     @FXML private TextField imagemField;
     @FXML private TextField linkField;
-
     @FXML private ComboBox<Categoria> categoriaComboBox;
     @FXML private ComboBox<Departamento> departamentoComboBox;
-    
     @FXML private Button solicitarButton;
-
     private EventoController eventoController = new EventoController();
     private LoginFXMLController loginFXMLController;
 
@@ -72,35 +66,23 @@ public class SolicitarEventoFXMLController {
             return;
         }
 
-        // --- MUDANÇA NA LÓGICA DE AUTORIZAÇÃO ---
-        // Se "todo usuário logado é um organizador", verificamos apenas se há um usuário logado.
         if (loginFXMLController == null || loginFXMLController.getUsuarioLogado() == null) {
             mostrarAlerta("Erro de Autenticação", "Usuário não logado.",
                           "Você precisa estar logado para solicitar um evento.", AlertType.ERROR);
             return;
         }
-        // A variável 'organizador' local e o cast para Organizador foram removidos desta checagem,
-        // pois a premissa é que qualquer Usuario logado pode solicitar.
-        // O objeto Usuario logado pode ser acessado via loginFXMLController.getUsuarioLogado()
-        // se o eventoController.solicitarEvento precisar dele.
-        // --- FIM DA MUDANÇA NA LÓGICA DE AUTORIZAÇÃO ---
 
 
         EventoDTO dto = new EventoDTO();
         dto.setNome(nomeField.getText());
         dto.setDataInicio(dataInicio.toString());
         dto.setDataFim(dataFim != null ? dataFim.toString() : "");
-        
         dto.setCategoria(categoriaComboBox.getValue().name());
         dto.setDescricao(descricaoArea.getText());
         dto.setDepartamento(departamentoComboBox.getValue().name());
-
         dto.setImagem(imagemField.getText());
         dto.setLink(linkField.getText());
 
-
-        // A chamada para eventoController.solicitarEvento permanece a mesma,
-        // passando loginFXMLController, que contém o usuário logado.
         if (eventoController.solicitarEvento(dto, loginFXMLController)) {
             mostrarAlerta("Sucesso", "Solicitação Enviada!", 
                           "Sua solicitação de evento foi enviada com sucesso.", AlertType.INFORMATION);
