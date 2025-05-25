@@ -1,16 +1,14 @@
 package com.ufms.eventos.model;
 
-import java.util.Map;
 import lombok.Data;
+import java.util.Map;
 
 @Data
 public class Formulario {
-    private Long id;
+    private String nomeAcao;
     private String nome;
     private String email;
-    private String telefone;
     private String cpf;
-    private Map<String, String> camposExtras;
-
-    public Formulario(){}
+    private String curso;
+    private Map<String, String> respostasExtras; // campo → resposta
 }

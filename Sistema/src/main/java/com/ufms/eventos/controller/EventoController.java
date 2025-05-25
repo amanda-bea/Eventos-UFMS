@@ -7,6 +7,7 @@ import com.ufms.eventos.dto.EventoMinDTO;
 import com.ufms.eventos.model.Organizador;
 
 import com.ufms.eventos.services.EventoService;
+import com.ufms.eventos.ui.LoginFXMLController;
 
 import java.util.List;
 
@@ -18,15 +19,18 @@ public class EventoController {
         this.eventoService = new EventoService();
     }
 
-    public boolean solicitarEvento(EventoDTO eventoDTO, Organizador organizador) {
+    public boolean solicitarEvento(EventoDTO eventoDTO, LoginFXMLController loginController) {
+        Organizador organizador = (Organizador) loginController.getUsuarioLogado();
         return eventoService.solicitarEvento(eventoDTO, organizador);
     }
 
-    public boolean excluirSolicitacaoEvento(String nomeEvento, Organizador organizador) {
+    public boolean excluirSolicitacaoEvento(String nomeEvento, LoginFXMLController loginController) {
+        Organizador organizador = (Organizador) loginController.getUsuarioLogado();
         return eventoService.excluirSolicitacaoEvento(nomeEvento, organizador);
     }
 
-    public boolean editarEvento(EditarEventoDTO dto, Organizador organizador) {
+    public boolean editarEvento(EditarEventoDTO dto, LoginFXMLController loginController) {
+        Organizador organizador = (Organizador) loginController.getUsuarioLogado();
         return eventoService.editarEvento(dto, organizador);
     }
 
@@ -38,7 +42,7 @@ public class EventoController {
         return eventoService.cancelarEvento(nomeEvento, motivo);
     }
 
-    public List<EventoDTO> listarEventosAtivos() {
+    public List<EventoDTO> listarEventosAtivos() { //provavelmente não vai ser usado
         return eventoService.listarEventosAtivos();
     }
 

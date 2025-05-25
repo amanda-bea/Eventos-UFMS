@@ -10,6 +10,8 @@ import com.ufms.eventos.dto.AcaoDTO;
 import com.ufms.eventos.dto.EditarAcaoDTO;
 import com.ufms.eventos.dto.EventoDTO;
 
+import com.ufms.eventos.ui.LoginFXMLController;
+
 
 public class AcaoController {
     private AcaoService acaoService;
@@ -18,7 +20,8 @@ public class AcaoController {
         this.acaoService = new AcaoService();
     }
 
-    public boolean solicitarAcao(AcaoDTO acaoDTO, Organizador organizador, EventoDTO eventoDTO) {
+    public boolean solicitarAcao(AcaoDTO acaoDTO, LoginFXMLController loginController, EventoDTO eventoDTO) {
+        Organizador organizador = (Organizador) loginController.getUsuarioLogado();
         return acaoService.solicitarAcao(acaoDTO, organizador, eventoDTO);
     }
 
@@ -26,7 +29,8 @@ public class AcaoController {
         return acaoService.listarAcoes();
     }
 
-    public boolean editarAcao(EditarAcaoDTO acao, Organizador organizador) {
+    public boolean editarAcao(EditarAcaoDTO acao, LoginFXMLController loginController) {
+        Organizador organizador = (Organizador) loginController.getUsuarioLogado();
         return acaoService.editarAcao(acao, organizador);
     }
 
@@ -38,7 +42,8 @@ public class AcaoController {
         return acaoService.getAcao(nome);
     }
 
-    public boolean adicionarAcaoEmEventoExistente(String nomeEvento, AcaoDTO acaoDTO, Organizador organizador) {
+    public boolean adicionarAcaoEmEventoExistente(String nomeEvento, AcaoDTO acaoDTO, LoginFXMLController loginController) {
+        Organizador organizador = (Organizador) loginController.getUsuarioLogado();
         return acaoService.adicionarAcaoEmEventoExistente(nomeEvento, acaoDTO, organizador);
     }
 

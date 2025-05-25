@@ -1,14 +1,14 @@
-package com.ufms.eventos.dto;
+package com.ufms.eventos.model;
 
-import lombok.Data;
 import java.util.Map;
+import lombok.Data;
 
 @Data
-public class FormularioDTO {
-    private String nomeAcao;
+public class RespostaFormulario {
     private String nome;
     private String email;
     private String cpf;
     private String curso;
     private Map<String, String> respostasExtras;
+    private String acaoNome; // identificação da ação relacionada
 }

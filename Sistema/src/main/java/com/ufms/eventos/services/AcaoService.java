@@ -3,6 +3,7 @@ package com.ufms.eventos.services;
 import com.ufms.eventos.dto.AcaoDTO;
 import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.dto.EditarAcaoDTO;
+import com.ufms.eventos.dto.AcaoMinDTO;
 
 import com.ufms.eventos.model.Acao;
 import com.ufms.eventos.model.Organizador;
@@ -15,6 +16,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.stream.Collectors;
+import java.util.List;
+import java.util.ArrayList;
 
 public class AcaoService {
     private AcaoRepository acaoRepository;
@@ -105,6 +108,27 @@ public class AcaoService {
         novaAcao.setMensagemRejeicao(null);
 
         return acaoRepository.addAcao(novaAcao);
+    }
+
+    public List<AcaoMinDTO> listarAcoesPorEventoMin(String nomeEvento) {
+        Evento evento = eventoRepository.getEvento(nomeEvento);
+        if (evento == null) {
+            return new ArrayList<>(); // Retorna lista vazia se o evento não existir
+        }
+        return acaoRepository.getAcoes().stream()
+                .filter(acao -> acao.getEvento().equals(evento))
+                .map(AcaoMinDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<AcaoDTO> mostrarAcao(String nomeAcao) {
+        Acao acao = acaoRepository.getAcao(nomeAcao);
+        if (acao != null) {
+            List<AcaoDTO> acoes = new ArrayList<>();
+            acoes.add(new AcaoDTO(acao));
+            return acoes;
+        }
+        return new ArrayList<>(); // Retorna lista vazia se a ação não existir
     }
 
 }

@@ -8,7 +8,6 @@ package com.ufms.eventos.services;
 import com.ufms.eventos.model.Categoria;
 import com.ufms.eventos.model.Departamento;
 import com.ufms.eventos.model.Evento;
-import com.ufms.eventos.model.Formulario;
 import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.repository.EventoRepository;
 import com.ufms.eventos.repository.OrganizadorRepository;
@@ -96,14 +95,6 @@ public class EventoService {
         return Arrays.stream(Departamento.values())
                      .map(Enum::name)
                      .collect(Collectors.toList());
-    }
-
-    public String adicionarCampoExtra(Formulario formulario, String campo) {
-        if (formulario.getCamposExtras().containsKey(campo)) {
-            return "Campo já existe!";
-        }
-        formulario.getCamposExtras().put(campo, "");
-        return "Campo adicionado com sucesso!";
     }
 
     // Depois colocar esse metodo para rodar ao abrir o sistema

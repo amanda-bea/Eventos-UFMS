@@ -1,7 +1,5 @@
 package com.ufms.eventos.dto;
 
-import com.ufms.eventos.model.Categoria;
-import com.ufms.eventos.model.Departamento;
 import com.ufms.eventos.model.Evento;
 
 import lombok.Data;
@@ -58,8 +56,8 @@ public class EventoDTO {
         this.dataInicio = evento.getDataInicio();
         this.dataFim = evento.getDataFim();
         this.descricao = evento.getDescricao();
-        this.departamento = evento.getDepartamento().name();
-        this.categoria = evento.getCategoria().name();
+        this.departamento = evento.getDepartamento();
+        this.categoria = evento.getCategoria();
         this.imagem = evento.getImagem();
         this.link = evento.getLink();
     }

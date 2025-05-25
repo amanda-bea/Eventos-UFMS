@@ -23,12 +23,11 @@ public class AcaoDTO {
     private String modalidade;
     private String imagem;
     private String link;
-    private String status;
     private String capacidade;
 
     public AcaoDTO(String evento, String nome, String data, String descricao, String local, String horarioInicio,
                    String horarioFim, String departamento, String contato, String modalidade,
-                   String imagem, String link, String status, String capacidade) {
+                   String imagem, String link, String capacidade) {
         this.evento = evento;
         this.nome = nome;
         this.data = data;
@@ -41,7 +40,6 @@ public class AcaoDTO {
         this.modalidade = modalidade;
         this.imagem = imagem;
         this.link = link;
-        this.status = status;
         this.capacidade = capacidade;
     }
 
@@ -76,7 +74,6 @@ public class AcaoDTO {
         this.modalidade = acao.getModalidade();
         this.imagem = acao.getImagem();
         this.link = acao.getLink();
-        this.status = acao.getStatus();
         this.capacidade = acao.getCapacidade();
     }
 
@@ -93,7 +90,6 @@ public class AcaoDTO {
         this.modalidade = acao.getModalidade();
         this.imagem = acao.getImagem();
         this.link = acao.getLink();
-        this.status = acao.getStatus();
         this.capacidade = Integer.toString(acao.getCapacidade());
     }
 
@@ -134,9 +130,6 @@ public class AcaoDTO {
             return false;
         }
         if (link == null || link.isEmpty()) {
-            return false;
-        }
-        if (status == null || status.isEmpty()) {
             return false;
         }
         if (capacidade == null || capacidade.isEmpty()) {
