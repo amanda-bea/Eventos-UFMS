@@ -2,7 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?> <?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
@@ -63,41 +64,29 @@
                         </Label>
 
                         <Label text="Nome do Evento" textFill="#2f4a51">
-                            <font>
-                                <Font name="Nirmala UI Bold" size="12.0" />
-                            </font>
+                            <font><Font name="Nirmala UI Bold" size="12.0" /></font>
                         </Label>
                         <TextField fx:id="nomeField" promptText="Nome do Evento" prefHeight="30.0">
-                            <font>
-                                <Font name="Nirmala UI Semilight" size="12.0" />
-                            </font>
+                            <font><Font name="Nirmala UI Semilight" size="12.0" /></font>
                         </TextField>
 
                         <Label text="Descrição" textFill="#2f4a51">
-                            <font>
-                                <Font name="Nirmala UI Bold" size="12.0" />
-                            </font>
+                            <font><Font name="Nirmala UI Bold" size="12.0" /></font>
                         </Label>
                         <TextArea fx:id="descricaoArea" promptText="Descrição do Evento" prefHeight="60.0" wrapText="true">
-                            <font>
-                                <Font name="Nirmala UI Semilight" size="12.0" />
-                            </font>
+                            <font><Font name="Nirmala UI Semilight" size="12.0" /></font>
                         </TextArea>
 
                         <HBox spacing="20.0">
                             <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                                 <Label text="Data de Início" textFill="#2f4a51">
-                                    <font>
-                                        <Font name="Nirmala UI Bold" size="12.0" />
-                                    </font>
+                                    <font><Font name="Nirmala UI Bold" size="12.0" /></font>
                                 </Label>
                                 <DatePicker fx:id="dataInicioField" promptText="dd/MM/yyyy" prefHeight="30.0" prefWidth="1000.0"/>
                             </VBox>
                             <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                                 <Label text="Data de Fim" textFill="#2f4a51">
-                                    <font>
-                                        <Font name="Nirmala UI Bold" size="12.0" />
-                                    </font>
+                                    <font><Font name="Nirmala UI Bold" size="12.0" /></font>
                                 </Label>
                                 <DatePicker fx:id="dataFimField" promptText="dd/MM/yyyy" prefHeight="30.0" prefWidth="1000.0"/>
                             </VBox>
@@ -105,39 +94,48 @@
 
                         <HBox spacing="20.0">
                             <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                <Label text="Departamento" textFill="#2f4a51">
-                                    <font>
-                                        <Font name="Nirmala UI Bold" size="12.0" />
-                                    </font>
+                                <Label text="Departamento (Evento)" textFill="#2f4a51">
+                                     <font><Font name="Nirmala UI Bold" size="12.0" /></font>
                                 </Label>
                                 <ComboBox fx:id="departamentoComboBox" promptText="Selecione o Departamento" prefHeight="30.0" prefWidth="1000.0"/>
                             </VBox>
                             <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                <Label text="Categoria" textFill="#2f4a51">
-                                    <font>
-                                        <Font name="Nirmala UI Bold" size="12.0" />
-                                    </font>
+                                <Label text="Categoria (Evento)" textFill="#2f4a51">
+                                    <font><Font name="Nirmala UI Bold" size="12.0" /></font>
                                 </Label>
                                 <ComboBox fx:id="categoriaComboBox" promptText="Selecione a Categoria" prefHeight="30.0" prefWidth="1000.0"/>
                             </VBox>
                         </HBox>
 
                         <Label text="Imagem do Evento (URL)" textFill="#2f4a51">
-                            <font>
-                                <Font name="Nirmala UI Bold" size="12.0" />
-                            </font>
+                            <font><Font name="Nirmala UI Bold" size="12.0" /></font>
                         </Label>
                         <TextField fx:id="imagemField" promptText="Link da imagem do evento" prefHeight="30.0"/>
 
-                        <Label text="Link de Formulário/Inscrição" textFill="#2f4a51">
-                            <font>
-                                <Font name="Nirmala UI Bold" size="12.0" />
-                            </font>
+                        <Label text="Link de Formulário/Inscrição (Evento)" textFill="#2f4a51">
+                            <font><Font name="Nirmala UI Bold" size="12.0" /></font>
                         </Label>
                         <TextField fx:id="linkField" promptText="Link para inscrições ou mais informações" prefHeight="30.0"/>
+                        
+                        <Label text="Ações do Evento" textFill="#489ec1d1">
+                            <font><Font name="System Bold" size="16.0" /></font>
+                            <VBox.margin><Insets top="15.0" bottom="5.0"/></VBox.margin>
+                        </Label>
 
-                        <Button fx:id="solicitarButton" onAction="#handleSolicitarEvento" text="Solicitar Evento" maxWidth="Infinity" style="-fx-background-color: #489ec1; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10px 0px; -fx-background-radius: 5px; -fx-cursor: hand;">
+                        <VBox fx:id="acoesContainerVBox" spacing="20.0" style="-fx-border-color: #DDDDDD; -fx-border-width: 0 0 1 0; -fx-padding: 0 0 15 0;">
+                             <VBox.margin>
+                                <Insets bottom="10.0"/>
+                            </VBox.margin>
+                            </VBox>
+
+                        <Button fx:id="btnAdicionarAcao" onAction="#handleAdicionarAcao" text="Adicionar Ação" maxWidth="Infinity" style="-fx-background-color: #5cb85c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10px 0px; -fx-background-radius: 5px; -fx-cursor: hand;">
                             <VBox.margin>
+                                <Insets top="5.0"/>
+                            </VBox.margin>
+                        </Button>
+
+                        <Button fx:id="btnSolicitarEventoFinal" onAction="#handleSolicitarEventoFinal" text="Concluir e Solicitar Evento" maxWidth="Infinity" style="-fx-background-color: #489ec1; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10px 0px; -fx-background-radius: 5px; -fx-cursor: hand;"
+                                visible="false" managed="false"> <VBox.margin>
                                 <Insets top="15.0"/>
                             </VBox.margin>
                         </Button>

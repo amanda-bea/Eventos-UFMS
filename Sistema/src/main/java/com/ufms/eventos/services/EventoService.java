@@ -5,8 +5,6 @@
 
 package com.ufms.eventos.services;
 
-import com.ufms.eventos.model.Categoria;
-import com.ufms.eventos.model.Departamento;
 import com.ufms.eventos.model.Evento;
 import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.repository.EventoRepository;
@@ -16,7 +14,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.HashSet;
 
 import com.ufms.eventos.dto.EditarEventoDTO;
@@ -83,6 +80,7 @@ public class EventoService {
         return false;
     }
 
+    /* 
     // Método utilitário para listar categorias fixas
     public List<String> listarCategorias() {
         return Arrays.stream(Categoria.values())
@@ -96,6 +94,7 @@ public class EventoService {
                      .map(Enum::name)
                      .collect(Collectors.toList());
     }
+    */
 
     // Depois colocar esse metodo para rodar ao abrir o sistema
     public void atualizarEventosExpirados() {

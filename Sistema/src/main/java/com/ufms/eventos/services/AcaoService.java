@@ -130,5 +130,8 @@ public class AcaoService {
         }
         return new ArrayList<>(); // Retorna lista vazia se a ação não existir
     }
+    public Acao buscarPorNome(String nome) {
+        return acaoRepository.getAcao(nome);
+    }
 
 }

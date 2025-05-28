@@ -55,4 +55,13 @@ public class UsuarioRepository {
         return null;
     }
 
+    public Usuario getUsuarioPorNome(String nome) {
+        for (Usuario usuario : usuarios) {
+            if (usuario.getNome().equalsIgnoreCase(nome)) {
+                return usuario;
+            }
+        }
+        return null;
+    }
+
 }

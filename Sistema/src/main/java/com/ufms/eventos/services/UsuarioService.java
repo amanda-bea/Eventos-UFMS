@@ -13,4 +13,9 @@ public class UsuarioService {
     public Usuario autenticar(String nome, String senha) {
         return usuarioRepository.getUsuarioPorNomeESenha(nome, senha);
     }
+
+    public Usuario buscarPorNome(String nome) {
+        return usuarioRepository.getUsuarioPorNome(nome);
+    }
+
 }
