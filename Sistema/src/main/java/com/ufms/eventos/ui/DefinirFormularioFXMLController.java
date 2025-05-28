@@ -152,14 +152,10 @@ public class DefinirFormularioFXMLController {
             nomesCamposPersonalizados
         );
 
-        ConfiguracaoFormularioDTO configExistente = configuracaoLogicController.buscarConfiguracao(identificadorEvento);
         ConfiguracaoFormularioDTO resultadoOperacao;
 
-        if (configExistente != null) {
-            resultadoOperacao = configuracaoLogicController.atualizarConfiguracao(identificadorEvento, configDTO);
-        } else {
-            resultadoOperacao = configuracaoLogicController.criarConfiguracao(configDTO);
-        }
+
+        resultadoOperacao = configuracaoLogicController.criarConfiguracaoFormulario(configDTO);
 
         if (resultadoOperacao != null) {
             mostrarAlerta("Sucesso!", "Configuração Salva", "A configuração do formulário para o evento '" + eventoAtual.getNome() + "' foi salva.", AlertType.INFORMATION);

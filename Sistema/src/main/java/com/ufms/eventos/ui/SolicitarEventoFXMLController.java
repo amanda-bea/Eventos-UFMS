@@ -355,7 +355,7 @@ public class SolicitarEventoFXMLController {
                                   "A configuração do formulário foi salva, mas ocorreu um erro ao salvar os dados do evento/ações. ", AlertType.ERROR);
                     
                     ConfiguracaoFormularioController cfgCtrl = new ConfiguracaoFormularioController();
-                    boolean configDeletada = cfgCtrl.deletarConfiguracao(eventoDTO.getNome());
+                    boolean configDeletada = cfgCtrl.deletarConfiguracaoFormulario(eventoDTO.getNome());
                     if (configDeletada) {
                         System.out.println("Rollback da configuração do formulário executado para o evento: " + eventoDTO.getNome());
                     } else {
