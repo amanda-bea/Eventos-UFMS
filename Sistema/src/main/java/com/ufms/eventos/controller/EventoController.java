@@ -1,5 +1,6 @@
 package com.ufms.eventos.controller;
 
+import com.ufms.eventos.dto.AcaoDTO;
 import com.ufms.eventos.dto.EditarEventoDTO;
 import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.dto.EventoMinDTO;
@@ -53,4 +54,8 @@ public class EventoController {
     //public EventoDTO buscarEventoPorId(Long id) {
     //    return eventoService.buscarEventoPorId(id);
     //}
+
+    public boolean solicitarEventoComAcoes(EventoDTO eventoDTO, List<AcaoDTO> listaAcoesDTO, Organizador organizador) {
+        return eventoService.solicitarEventoComAcoes(eventoDTO, listaAcoesDTO, organizador);
+    }
 }

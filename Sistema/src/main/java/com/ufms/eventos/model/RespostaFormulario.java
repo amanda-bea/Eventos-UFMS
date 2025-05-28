@@ -10,5 +10,5 @@ public class RespostaFormulario {
     private String cpf;
     private String curso;
     private Map<String, String> respostasExtras;
-    private String acaoNome; // identificação da ação relacionada
+    private String nomeAcao; // identificação da ação relacionada
 }

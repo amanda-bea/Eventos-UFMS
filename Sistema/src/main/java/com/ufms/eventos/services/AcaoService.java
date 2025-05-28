@@ -134,4 +134,26 @@ public class AcaoService {
         return acaoRepository.getAcao(nome);
     }
 
+    public void atualizarAcoesExpiradas() {
+        LocalDate hoje = LocalDate.now();
+        acaoRepository.getAcoes().stream()
+            .filter(acao -> acao.getData().isBefore(hoje) && !acao.getStatus().equals("Cancelado"))
+            .forEach(acao -> {
+                acao.setStatus("Inativo");
+                acaoRepository.updateAcao(acao);
+            });
+    }
+
+    /*
+    public void verificarStatusVagas(Long idAcao) {
+        Acao acao = acaoRepository.findById(idAcao);
+        int confirmados = contarPresencasConfirmadas(idAcao);
+        int capacidade = acao.getCapacidade();
+
+        if (confirmados >= capacidade) {
+            acao.setStatus("Lotado");
+        } else if (capacidade - confirmados <= 10) {
+            String label = Últimas vagas
+    }
+     */
 }

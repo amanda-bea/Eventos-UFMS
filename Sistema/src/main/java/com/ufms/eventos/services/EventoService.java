@@ -5,8 +5,10 @@
 
 package com.ufms.eventos.services;
 
+import com.ufms.eventos.model.Acao;
 import com.ufms.eventos.model.Evento;
 import com.ufms.eventos.model.Organizador;
+import com.ufms.eventos.repository.AcaoRepository;
 import com.ufms.eventos.repository.EventoRepository;
 import com.ufms.eventos.repository.OrganizadorRepository;
 
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.util.HashSet;
 
+import com.ufms.eventos.dto.AcaoDTO;
 import com.ufms.eventos.dto.EditarEventoDTO;
 import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.dto.EventoMinDTO;
@@ -23,10 +26,12 @@ import com.ufms.eventos.dto.EventoMinDTO;
 public class EventoService {
     private EventoRepository er;
     private OrganizadorRepository or;
+    private AcaoRepository ar;
 
     public EventoService() {
         this.er = new EventoRepository();
         this.or = new OrganizadorRepository();
+        this.ar = new AcaoRepository();
     }
 
     public List<EventoDTO> listarEventosAtivos() {
@@ -129,6 +134,31 @@ public class EventoService {
         evento.setStatus("Cancelado");
         evento.setMensagemRejeicao(null);
         return true;
+    }
+
+    public boolean solicitarEventoComAcoes(EventoDTO eventoDTO, List<AcaoDTO> listaAcoesDTO, Organizador organizador) {
+        Evento evento = new Evento(eventoDTO);
+        evento.setStatus("Aguardando aprovação");
+        evento.setOrganizador(organizador);
+        evento.setMensagemRejeicao(null);
+
+        // Adiciona o evento se ainda não existir
+        if (er.getEvento(evento.getNome()) == null) {
+           er.addEvento(evento);
+        }
+
+        boolean sucesso = true;
+        for (AcaoDTO acaoDTO : listaAcoesDTO) {
+            Acao acao = new Acao(acaoDTO);
+            acao.setEvento(evento);
+            acao.setStatus("Aguardando aprovação");
+            acao.setMensagemRejeicao(null);
+            boolean adicionada = ar.addAcao(acao);
+            if (!adicionada) {
+                sucesso = false; // Se alguma ação não for adicionada, marca como falso
+            }
+        }
+        return sucesso;
     }
 
 }

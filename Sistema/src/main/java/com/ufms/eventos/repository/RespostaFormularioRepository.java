@@ -15,7 +15,7 @@ public class RespostaFormularioRepository {
     public List<RespostaFormulario> listarPorAcao(String acaoNome) {
         List<RespostaFormulario> resultado = new ArrayList<>();
         for (RespostaFormulario r : respostas) {
-            if (r.getAcaoNome().equalsIgnoreCase(acaoNome)) {
+            if (r.getNomeAcao().equalsIgnoreCase(acaoNome)) {
                 resultado.add(r);
             }
         }

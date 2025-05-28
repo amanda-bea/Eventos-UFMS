@@ -65,6 +65,7 @@ public class LoginFXMLController {
             Organizador organizadorInstancia = new Organizador();
             organizadorInstancia.setNome(nome);    // 'nome' vindo do campo da tela de login
             organizadorInstancia.setSenha(senha);
+            this.usuarioLogado = organizadorInstancia;
         }
 
         Usuario usuario = new Usuario();

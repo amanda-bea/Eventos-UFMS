@@ -17,7 +17,7 @@ public class RespostaFormularioService {
         resposta.setCpf(dto.getCpf());
         resposta.setCurso(dto.getCurso());
         resposta.setRespostasExtras(dto.getRespostasExtras());
-        resposta.setAcaoNome(dto.getAcaoNome());
+        resposta.setNomeAcao(dto.getAcaoNome());
         repository.salvar(resposta);
     }
 
@@ -29,7 +29,7 @@ public class RespostaFormularioService {
             dto.setCpf(r.getCpf());
             dto.setCurso(r.getCurso());
             dto.setRespostasExtras(r.getRespostasExtras());
-            dto.setAcaoNome(r.getAcaoNome());
+            dto.setAcaoNome(r.getNomeAcao());
             return dto;
         }).collect(Collectors.toList());
     }
