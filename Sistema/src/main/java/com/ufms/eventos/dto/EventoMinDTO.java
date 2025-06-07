@@ -6,8 +6,9 @@ import lombok.Data;
 
 @Data
 public class EventoMinDTO {
+    private Integer id;
     private String nome;
-    private String dataInicio; //se data inicio for igual adata fim, mostrar apenas uma data
+    private String dataInicio;
     private String categoria; // Ex: Cultura, Educação, Saúde, etc.
     private String imagem; // URL da imagem do evento
 

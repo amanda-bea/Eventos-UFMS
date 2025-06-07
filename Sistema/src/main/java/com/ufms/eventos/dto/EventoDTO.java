@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class EventoDTO {
+    private Integer id;
     private String nome;
     private String descricao;
     private String dataInicio;

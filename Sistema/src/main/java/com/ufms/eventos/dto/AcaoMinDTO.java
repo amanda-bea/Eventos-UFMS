@@ -7,6 +7,7 @@ import com.ufms.eventos.model.Acao;
 
 @Data
 public class AcaoMinDTO {
+    private Integer id;
     private String nome;
     private String data;
     private String departamento;

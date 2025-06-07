@@ -11,6 +11,7 @@ import lombok.Data;
 
 @Data
 public class AcaoDTO {
+    private Integer id;
     private String evento;
     private String nome;
     private String data;
