@@ -6,11 +6,10 @@ import lombok.Data;
 
 @Data
 public class Usuario {
-    private Integer id; // Adicionado id
     private String nome;
     private String email;
     private String senha;
-    private String telefone; // Formato: telefone ou e-mail
+    private String telefone;
 
     public Usuario(String nome, String email, String senha, String telefone) {
         this.nome = nome;
@@ -21,6 +20,14 @@ public class Usuario {
 
     public Usuario() {
         // Construtor padrão
+    }
+
+    public Usuario(String nome, String senha) {
+        this.nome = nome;
+        this.senha = senha;
+        this.email = null; // Email não é obrigatório nesse construtor
+        this.telefone = null; // Telefone não é obrigatório nesse construtor
+
     }
 
     @Override
@@ -38,11 +45,13 @@ public class Usuario {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Usuario usuario = (Usuario) o;
-        return Objects.equals(email, usuario.email);
+        // Dois usuários são considerados iguais se seus nomes forem iguais.
+        return Objects.equals(nome, usuario.nome);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email);
+        // O hashCode também deve ser baseado no campo usado no equals.
+        return Objects.hash(nome);
     }
 }

@@ -20,5 +20,10 @@ public class Admin extends Usuario {
         this.cargo = "Admin"; // Definindo cargo como Admin por padrão
     }
 
+    public Admin(String nome, String senha){
+        super(nome, null, senha, null); // Telefone e email podem ser nulos
+        this.cargo = "Admin"; // Definindo cargo como Admin por padrão
+    }
+
 
 }

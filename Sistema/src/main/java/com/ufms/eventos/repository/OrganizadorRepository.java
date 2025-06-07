@@ -18,10 +18,6 @@ public class OrganizadorRepository {
         return this.organizadores.add(organizador);
     }
 
-    public boolean addOrganizador(String nome) {
-        return this.organizadores.add(new Organizador(nome));
-    }
-
     public boolean removeOrganizador(Organizador organizador) {
         return this.organizadores.remove(organizador);
     }

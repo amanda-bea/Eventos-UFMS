@@ -2,6 +2,10 @@ package com.ufms.eventos.ui;
 
 import com.ufms.eventos.controller.AdminController;
 import com.ufms.eventos.dto.EventoMinDTO;
+import com.ufms.eventos.model.Admin;
+import com.ufms.eventos.model.Usuario;
+import com.ufms.eventos.util.SessaoUsuario;
+
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
@@ -30,10 +34,24 @@ public class EventosPendentesFXMLController implements Initializable {
 
     private AdminController adminController;
 
-    @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.adminController = new AdminController();
-        carregarEventosParaAnalise();
+
+        // --- VERIFICAÇÃO DE PERMISSÃO ADICIONADA ---
+        Usuario usuarioLogado = SessaoUsuario.getInstancia().getUsuarioLogado();
+
+        if (usuarioLogado == null || !(usuarioLogado instanceof Admin)) {
+            // Se não há usuário logado ou se ele NÃO é um Admin...
+            tituloPrincipalLabel.setText("Acesso Negado");
+            Label msgErro = new Label("Você não tem permissão para acessar esta página.");
+            msgErro.setStyle("-fx-text-fill: red; -fx-font-size: 16px;");
+            eventoContainer.getChildren().clear();
+            eventoContainer.getChildren().add(msgErro);
+            // Opcional: desabilitar outros componentes da tela
+        } else {
+            // Se for um Admin, carrega os eventos normalmente.
+            carregarEventosParaAnalise();
+        }
     }
 
     private void carregarEventosParaAnalise() {

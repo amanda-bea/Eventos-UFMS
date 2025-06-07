@@ -1,28 +1,28 @@
-//CAMADA QUE FAZ A INTERAÇÃO ENTRE O CONTROLLER E O REPOSITORY
-//CAMADA DE SERVIÇO
-//FAZ A REQUISIÇÃO DOS DADOS DO BANCO DE DADOS COM O REPOSITORY
-//CONTÉM A LÓGICA/CASOS DE USO
-
 package com.ufms.eventos.services;
-
-import com.ufms.eventos.model.Acao;
-import com.ufms.eventos.model.Evento;
-import com.ufms.eventos.model.Organizador;
-import com.ufms.eventos.repository.AcaoRepository;
-import com.ufms.eventos.repository.EventoRepository;
-import com.ufms.eventos.repository.OrganizadorRepository;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.time.LocalDate;
-import java.util.HashSet;
 
 import com.ufms.eventos.dto.AcaoDTO;
 import com.ufms.eventos.dto.EditarEventoDTO;
 import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.dto.EventoMinDTO;
+import com.ufms.eventos.model.Acao;
+import com.ufms.eventos.model.Categoria;
+import com.ufms.eventos.model.Departamento;
+import com.ufms.eventos.model.Evento;
+import com.ufms.eventos.model.Organizador;
+import com.ufms.eventos.model.Usuario;
+import com.ufms.eventos.repository.AcaoRepository;
+import com.ufms.eventos.repository.EventoRepository;
+import com.ufms.eventos.repository.OrganizadorRepository;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * Camada de Serviço que contém TODA a lógica de negócio para Eventos.
+ * É utilizada tanto pelo EventoController quanto pelo AdminController.
+ */
 public class EventoService {
     private EventoRepository er;
     private OrganizadorRepository or;
@@ -34,89 +34,48 @@ public class EventoService {
         this.ar = new AcaoRepository();
     }
 
-    public List<EventoDTO> listarEventosAtivos() {
-        HashSet<Evento> eventos = er.getEventos();
-        return eventos.stream()
-                .filter(e -> "Ativo".equalsIgnoreCase(e.getStatus()))
-                .map(EventoDTO::new)
-                .collect(Collectors.toList());
-    }
+    // ===================================================================
+    // MÉTODOS PARA USUÁRIOS E ORGANIZADORES (Chamados pelo EventoController)
+    // ===================================================================
 
-    public List<EventoMinDTO> listarEventosAtivosMin() {
-        return er.getEventos().stream()
-                .filter(e -> "Ativo".equalsIgnoreCase(e.getStatus()))
-                .map(EventoMinDTO::new)
-                .collect(Collectors.toList());
-    }
+    /**
+     * Método principal para criar um evento. Recebe qualquer usuário e o trata
+     * como o organizador do evento.
+     */
+    public boolean solicitarEventoComAcoes(EventoDTO eventoDTO, List<AcaoDTO> listaAcoesDTO, Usuario criadorDoEvento) {
+        // Converte o Usuario em um objeto Organizador para o contexto do evento.
+        Organizador organizadorDoEvento = new Organizador(
+            criadorDoEvento.getNome(), criadorDoEvento.getEmail(),
+            criadorDoEvento.getSenha(), criadorDoEvento.getTelefone()
+        );
+        // Em um sistema real, você salvaria/atualizaria este registro de organizador no banco.
+        // or.salvar(organizadorDoEvento);
 
-    //public EventoDTO buscarEventoPorId(Long id) {
-    //    Evento evento = er.getEventos().stream()
-    //            .filter(e -> e.getId().equals(id))
-    //            .findFirst()
-    //            .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
-    //
-    //    return new EventoDTO(evento);
-    //}
-
-    //Organizador deve ser recebido pelo controller obtendo o usuário logado
-    public boolean solicitarEvento(EventoDTO eventoDTO, Organizador organizador) {
         Evento evento = new Evento(eventoDTO);
         evento.setStatus("Aguardando aprovação");
-        evento.setOrganizador(organizador);
-        evento.setMensagemRejeicao(null);
-
-        // Se o evento ainda não existe no repositório, adiciona
+        evento.setOrganizador(organizadorDoEvento);
+        
         if (er.getEvento(evento.getNome()) == null) {
             er.addEvento(evento);
         }
 
-        this.or.addOrganizador(organizador);
-
-        // Retorna true se o evento foi adicionado ou já existia
+        for (AcaoDTO acaoDTO : listaAcoesDTO) {
+            Acao acao = new Acao(acaoDTO);
+            acao.setEvento(evento);
+            acao.setStatus("Aguardando aprovação");
+            ar.addAcao(acao);
+        }
         return true;
     }
 
-    public boolean excluirSolicitacaoEvento(String nomeEvento, Organizador organizador) {
-        Evento evento = er.getEvento(nomeEvento);
-        if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())
-            && evento.getOrganizador().equals(organizador)) {
-            return er.removeEvento(evento);
-        }
-        return false;
-    }
-
-    /* 
-    // Método utilitário para listar categorias fixas
-    public List<String> listarCategorias() {
-        return Arrays.stream(Categoria.values())
-                     .map(Enum::name)
-                     .collect(Collectors.toList());
-    }
-
-    // Método utilitário para listar departamentos fixos
-    public List<String> listarDepartamentos() {
-        return Arrays.stream(Departamento.values())
-                     .map(Enum::name)
-                     .collect(Collectors.toList());
-    }
-    */
-
-    // Depois colocar esse metodo para rodar ao abrir o sistema
-    public void atualizarEventosExpirados() {
-        LocalDate hoje = LocalDate.now();
-        Set<Evento> eventos = er.getEventos();
-
-        for (Evento evento : eventos) {
-            if (evento.getDataFim().isBefore(hoje) && !"Inativo".equalsIgnoreCase(evento.getStatus())) {
-                evento.setStatus("Inativo");
-                er.updateEvento(evento); // Atualiza no repositório em memória
-            }
-        }
-    }
-
-    public boolean editarEvento(EditarEventoDTO dto, Organizador organizador) {
+    /**
+     * CORRIGIDO: Edita um evento. Recebe o usuário logado para verificar a permissão.
+     */
+    public boolean editarEvento(EditarEventoDTO dto, Usuario usuarioLogado) {
         Evento evento = er.getEvento(dto.getNomeEvento());
-        if (evento != null && evento.getOrganizador().equals(organizador)) {
+        
+        // A verificação agora é muito mais limpa e correta
+        if (evento != null && evento.getOrganizador().equals(usuarioLogado)) {
             evento.setDataInicio(LocalDate.parse(dto.getNovaDataInicio()));
             evento.setDataFim(LocalDate.parse(dto.getNovaDataFim()));
             evento.setLink(dto.getNovoLink());
@@ -125,41 +84,141 @@ public class EventoService {
         }
         return false;
     }
-
-    public boolean cancelarEvento(String nomeEvento, String motivo) { //ver depois
+    
+    /**
+     * CORRIGIDO: Exclui uma solicitação de evento. Recebe o usuário logado para verificar a permissão.
+     */
+    public boolean excluirSolicitacaoEvento(String nomeEvento, Usuario usuarioLogado) {
         Evento evento = er.getEvento(nomeEvento);
+        
+        if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())
+            && evento.getOrganizador().equals(usuarioLogado)) {
+            return er.removeEvento(evento);
+        }
+        return false;
+    }
+
+    /**
+     * CORRIGIDO: Busca eventos associados a um usuário específico.
+     */
+    public List<EventoMinDTO> buscarEventosPorUsuario(Usuario usuario) {
+        if (usuario == null) return new ArrayList<>();
+
+        return er.getEventos().stream()
+                .filter(evento -> evento.getOrganizador() != null && evento.getOrganizador().equals(usuario))
+                .map(EventoMinDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    // ===================================================================
+    // MÉTODOS PARA ADMINS (Chamados pelo AdminController)
+    // ===================================================================
+
+    public List<EventoMinDTO> buscarEventosPorStatus(String status) {
+        return er.getEventos().stream()
+                .filter(e -> status.equalsIgnoreCase(e.getStatus()))
+                .map(EventoMinDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public boolean aprovarEvento(String nomeEvento) {
+        Evento evento = er.getEvento(nomeEvento);
+        if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
+            evento.setStatus("Ativo");
+            er.updateEvento(evento);
+            // ... lógica para aprovar ações filhas ...
+            return true;
+        }
+        return false;
+    }
+
+    public boolean rejeitarEvento(String nomeEvento, String motivo) {
+        Evento evento = er.getEvento(nomeEvento);
+        if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
+            evento.setStatus("Rejeitado");
+            evento.setMensagemRejeicao(motivo);
+            er.updateEvento(evento);
+            // ... lógica para rejeitar ações filhas ...
+            return true;
+        }
+        return false;
+    }
+
+    // ===================================================================
+    // MÉTODOS GERAIS
+    // ===================================================================
+
+    public List<EventoMinDTO> listarEventosAtivosMin() {
+        return er.getEventos().stream()
+                .filter(e -> "Ativo".equalsIgnoreCase(e.getStatus()))
+                .map(EventoMinDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public EventoDTO buscarDtoPorId(Long id) {
+        Evento evento = er.findById(id);
         if (evento == null) {
-            throw new RuntimeException("Evento não encontrado");
+            throw new IllegalArgumentException("Evento com ID " + id + " não encontrado.");
         }
-        evento.setStatus("Cancelado");
-        evento.setMensagemRejeicao(null);
-        return true;
+        return new EventoDTO(evento);
     }
 
-    public boolean solicitarEventoComAcoes(EventoDTO eventoDTO, List<AcaoDTO> listaAcoesDTO, Organizador organizador) {
-        Evento evento = new Evento(eventoDTO);
-        evento.setStatus("Aguardando aprovação");
-        evento.setOrganizador(organizador);
-        evento.setMensagemRejeicao(null);
-
-        // Adiciona o evento se ainda não existir
-        if (er.getEvento(evento.getNome()) == null) {
-           er.addEvento(evento);
+    public List<EventoMinDTO> buscarEventosComFiltro(String termoBusca, Categoria categoria, Departamento departamento, String modalidade) {
+    
+        // Pega todos os eventos com status "Ativo" como base
+        List<Evento> eventosFiltrados = this.listarEventosAtivos();
+        
+        // Aplica filtro de termo de busca
+        if (termoBusca != null && !termoBusca.trim().isEmpty()) {
+            String termoLowerCase = termoBusca.toLowerCase();
+            eventosFiltrados = eventosFiltrados.stream()
+                    .filter(e -> e.getNome().toLowerCase().contains(termoLowerCase) || 
+                                e.getDescricao().toLowerCase().contains(termoLowerCase))
+                    .collect(Collectors.toList());
         }
 
-        boolean sucesso = true;
-        for (AcaoDTO acaoDTO : listaAcoesDTO) {
-            Acao acao = new Acao(acaoDTO);
-            acao.setEvento(evento);
-            acao.setStatus("Aguardando aprovação");
-            acao.setMensagemRejeicao(null);
-            boolean adicionada = ar.addAcao(acao);
-            if (!adicionada) {
-                sucesso = false; // Se alguma ação não for adicionada, marca como falso
-            }
+        // Aplica filtro de Categoria
+        if (categoria != null) {
+            eventosFiltrados = eventosFiltrados.stream()
+                    .filter(e -> e.getCategoria() == categoria)
+                    .collect(Collectors.toList());
         }
-        return sucesso;
+
+        // Aplica filtro de Departamento
+        if (departamento != null) {
+            eventosFiltrados = eventosFiltrados.stream()
+                    .filter(e -> e.getDepartamento() == departamento)
+                    .collect(Collectors.toList());
+        }
+
+        // Aplica filtro de Modalidade (lembre-se de adicionar o campo 'modalidade' na sua classe Evento)
+        if (modalidade != null && !modalidade.isEmpty()) {
+            eventosFiltrados = eventosFiltrados.stream()
+                    // Mantém na lista apenas os eventos que possuem pelo menos uma ação com a modalidade desejada.
+                    .filter(evento -> temAcaoComModalidade(evento, modalidade))
+                    .collect(Collectors.toList());
+        }
+
+        // Converte a lista final de entidades para DTOs
+        return eventosFiltrados.stream()
+                .map(EventoMinDTO::new)
+                .collect(Collectors.toList());
     }
 
+
+    private List<Evento> listarEventosAtivos() {
+        return er.getEventos().stream()
+                .filter(e -> "Ativo".equalsIgnoreCase(e.getStatus()))
+                .collect(Collectors.toList());
+    }
+
+    private boolean temAcaoComModalidade(Evento evento, String modalidade) {
+    // Busca em TODAS as ações do repositório
+    return ar.getAcoes().stream()
+            // Filtra as ações que pertencem ao evento em questão
+            .filter(acao -> acao.getEvento().equals(evento))
+            // Verifica se ALGUMA das ações filtradas tem a modalidade correta (ignorando maiúsculas/minúsculas)
+            .anyMatch(acao -> modalidade.equalsIgnoreCase(acao.getModalidade()));
 }
 
+}

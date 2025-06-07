@@ -1,18 +1,17 @@
 package com.ufms.eventos.controller;
 
-import java.util.HashSet;
-
-import com.ufms.eventos.model.Organizador;
-
+import com.ufms.eventos.model.Usuario; // <-- Importe o Usuario
 import com.ufms.eventos.services.AcaoService;
-
 import com.ufms.eventos.dto.AcaoDTO;
+import com.ufms.eventos.dto.AcaoMinDTO; // Adicionei este import, pois é útil
 import com.ufms.eventos.dto.EditarAcaoDTO;
-import com.ufms.eventos.dto.EventoDTO;
 
-import com.ufms.eventos.ui.LoginFXMLController;
+import java.util.List;
 
-
+/**
+ * Controller que lida com as operações relacionadas a Ações de eventos.
+ * Funciona como um ponto de entrada para a UI, delegando a lógica para o AcaoService.
+ */
 public class AcaoController {
     private AcaoService acaoService;
 
@@ -20,33 +19,52 @@ public class AcaoController {
         this.acaoService = new AcaoService();
     }
 
-    public boolean solicitarAcao(AcaoDTO acaoDTO, LoginFXMLController loginController, EventoDTO eventoDTO) {
-        Organizador organizador = (Organizador) loginController.getUsuarioLogado();
-        return acaoService.solicitarAcao(acaoDTO, organizador, eventoDTO);
+    /*
+     * O método 'solicitarAcao' foi REMOVIDO. Ele era redundante.
+     * Use 'adicionarAcaoEmEventoExistente' para adicionar ações a um evento que já existe.
+     * A criação de um evento com sua primeira ação é feita pelo 'EventoController'.
+     */
+
+    /**
+     * Adiciona uma nova ação a um evento existente.
+     * A assinatura agora recebe o 'Usuario' logado para verificação de permissão.
+     */
+    public boolean adicionarAcaoEmEventoExistente(String nomeEvento, AcaoDTO acaoDTO, Usuario usuarioLogado) {
+        return acaoService.adicionarAcaoEmEventoExistente(nomeEvento, acaoDTO, usuarioLogado);
     }
 
-    public HashSet<AcaoDTO> listarAcoes() {
-        return acaoService.listarAcoes();
+    /**
+     * Edita uma ação existente.
+     * A assinatura agora recebe o 'Usuario' logado para verificação de permissão.
+     */
+    public boolean editarAcao(EditarAcaoDTO dto, Usuario usuarioLogado) {
+        return acaoService.editarAcao(dto, usuarioLogado);
     }
 
-    public boolean editarAcao(EditarAcaoDTO acao, LoginFXMLController loginController) {
-        Organizador organizador = (Organizador) loginController.getUsuarioLogado();
-        return acaoService.editarAcao(acao, organizador);
+    /**
+     * Deleta uma ação existente.
+     * A assinatura agora recebe o 'Usuario' logado para verificação de permissão.
+     */
+    public boolean deletarAcao(String nomeAcao, Usuario usuarioLogado) {
+        return acaoService.deletarAcao(nomeAcao, usuarioLogado);
     }
-
-    public boolean deletarAcao(String nome) {
-        return acaoService.deletarAcao(nome);
-    }
-
-    public AcaoDTO getAcao(String nome) {
-        return acaoService.getAcao(nome);
-    }
-
-    public boolean adicionarAcaoEmEventoExistente(String nomeEvento, AcaoDTO acaoDTO, LoginFXMLController loginController) {
-        Organizador organizador = (Organizador) loginController.getUsuarioLogado();
-        return acaoService.adicionarAcaoEmEventoExistente(nomeEvento, acaoDTO, organizador);
-    }
-
     
+    /**
+     * Busca os detalhes de uma única ação pelo nome.
+     * Alinhado com o método corrigido no AcaoService.
+     */
+    public AcaoDTO getAcaoDtoPorNome(String nome) {
+        return acaoService.getAcaoDtoPorNome(nome);
+    }
+    
+    /**
+     * Lista todas as ações de um evento específico.
+     */
+    public List<AcaoMinDTO> listarAcoesPorEventoMin(String nomeEvento) {
+        return acaoService.listarAcoesPorEventoMin(nomeEvento);
+    }
 
+    /* O método 'listarAcoes' foi removido por ser muito genérico.
+     * É mais útil e performático listar ações de um evento específico.
+     * Se precisar dele, pode adicionar de volta. */
 }

@@ -11,12 +11,15 @@ public class EventoMinDTO {
     private String dataInicio;
     private String categoria; // Ex: Cultura, Educação, Saúde, etc.
     private String imagem; // URL da imagem do evento
+    private String status;
+    private String modalidade;
 
-    public EventoMinDTO(String nome, String dataInicio, String categoria, String imagem) {
+    public EventoMinDTO(String nome, String dataInicio, String categoria, String imagem, String status) {
         this.nome = nome;
         this.dataInicio = dataInicio;
         this.categoria = categoria;
         this.imagem = imagem;
+        this.status = status;
     }
 
     public EventoMinDTO(EventoDTO evento){
@@ -24,6 +27,7 @@ public class EventoMinDTO {
         this.dataInicio = evento.getDataInicio();
         this.categoria = evento.getCategoria();
         this.imagem = evento.getImagem();
+        
     }
 
     public EventoMinDTO(Evento evento) {
@@ -31,23 +35,8 @@ public class EventoMinDTO {
         this.dataInicio = evento.getDataInicio().toString();
         this.categoria = evento.getCategoria().name();
         this.imagem = evento.getImagem();
+        this.status = evento.getStatus();
     }
     public EventoMinDTO(){}
-
-    public boolean validate() {
-        // Implementar validações necessárias
-        if (nome == null || nome.isEmpty()) {
-            throw new IllegalArgumentException("Nome do evento não pode ser vazio.");
-        }
-        if (dataInicio == null) {
-            throw new IllegalArgumentException("Data do evento não pode ser nula.");
-        }
-        if (categoria == null || categoria.isEmpty()) {
-            throw new IllegalArgumentException("Categoria do evento não pode ser vazia.");
-        }
-
-        return true;
-    }
-
 
 }

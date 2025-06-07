@@ -8,7 +8,7 @@ import com.ufms.eventos.dto.AcaoDTO;
 
 @Data
 public class Acao {
-    private Integer id; // Adicionado id
+    private Long id; // Adicionado id
     private Evento evento;
     private String nome;
     private LocalDate data;

@@ -8,6 +8,7 @@ import com.ufms.eventos.model.Categoria;
 import com.ufms.eventos.model.Departamento;
 import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.model.Usuario;
+import com.ufms.eventos.util.SessaoUsuario;
 
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -52,14 +53,11 @@ public class SolicitarEventoFXMLController {
     @FXML private Button btnSolicitarEventoFinal;
 
     private EventoController eventoController = new EventoController();
-    private LoginFXMLController loginFXMLController;
+    private Organizador organizadorLogado;
 
     private List<AcaoFormControls> listaControlesAcoes = new ArrayList<>();
     private int contadorAcao = 0;
 
-    public void setLoginFXMLController(LoginFXMLController loginFXMLController) {
-        this.loginFXMLController = loginFXMLController;
-    }
 
     @FXML
     public void initialize() {
@@ -190,6 +188,17 @@ public class SolicitarEventoFXMLController {
     @FXML
     private void handleSolicitarEventoFinal(ActionEvent event) {
         try {
+
+            // --- 1. BUSCA O USUÁRIO DIRETAMENTE DA SESSÃO ---
+            Usuario criadorDoEvento = SessaoUsuario.getInstancia().getUsuarioLogado();
+
+            // --- 2. VERIFICA SE HÁ ALGUÉM LOGADO NA SESSÃO ---
+            if (criadorDoEvento == null) {
+                mostrarAlerta("Erro de Autenticação", "Sessão Inválida", 
+                            "Não foi possível identificar o usuário logado. Por favor, faça o login novamente.", AlertType.ERROR);
+                return;
+            }
+
             // 1. Validação dos campos do Evento Principal
             if (nomeField.getText() == null || nomeField.getText().trim().isEmpty() ||
                 dataInicioField.getValue() == null ||
@@ -207,24 +216,11 @@ public class SolicitarEventoFXMLController {
                 return;
             }
 
-            if (loginFXMLController == null) {
-                mostrarAlerta("Erro de Autenticação", "Usuário Não Logado (Controller não definido)",
-                              "O sistema de login não foi corretamente inicializado.", AlertType.ERROR);
-                return;
-            }
-            if (loginFXMLController.getUsuarioLogado() == null) {
-                mostrarAlerta("Erro de Autenticação", "Usuário Não Logado",
-                              "Você precisa estar logado para solicitar um evento.", AlertType.ERROR);
-                return;
-            }
-            Usuario usuarioAtual = loginFXMLController.getUsuarioLogado();
-            if (!(usuarioAtual instanceof Organizador)) {
-                mostrarAlerta("Erro de Permissão", "Acesso Negado",
-                              "Apenas Organizadores podem solicitar eventos. Usuário atual: " + usuarioAtual.getClass().getSimpleName(), AlertType.ERROR);
-                return;
-            }
-            Organizador organizadorLogado = (Organizador) usuarioAtual;
-
+            if (this.organizadorLogado == null) {
+            mostrarAlerta("Erro de Autenticação", "Usuário Não Logado",
+                          "Não foi possível identificar o organizador logado.", AlertType.ERROR);
+            return;
+        }
 
             if (listaControlesAcoes.isEmpty()) {
                 mostrarAlerta("Erro de Validação", "Nenhuma Ação Adicionada",
@@ -344,7 +340,7 @@ public class SolicitarEventoFXMLController {
 
             // 5. Se a configuração do formulário foi salva com sucesso, AGORA salvamos o evento e ações
             if (configuracaoFormularioSalva) {
-                boolean sucessoCriacaoEventoEAcoes = eventoController.solicitarEventoComAcoes(eventoDTO, listaAcoesDTO, organizadorLogado);
+                boolean sucessoCriacaoEventoEAcoes = eventoController.solicitarEventoComAcoes(eventoDTO, listaAcoesDTO, criadorDoEvento);
 
                 if (sucessoCriacaoEventoEAcoes) {
                     mostrarAlerta("Sucesso Completo!", "Evento, Ações e Formulário Definido",
@@ -435,5 +431,11 @@ public class SolicitarEventoFXMLController {
         
         public VBox getContainer() { return container; }
         public void setContainer(VBox container) { this.container = container; }
+    }
+
+    // Método para receber o organizador da tela anterior
+    public void initData(Organizador organizador) {
+        this.organizadorLogado = organizador;
+        System.out.println("Tela de solicitação aberta para o organizador: " + this.organizadorLogado.getNome());
     }
 }

@@ -2,6 +2,7 @@ package com.ufms.eventos.repository;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Optional;
 
 import com.ufms.eventos.model.Departamento;
 import com.ufms.eventos.model.Evento;
@@ -69,5 +70,17 @@ public class EventoRepository {
             }
         }
         return solicitacoes;
+    }
+
+    public Evento findById(Long id) {
+        if (id == null) {
+            return null;
+        }
+        // Usamos stream para encontrar o primeiro evento que corresponde ao ID.
+        Optional<Evento> eventoEncontrado = this.eventos.stream()
+                .filter(evento -> id.equals(evento.getId()))
+                .findFirst();
+        
+        return eventoEncontrado.orElse(null);
     }
 }
