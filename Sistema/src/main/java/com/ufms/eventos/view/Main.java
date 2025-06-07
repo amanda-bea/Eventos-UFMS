@@ -11,7 +11,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         // Carrega a tela de login
-        Parent root = FXMLLoader.load(getClass().getResource("/com/ufms/eventos/view/TelaSolicitacaoEvento.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/com/ufms/eventos/view/EventoDetalhado.fxml"));
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Login");
