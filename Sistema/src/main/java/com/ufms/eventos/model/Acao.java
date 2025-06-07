@@ -8,6 +8,7 @@ import com.ufms.eventos.dto.AcaoDTO;
 
 @Data
 public class Acao {
+    private Integer id; // Adicionado id
     private Evento evento;
     private String nome;
     private LocalDate data;
@@ -24,7 +25,6 @@ public class Acao {
     private int capacidade; // Capacidade do evento (opcional)
     private String mensagemRejeicao; // Mensagem de rejeição (opcional)
 
-    //arrumar isso aqui depois
     public Acao(Evento evento, String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim,
                 Departamento departamento, String contato, String modalidade, String imagem, 
                 String link, int capacidade, String status, String mensagemRejeicao) {
@@ -45,10 +45,10 @@ public class Acao {
         this.mensagemRejeicao = mensagemRejeicao;
     }
 
-    public Acao(){
+    public Acao() {
     }
 
-    public Acao(AcaoDTO acaoDTO){
+    public Acao(AcaoDTO acaoDTO) {
         this.nome = acaoDTO.getNome();
         this.data = LocalDate.parse(acaoDTO.getData());
         this.descricao = acaoDTO.getDescricao();
@@ -68,14 +68,11 @@ public class Acao {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Acao acao = (Acao) o;
-        return nome != null && nome.equalsIgnoreCase(acao.nome);
+        return id != null && id.equals(acao.id);
     }
 
     @Override
     public int hashCode() {
-        return nome == null ? 0 : nome.toLowerCase().hashCode();
+        return id == null ? 0 : id.hashCode();
     }
-
 }
-
-

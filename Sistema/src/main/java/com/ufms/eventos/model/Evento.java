@@ -7,6 +7,7 @@ import com.ufms.eventos.dto.EventoDTO;
 
 @Data
 public class Evento {
+    private Integer id;
     private String nome;
     private LocalDate dataInicio;
     private LocalDate dataFim;
@@ -18,8 +19,6 @@ public class Evento {
     private String link; // Link para mais informações (opcional)
     private String status; // Ativo, Inativo, Cancelado, etc.
     private String mensagemRejeicao;
-
-    public Evento(){}
 
     public Evento(String nome, LocalDate dataInicio, LocalDate dataFim, String descricao, Organizador organizador, Departamento departamento, 
                   Categoria categoria, String imagem, String link, String status, String mensagemRejeicao) {
@@ -62,16 +61,26 @@ public class Evento {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Evento evento = (Evento) o;
-        return nome != null && nome.equalsIgnoreCase(evento.nome);
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Evento other = (Evento) obj;
+        if (id != other.id)
+            return false;
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return nome == null ? 0 : nome.toLowerCase().hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + id;
+        return result;
     }
+
     
 }

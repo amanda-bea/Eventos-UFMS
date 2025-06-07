@@ -2,14 +2,16 @@ package com.ufms.eventos.services;
 
 import com.ufms.eventos.dto.ConfiguracaoFormularioDTO;
 import com.ufms.eventos.model.ConfiguracaoFormulario;
+import com.ufms.eventos.model.Acao;
 import com.ufms.eventos.repository.ConfiguracaoFormularioRepository;
+import com.ufms.eventos.repository.AcaoRepository;
 import java.util.ArrayList;
-
 import java.util.Optional;
 
 public class ConfiguracaoFormularioService {
 
     private final ConfiguracaoFormularioRepository repository;
+    private final AcaoRepository acaoRepository = new AcaoRepository();
 
     public ConfiguracaoFormularioService() {
         this.repository = new ConfiguracaoFormularioRepository();
@@ -27,7 +29,13 @@ public class ConfiguracaoFormularioService {
 
         // Converte DTO para Model
         ConfiguracaoFormulario model = new ConfiguracaoFormulario();
-        model.setNomeAcao(dto.getNomeAcao());
+        // Busca a ação pelo nome e seta no model
+        Acao acao = acaoRepository.buscarPorNome(dto.getNomeAcao());
+        if (acao == null) {
+            System.err.println("Ação não encontrada: " + dto.getNomeAcao());
+            return null;
+        }
+        model.setAcao(acao);
         model.setUsarNome(dto.isUsarNome());
         model.setUsarEmail(dto.isUsarEmail());
         model.setUsarCpf(dto.isUsarCpf());
@@ -38,7 +46,7 @@ public class ConfiguracaoFormularioService {
         if (salvo != null) {
             // Converte Model de volta para DTO para o retorno
             return new ConfiguracaoFormularioDTO(
-                salvo.getNomeAcao(),
+                salvo.getAcao().getNome(),
                 salvo.isUsarNome(),
                 salvo.isUsarEmail(),
                 salvo.isUsarCpf(),
@@ -55,7 +63,7 @@ public class ConfiguracaoFormularioService {
             ConfiguracaoFormulario model = modelOptional.get();
             // Converte Model para DTO
             ConfiguracaoFormularioDTO dto = new ConfiguracaoFormularioDTO(
-                model.getNomeAcao(),
+                model.getAcao().getNome(),
                 model.isUsarNome(),
                 model.isUsarEmail(),
                 model.isUsarCpf(),
@@ -71,4 +79,3 @@ public class ConfiguracaoFormularioService {
         return repository.deletarPorNomeAcao(nomeAcao);
     }
 }
-    

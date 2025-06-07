@@ -19,8 +19,4 @@ public enum Categoria {
     public String toString() {
         return displayName;
     }
-    // Se você preferir que os nomes das constantes (Cultura, Educacao) sejam exibidos diretamente,
-    // você pode remover o construtor e o campo displayName, e o @Override de toString().
-    // O Java usará o .name() da constante por padrão se toString() não for sobrescrito.
-    // Para ComboBox, sobrescrever toString() é a forma padrão de customizar a exibição.
 }

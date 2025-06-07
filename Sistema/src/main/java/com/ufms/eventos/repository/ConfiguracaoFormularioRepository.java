@@ -16,12 +16,12 @@ public class ConfiguracaoFormularioRepository {
      * @return O objeto ConfiguracaoFormulario salvo.
      */
     public ConfiguracaoFormulario salvar(ConfiguracaoFormulario configuracao) {
-        if (configuracao == null || configuracao.getNomeAcao() == null || configuracao.getNomeAcao().trim().isEmpty()) {
+        if (configuracao == null || configuracao.getAcao() == null || configuracao.getAcao().getNome() == null || configuracao.getAcao().getNome().trim().isEmpty()) {
             // Em uma aplicação real, poderia lançar uma exceção aqui.
             System.err.println("ConfiguracaoFormularioRepository: Tentativa de salvar configuração nula ou sem nome de ação.");
             return null;
         }
-        db.put(configuracao.getNomeAcao(), configuracao);
+        db.put(configuracao.getAcao().getNome(), configuracao);
         return configuracao;
     }
 

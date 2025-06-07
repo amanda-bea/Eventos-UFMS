@@ -4,11 +4,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.ufms.eventos.dto.RespostaFormularioDTO;
+
+import com.ufms.eventos.model.Acao;
 import com.ufms.eventos.model.RespostaFormulario;
+
 import com.ufms.eventos.repository.RespostaFormularioRepository;
+import com.ufms.eventos.repository.AcaoRepository;
 
 public class RespostaFormularioService {
     private RespostaFormularioRepository repository = new RespostaFormularioRepository();
+    private AcaoRepository acaoRepository = new AcaoRepository();
 
     public void salvarResposta(RespostaFormularioDTO dto) {
         RespostaFormulario resposta = new RespostaFormulario();
@@ -17,7 +22,8 @@ public class RespostaFormularioService {
         resposta.setCpf(dto.getCpf());
         resposta.setCurso(dto.getCurso());
         resposta.setRespostasExtras(dto.getRespostasExtras());
-        resposta.setNomeAcao(dto.getAcaoNome());
+        Acao acao = acaoRepository.buscarPorNome(dto.getAcaoNome());
+        resposta.setAcao(acao);
         repository.salvar(resposta);
     }
 
@@ -29,7 +35,7 @@ public class RespostaFormularioService {
             dto.setCpf(r.getCpf());
             dto.setCurso(r.getCurso());
             dto.setRespostasExtras(r.getRespostasExtras());
-            dto.setAcaoNome(r.getNomeAcao());
+            dto.setAcaoNome(r.getAcao().getNome());
             return dto;
         }).collect(Collectors.toList());
     }

@@ -58,4 +58,14 @@ public class AcaoRepository {
         }
         return false;
     }
+
+    public Acao buscarPorNome(String nome) {
+        for (Acao acao : acoes) {
+        if (acao.getNome().equalsIgnoreCase(nome)) {
+            return acao;
+        }
+    }
+    return null;
+    }
 }
+

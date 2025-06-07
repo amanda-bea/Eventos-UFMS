@@ -1,9 +1,12 @@
 package com.ufms.eventos.model;
 
+import java.util.Objects;
+
 import lombok.Data;
 
 @Data
 public class Usuario {
+    private Integer id; // Adicionado id
     private String nome;
     private String email;
     private String senha;
@@ -14,10 +17,6 @@ public class Usuario {
         this.email = email;
         this.senha = senha;
         this.telefone = telefone;
-    }
-
-    public Usuario(String nome) {
-        this.nome = nome;
     }
 
     public Usuario() {
@@ -32,5 +31,18 @@ public class Usuario {
                 ", email='" + email + '\'' +
                 ", senha='" + senha + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Usuario usuario = (Usuario) o;
+        return Objects.equals(email, usuario.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(email);
     }
 }
