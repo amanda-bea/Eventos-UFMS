@@ -12,7 +12,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <AnchorPane fx:id="topBarPane" maxHeight="73.0" prefHeight="71.0" prefWidth="600.0" style="-fx-background-color: #489ec1;">
@@ -47,18 +46,18 @@
                      <children>
                         <AnchorPane prefHeight="208.0" prefWidth="67.0" style="-fx-background-color: #e9f5fa; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-background-radius: 5;">
                            <children>
-                              <ImageView fitHeight="138.0" fitWidth="177.0" layoutX="11.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="campoImagem" fitHeight="138.0" fitWidth="177.0" layoutX="11.0" layoutY="10.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../../../../../../../../../../../Pictures/Captura%20de%20tela%202025-05-25%20084158.png" />
                                  </image>
                               </ImageView>
-                              <Label layoutX="12.0" layoutY="153.0" text="Nome do Evento" textFill="#2f4a51" />
-                              <Label layoutX="12.0" layoutY="170.0" text="Categoria" textFill="#489ec1">
+                              <Label fx:id="campoNome" layoutX="12.0" layoutY="153.0" text="Nome do Evento" textFill="#2f4a51" />
+                              <Label fx:id="campoCategoria" layoutX="12.0" layoutY="170.0" text="Categoria" textFill="#489ec1">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
                               </Label>
-                              <Label layoutX="150.0" layoutY="153.0" text="Data" textFill="#2f4a51" />
+                              <Label fx:id="campoData" layoutX="150.0" layoutY="153.0" text="Data" textFill="#2f4a51" />
                            </children>
                         </AnchorPane>
                      </children>
