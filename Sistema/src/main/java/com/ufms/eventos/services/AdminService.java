@@ -3,7 +3,9 @@ package com.ufms.eventos.services;
 import com.ufms.eventos.dto.EventoMinDTO;
 import com.ufms.eventos.model.Evento;
 import com.ufms.eventos.repository.AcaoRepository;
+import com.ufms.eventos.repository.AdminRepositoryJDBC;
 import com.ufms.eventos.repository.EventoRepository;
+import com.ufms.eventos.repository.IAdminRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,10 +15,12 @@ import java.util.stream.Collectors;
  */
 public class AdminService {
 
+    private IAdminRepository adminRepository;
     private EventoRepository er;
     private AcaoRepository ar;
 
     public AdminService() {
+        this.adminRepository = new AdminRepositoryJDBC();
         this.er = new EventoRepository();
         this.ar = new AcaoRepository();
     }

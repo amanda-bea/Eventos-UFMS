@@ -9,7 +9,7 @@ import com.ufms.eventos.model.Evento;
 import com.ufms.eventos.model.Categoria;
 import com.ufms.eventos.model.Organizador;
 
-public class EventoRepository {
+public class EventoRepository implements IEventoRepository {
     private HashSet<Evento> eventos;
 
     public EventoRepository() {

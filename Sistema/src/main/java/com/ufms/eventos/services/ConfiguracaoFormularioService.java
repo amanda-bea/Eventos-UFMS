@@ -4,17 +4,19 @@ import com.ufms.eventos.dto.ConfiguracaoFormularioDTO;
 import com.ufms.eventos.model.ConfiguracaoFormulario;
 import com.ufms.eventos.model.Acao;
 import com.ufms.eventos.repository.ConfiguracaoFormularioRepository;
+import com.ufms.eventos.repository.ConfiguracaoFormularioRepositoryJDBC;
+import com.ufms.eventos.repository.IConfiguracaoFormularioRepository;
 import com.ufms.eventos.repository.AcaoRepository;
 import java.util.ArrayList;
 import java.util.Optional;
 
 public class ConfiguracaoFormularioService {
 
-    private final ConfiguracaoFormularioRepository repository;
+    private final IConfiguracaoFormularioRepository repository;
     private final AcaoRepository acaoRepository = new AcaoRepository();
 
     public ConfiguracaoFormularioService() {
-        this.repository = new ConfiguracaoFormularioRepository();
+        this.repository = new ConfiguracaoFormularioRepositoryJDBC();
     }
 
     public ConfiguracaoFormularioService(ConfiguracaoFormularioRepository repository) {

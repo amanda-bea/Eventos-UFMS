@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.ufms.eventos.model.RespostaFormulario;
 
-public class RespostaFormularioRepository {
+public class RespostaFormularioRepository implements IRespostaFormularioRepository{
     private List<RespostaFormulario> respostas = new ArrayList<>();
 
     public void salvar(RespostaFormulario resposta) {

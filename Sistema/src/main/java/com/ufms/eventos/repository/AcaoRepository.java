@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AcaoRepository {
+public class AcaoRepository implements IAcaoRepository {
     private HashSet<Acao> acoes;
 
     public AcaoRepository() {
@@ -54,7 +54,7 @@ public class AcaoRepository {
         Iterator<Acao> iterator = this.acoes.iterator();
         while (iterator.hasNext()) {
             Acao acao = iterator.next();
-            if (acao.getNome() == nome) {
+            if (acao.getNome().equals(nome)) {
                 iterator.remove();
                 return true;
             }
@@ -95,5 +95,21 @@ public class AcaoRepository {
         
         return null;
     }
+    
+    // Método adicional para compatibilidade com AcaoRepositoryJDBC
+    public boolean delete(Long id) {
+        if (id == null) {
+            return false;
+        }
+        
+        Iterator<Acao> iterator = this.acoes.iterator();
+        while (iterator.hasNext()) {
+            Acao acao = iterator.next();
+            if (id.equals(acao.getId())) {
+                iterator.remove();
+                return true;
+            }
+        }
+        return false;
+    }
 }
-

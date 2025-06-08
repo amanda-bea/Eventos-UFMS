@@ -1,12 +1,10 @@
-// não sei se precisa
-
 package com.ufms.eventos.repository;
 
 import java.util.HashSet;
 
 import com.ufms.eventos.model.Admin;
 
-public class AdminRepository {
+public class AdminRepository implements IAdminRepository {
     private HashSet<Admin> admins;
 
     public AdminRepository() {
@@ -24,6 +22,5 @@ public class AdminRepository {
     public boolean removeAdmin(Admin admin) {
         return this.admins.remove(admin);
     }
-    
 
 }

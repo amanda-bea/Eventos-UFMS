@@ -8,11 +8,12 @@ import com.ufms.eventos.dto.RespostaFormularioDTO;
 import com.ufms.eventos.model.Acao;
 import com.ufms.eventos.model.RespostaFormulario;
 
-import com.ufms.eventos.repository.RespostaFormularioRepository;
+import com.ufms.eventos.repository.IRespostaFormularioRepository;
+import com.ufms.eventos.repository.RespostaFormularioRepositoryJDBC;
 import com.ufms.eventos.repository.AcaoRepository;
 
 public class RespostaFormularioService {
-    private RespostaFormularioRepository repository = new RespostaFormularioRepository();
+    private IRespostaFormularioRepository repository = new RespostaFormularioRepositoryJDBC();
     private AcaoRepository acaoRepository = new AcaoRepository();
 
     public void salvarResposta(RespostaFormularioDTO dto) {

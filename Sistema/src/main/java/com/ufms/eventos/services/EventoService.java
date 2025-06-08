@@ -12,6 +12,8 @@ import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.model.Usuario;
 import com.ufms.eventos.repository.AcaoRepository;
 import com.ufms.eventos.repository.EventoRepository;
+import com.ufms.eventos.repository.EventoRepositoryJDBC;
+import com.ufms.eventos.repository.IEventoRepository;
 import com.ufms.eventos.repository.OrganizadorRepository;
 
 import java.time.LocalDate;
@@ -24,12 +26,14 @@ import java.util.stream.Collectors;
  * É utilizada tanto pelo EventoController quanto pelo AdminController.
  */
 public class EventoService {
+    private IEventoRepository repository;
     private EventoRepository er;
     private OrganizadorRepository or;
     private AcaoRepository ar;
     private AcaoService acaoService = new AcaoService();
 
     public EventoService() {
+        this.repository = new EventoRepositoryJDBC();
         this.er = new EventoRepository();
         this.or = new OrganizadorRepository();
         this.ar = new AcaoRepository();

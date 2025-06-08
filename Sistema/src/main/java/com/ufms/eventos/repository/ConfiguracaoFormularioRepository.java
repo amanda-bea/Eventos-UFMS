@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional; // Usar Optional para buscas pode ser uma boa prática
 
-public class ConfiguracaoFormularioRepository {
+public class ConfiguracaoFormularioRepository implements IConfiguracaoFormularioRepository{
 
     // Armazenamento em memória. Em um sistema real, isso seria um banco de dados.
     private final Map<String, ConfiguracaoFormulario> db = new HashMap<>();

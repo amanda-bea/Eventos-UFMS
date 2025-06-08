@@ -5,20 +5,22 @@ import com.ufms.eventos.model.PresencaConfirmada;
 import com.ufms.eventos.model.Usuario;
 
 import com.ufms.eventos.repository.AcaoRepository;
-import com.ufms.eventos.repository.PresencaConfirmadaRepository;
+import com.ufms.eventos.repository.IPresencaConfirmadaRepository;
+import com.ufms.eventos.repository.PresencaConfirmadaRepositoryJDBC;
 import com.ufms.eventos.dto.EventoMinDTO;
-import com.ufms.eventos.dto.PresencaConfirmadaDTO; // If you use this DTO elsewhere
+import com.ufms.eventos.dto.PresencaConfirmadaDTO;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class PresencaConfirmadaService {
-    private PresencaConfirmadaRepository pr;
+    private IPresencaConfirmadaRepository pr;
     private AcaoRepository ar;
 
     public PresencaConfirmadaService() {
-        this.pr = new PresencaConfirmadaRepository();
+        this.pr = new PresencaConfirmadaRepositoryJDBC();
+        this.ar = new AcaoRepository();
     }
 
     public boolean confirmarPresenca(PresencaConfirmadaDTO dto) {

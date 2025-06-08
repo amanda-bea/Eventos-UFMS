@@ -8,7 +8,8 @@ import com.ufms.eventos.model.Acao;
 import com.ufms.eventos.model.Evento;
 import com.ufms.eventos.model.Usuario;
 
-import com.ufms.eventos.repository.AcaoRepository;
+import com.ufms.eventos.repository.IAcaoRepository;
+import com.ufms.eventos.repository.AcaoRepositoryJDBC;
 import com.ufms.eventos.repository.EventoRepository;
 
 import java.time.LocalDate;
@@ -21,12 +22,12 @@ import java.util.stream.Collectors;
  * Camada de Serviço que contém a lógica de negócio para Ações de eventos.
  */
 public class AcaoService {
-    private AcaoRepository acaoRepository;
+    private IAcaoRepository acaoRepository;
     private EventoRepository eventoRepository;
     private PresencaConfirmadaService presencaService = new PresencaConfirmadaService();
 
     public AcaoService() {
-        this.acaoRepository = new AcaoRepository();
+        this.acaoRepository = new AcaoRepositoryJDBC();
         this.eventoRepository = new EventoRepository();
     }
 
