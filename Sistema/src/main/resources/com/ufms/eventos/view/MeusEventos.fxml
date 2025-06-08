@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ufms.eventos.ui.MeusEventosFXMLController">
+   <children>
+   
+      <fx:include source="/com/ufms/eventos/view/Homebar.fxml" />
+      
+      <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+         <content>
+            <VBox spacing="10.0" style="-fx-background-color: #f4f4f8;">
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+               <children>
+                  <AnchorPane>
+                     <children>
+                        <Label fx:id="tituloPrincipalLabel" layoutX="14.0" layoutY="54.0" prefHeight="30.0" prefWidth="250.0" text="Meus Eventos Criados">
+                           <font><Font name="System Bold" size="20.0" /></font>
+                        </Label>
+                        <Button fx:id="btnSolicitarNovoEvento" onAction="#handleSolicitarNovoEvento" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="180.0" style="-fx-background-color: #93c4d8; -fx-background-radius: 30;" text="Solicitar Novo Evento">
+                           <font><Font name="System Bold" size="12.0" /></font>
+                        </Button>
+                     </children>
+                  </AnchorPane>
+                  
+                  <TilePane fx:id="eventoContainer" hgap="20.0" prefColumns="4" vgap="20.0">
+                     <padding>
+                        <Insets top="10.0" />
+                     </padding>
+                  </TilePane>
+               </children>
+            </VBox>
+         </content>
+      </ScrollPane>
+   </children>
+</VBox>

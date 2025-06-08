@@ -10,21 +10,20 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Popup;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.io.IOException;
 import java.net.URL;
@@ -42,71 +41,94 @@ public class HomebarFXMLController implements Initializable {
     @FXML private TextField searchTextField;
     @FXML private Button searchButton;
 
-    // --- LÓGICA DE COMUNICAÇÃO (CALLBACK) ---
+    // --- LÓGICA DE FILTRO E COMUNICAÇÃO ---
+    private Popup filterTriggerPopup;
     private Consumer<FilterData> onSearchCallback;
-
-    /**
-     * Um "pacote" de dados para enviar os filtros para a tela principal.
-     */
     public record FilterData(Categoria categoria, Departamento departamento, String modalidade, String termoBusca) {}
-
-    /**
-     * Método público que permite à tela principal (ex: HomeUsuario) "assinar" o evento de busca.
-     * @param callback A função que será executada quando o usuário aplicar os filtros.
-     */
     public void setOnSearch(Consumer<FilterData> callback) {
         this.onSearchCallback = callback;
     }
     
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Lógica para mostrar/esconder links baseada no papel do usuário logado
+        // Prepara o popup de filtro
+        createFilterTriggerPopup();
+
+        // Pega o usuário da sessão para decidir o que mostrar
         Usuario usuarioLogado = SessaoUsuario.getInstancia().getUsuarioLogado();
 
-        boolean isAdmin = SessaoUsuario.getInstancia().isAdmin();
-        // Qualquer usuário logado pode ver "Meus Eventos"
-        boolean isLoggedIn = usuarioLogado != null;
-
+        // Garante que os links opcionais comecem invisíveis
         if (analiseLabel != null) {
-            // Apenas admin vê "Eventos Pendentes"
-            analiseLabel.setVisible(isAdmin);
-            analiseLabel.setManaged(isAdmin);
+            analiseLabel.setVisible(false);
+            analiseLabel.setManaged(false);
+        }
+        if (meusEventosLabel != null) {
+            meusEventosLabel.setVisible(false);
+            meusEventosLabel.setManaged(false);
         }
         
-        if (meusEventosLabel != null) {
-            // Qualquer usuário logado pode ver "Meus Eventos"
-            meusEventosLabel.setVisible(isLoggedIn);
-            meusEventosLabel.setManaged(isLoggedIn);
+        if (usuarioLogado == null) return; // Sai se não houver usuário
+
+        // Mostra o link de "Análise de Eventos" APENAS se for Admin
+        if (SessaoUsuario.getInstancia().isAdmin()) {
+            analiseLabel.setVisible(true);
+            analiseLabel.setManaged(true);
+        }
+
+        // MOSTRA O BOTÃO "MEUS EVENTOS" PARA QUALQUER USUÁRIO LOGADO
+        meusEventosLabel.setVisible(true);
+        meusEventosLabel.setManaged(true);
+    }
+
+    /**
+     * Cria o objeto Popup com o link "Abrir Filtros", mas ainda não o mostra.
+     */
+    private void createFilterTriggerPopup() {
+        filterTriggerPopup = new Popup();
+        filterTriggerPopup.setAutoHide(true);
+        Hyperlink openFilterLink = new Hyperlink("Abrir Filtros Avançados");
+        openFilterLink.setOnAction(this::handleOpenFilterPopup);
+        VBox popupContent = new VBox(openFilterLink);
+        popupContent.setPadding(new Insets(10));
+        popupContent.setStyle("-fx-background-color: white; -fx-border-color: lightgray; -fx-border-radius: 5; -fx-background-radius: 5;");
+        filterTriggerPopup.getContent().add(popupContent);
+    }
+
+    /**
+     * Chamado pelo onMouseClicked do TextField para mostrar o popup de gatilho.
+     */
+    @FXML
+    private void handleSearchFieldClick(MouseEvent event) {
+        if (filterTriggerPopup.isShowing()) {
+            filterTriggerPopup.hide();
+        } else {
+            Node ownerNode = searchTextField;
+            Window window = ownerNode.getScene().getWindow();
+            Point2D screenCoords = ownerNode.localToScreen(0, ownerNode.getBoundsInLocal().getHeight());
+            filterTriggerPopup.show(window, screenCoords.getX(), screenCoords.getY() + 5);
         }
     }
-
-    // --- MÉTODOS DE AÇÃO DA UI (@FXML) ---
-
-    @FXML
-    private void handleSearch() {
-        // O botão "Buscar" aplica os filtros atuais (com os ComboBoxes vazios, se não abertos)
-        executeSearchLogic(null, null, null);
-    }
     
+    /**
+     * Cria e mostra a janela modal com os filtros avançados.
+     */
     @FXML
-    private void handleOpenFilterPopup() {
-        // Cria e mostra a janela modal com os filtros avançados
+    private void handleOpenFilterPopup(ActionEvent event) {
+        if (filterTriggerPopup.isShowing()) filterTriggerPopup.hide();
+
         Stage popupStage = new Stage();
         popupStage.initModality(Modality.APPLICATION_MODAL);
         popupStage.initOwner(searchTextField.getScene().getWindow());
         popupStage.setTitle("Filtrar Eventos");
 
-        // --- Layout da Janela de Filtro ---
         VBox popupRoot = new VBox(20);
         popupRoot.setPadding(new Insets(25));
         popupRoot.setAlignment(Pos.CENTER_LEFT);
         
         ComboBox<Categoria> categoriaCombo = new ComboBox<>(FXCollections.observableArrayList(Categoria.values()));
         categoriaCombo.setPromptText("Todas as Categorias");
-
         ComboBox<Departamento> departamentoCombo = new ComboBox<>(FXCollections.observableArrayList(Departamento.values()));
         departamentoCombo.setPromptText("Todos os Departamentos");
-
         ComboBox<String> modalidadeCombo = new ComboBox<>(FXCollections.observableArrayList("Presencial", "Online"));
         modalidadeCombo.setPromptText("Todas as Modalidades");
         
@@ -117,9 +139,7 @@ public class HomebarFXMLController implements Initializable {
         grid.add(new Label("Departamento:"), 0, 1); grid.add(departamentoCombo, 1, 1);
         grid.add(new Label("Modalidade:"), 0, 2); grid.add(modalidadeCombo, 1, 2);
         
-        // --- Botões da Janela de Filtro ---
         Button aplicarButton = new Button("Aplicar Filtros");
-        aplicarButton.setDefaultButton(true);
         aplicarButton.setOnAction(e -> {
             executeSearchLogic(categoriaCombo.getValue(), departamentoCombo.getValue(), modalidadeCombo.getValue());
             popupStage.close();
@@ -127,10 +147,10 @@ public class HomebarFXMLController implements Initializable {
 
         Button limparButton = new Button("Limpar Filtros");
         limparButton.setOnAction(e -> {
-            executeSearchLogic(null, null, null); // Chama a busca sem filtros
+            executeSearchLogic(null, null, null);
             popupStage.close();
         });
-
+        
         HBox buttonsBox = new HBox(10, aplicarButton, limparButton);
         buttonsBox.setAlignment(Pos.CENTER_RIGHT);
         
@@ -140,22 +160,22 @@ public class HomebarFXMLController implements Initializable {
         popupStage.showAndWait();
     }
     
-    /**
-     * Coleta os dados dos filtros e do campo de busca, e notifica a tela principal.
-     */
+    @FXML
+    private void handleSearch() {
+        executeSearchLogic(null, null, null);
+    }
+    
     private void executeSearchLogic(Categoria categoria, Departamento departamento, String modalidade) {
         if (onSearchCallback != null) {
             String termo = searchTextField.getText();
             FilterData dadosDoFiltro = new FilterData(categoria, departamento, modalidade, termo);
-            
-            // EXECUTA A FUNÇÃO DA TELA PRINCIPAL, passando os dados do filtro
             onSearchCallback.accept(dadosDoFiltro);
         }
     }
 
     // --- MÉTODOS DE NAVEGAÇÃO ---
     @FXML private void handleNavigateAnalise(MouseEvent event) { navegarPara(event, "/com/ufms/eventos/view/EventosPendentes.fxml", "Análise de Eventos"); }
-    @FXML private void handleNavigateHome(MouseEvent event) { navegarPara(event, "/com/ufms/eventos/view/HomeUsuario.fxml", "Home"); }
+    @FXML private void handleNavigateHome(MouseEvent event) { navegarPara(event, "/com/ufms/eventos/view/Home.fxml", "Home"); }
     @FXML private void handleNavigatePresencas(MouseEvent event) { navegarPara(event, "/com/ufms/eventos/view/PresencasConfirmadas.fxml", "Minhas Presenças"); }
     @FXML private void handleNavigateMeusEventos(MouseEvent event) { navegarPara(event, "/com/ufms/eventos/view/MeusEventos.fxml", "Meus Eventos"); }
 

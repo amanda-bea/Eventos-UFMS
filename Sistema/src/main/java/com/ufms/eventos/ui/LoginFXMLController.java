@@ -38,30 +38,25 @@ public class LoginFXMLController {
             return;
         }
 
-        // --- LÓGICA DE AUTENTICAÇÃO CORRIGIDA ---
-        // Aqui você faria uma busca no banco de dados. Para simulação:
-        Usuario usuarioAutenticado;
+        // Simulação de autenticação
+        Usuario usuarioAutenticado = null;
+        
+        // Verifica se é admin - APENAS este caso é especial
         if (nome.equalsIgnoreCase("admin") && senha.equals("admin")) {
-            // ÚNICA CONDIÇÃO PARA SER ADMIN
             usuarioAutenticado = new Admin(nome, senha);
+            System.out.println("Login como administrador");
         } else {
-            // QUALQUER OUTRO LOGIN VÁLIDO É UM USUÁRIO COMUM
-            // (Aqui, estamos assumindo que qualquer outra combinação é um usuário válido para teste)
+            // Qualquer outra combinação de login/senha cria um usuário comum
             usuarioAutenticado = new Usuario(nome, senha);
+            System.out.println("Login como usuário comum: " + nome);
         }
-        // NÃO EXISTE MAIS a verificação para "organizador" aqui.
-        // ------------------------------------
-
-        if (usuarioAutenticado != null) {
-            // Inicia a sessão global com o objeto correto (Admin ou Usuario)
-            SessaoUsuario.getInstancia().login(usuarioAutenticado);
-            
-            showMessageText("Login realizado com sucesso! Redirecionando...");
-            navegarParaTelaPrincipal();
-        } else {
-            // Esta parte seria alcançada se a busca no banco de dados falhasse
-            showMessageText("Nome de usuário ou senha inválidos.");
-        }
+        
+        // Inicia a sessão com o usuário autenticado
+        SessaoUsuario.getInstancia().login(usuarioAutenticado);
+        System.out.println("DEBUG: Usuário salvo na sessão é do tipo: " + usuarioAutenticado.getClass().getName());
+        
+        showMessageText("Login realizado com sucesso! Redirecionando...");
+        navegarParaTelaPrincipal();
     }
 
     private void navegarParaTelaPrincipal() {
@@ -71,17 +66,8 @@ public class LoginFXMLController {
         pause.setOnFinished(event -> {
             try {
                 String fxmlPath;
-                Usuario usuarioDaSessao = SessaoUsuario.getInstancia().getUsuarioLogado();
-
-                // A navegação continua a mesma e funciona perfeitamente com a lógica corrigida.
-                if (usuarioDaSessao instanceof Admin) {
-                    fxmlPath = "/com/ufms/eventos/view/HomeAdmin.fxml";
-                } else {
-                    // Se não for Admin, é um Usuario (que pode ou não já ser um organizador).
-                    // Ele vai para a home de usuário padrão.
-                    fxmlPath = "/com/ufms/eventos/view/HomeUsuario.fxml";
-                }
-
+                fxmlPath = "/com/ufms/eventos/view/Home.fxml";
+                
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
                 Parent root = loader.load();
                 

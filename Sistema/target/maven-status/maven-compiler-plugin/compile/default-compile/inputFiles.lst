@@ -3,6 +3,7 @@ C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eve
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\controller\ConfiguracaoFormularioController.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\controller\EventoController.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\controller\OrganizadorController.java
+C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\controller\PresencaConfirmadaController.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\controller\RespostaFormularioController.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\dto\AcaoDTO.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\dto\AcaoMinDTO.java
@@ -46,10 +47,11 @@ C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eve
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\ui\DetalhesEventoFXMLController.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\ui\EventosPendentesFXMLController.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\ui\FormularioRespostaFXMLController.java
+C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\ui\HomebarFXMLController.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\ui\HomeFXMLController.java
-C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\ui\HomeUsuarioFXMLController.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\ui\LoginFXMLController.java
-C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\ui\MeusEventosUserFXMLController.java
+C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\ui\MeusEventosFXMLController.java
+C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\ui\PresencasConfirmadasFXMLController.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\ui\SolicitarEventoFXMLController.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\util\ConnectionFactory.java
 C:\Users\amand\Desktop\Faculdade\Eventos-UFMS\Sistema\src\main\java\com\ufms\eventos\util\SessaoUsuario.java

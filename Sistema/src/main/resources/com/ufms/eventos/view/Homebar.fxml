@@ -1,23 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="40.0" prefHeight="40.0" style="-fx-background-color: #489ec1;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ufms.eventos.ui.HomebarFXMLController">
+<HBox alignment="CENTER_LEFT" maxHeight="40.0" prefHeight="40.0" prefWidth="800.0" spacing="15.0" style="-fx-background-color: #489ec1;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ufms.eventos.ui.HomebarFXMLController">
    <children>
-      <Label fx:id="homeLabel" onMouseClicked="#handleNavigateHome" layoutX="24.0" layoutY="11.0" style="-fx-cursor: hand;" text="Home" textFill="white">
-         <font><Font name="System Bold" size="14.0" /></font>
-      </Label>
-      <Label fx:id="presencasLabel" onMouseClicked="#handleNavigatePresencas" layoutX="90.0" layoutY="11.0" style="-fx-cursor: hand;" text="Minhas Presenças" textFill="#2f4a51">
+      
+      <Label fx:id="homeLabel" onMouseClicked="#handleNavigateHome" style="-fx-cursor: hand;" text="Home" textFill="#2f4a51">
          <font><Font name="System Bold" size="12.0" /></font>
       </Label>
-      <Label fx:id="meusEventosLabel" onMouseClicked="#handleNavigateMeusEventos" layoutX="220.0" layoutY="11.0" style="-fx-cursor: hand;" text="Meus Eventos" textFill="#2f4a51">
+
+      <Label fx:id="analiseLabel" onMouseClicked="#handleNavigateAnalise" style="-fx-cursor: hand;" text="Análise de Eventos" textFill="#2f4a51" visible="false" managed="false">
          <font><Font name="System Bold" size="12.0" /></font>
       </Label>
-      <Button fx:id="searchButton" mnemonicParsing="false" onAction="#handleSearch" prefHeight="25.0" prefWidth="51.0" style="-fx-background-color: #2f4a51;" text="Buscar" textFill="WHITE" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="6.0" />
-      <TextField fx:id="searchTextField" prefHeight="25.0" prefWidth="180.0" promptText="Pesquisar Evento" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="6.0" />
+      
+      <Label fx:id="presencasLabel" onMouseClicked="#handleNavigatePresencas" style="-fx-cursor: hand;" text="Minhas Presenças" textFill="#2f4a51">
+         <font><Font name="System Bold" size="12.0" /></font>
+      </Label>
+      
+      <Label fx:id="meusEventosLabel" onMouseClicked="#handleNavigateMeusEventos" style="-fx-cursor: hand;" text="Meus Eventos" textFill="#2f4a51" visible="false" managed="false">
+         <font><Font name="System Bold" size="12.0" /></font>
+      </Label>
+
+      <Region HBox.hgrow="ALWAYS" />
+
+      <TextField fx:id="searchTextField" onMouseClicked="#handleSearchFieldClick" prefHeight="25.0" prefWidth="180.0" promptText="Pesquisar Evento" />
+      <Button fx:id="searchButton" mnemonicParsing="false" onAction="#handleSearch" prefHeight="25.0" style="-fx-background-color: #2f4a51;" text="Buscar" textFill="WHITE" />
+      
    </children>
-</AnchorPane>
+   <padding>
+      <Insets left="20.0" right="14.0" />
+   </padding>
+</HBox>

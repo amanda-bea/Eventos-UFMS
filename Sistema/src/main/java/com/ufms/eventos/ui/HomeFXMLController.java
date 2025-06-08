@@ -30,7 +30,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class HomeUsuarioFXMLController implements Initializable {
+public class HomeFXMLController implements Initializable {
 
     // --- CAMPOS FXML DA TELA PRINCIPAL ---
     @FXML private TilePane eventoContainer;

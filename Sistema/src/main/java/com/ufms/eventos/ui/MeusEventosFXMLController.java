@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * Controller para a tela "Meus Eventos" do Organizador.
  * Esta classe é autossuficiente, buscando o usuário logado diretamente da SessaoUsuario.
  */
-public class MeusEventosUserFXMLController implements Initializable {
+public class MeusEventosFXMLController implements Initializable {
 
     @FXML
     private TilePane eventoContainer;
