@@ -4,7 +4,6 @@ import com.ufms.eventos.controller.EventoController;
 import com.ufms.eventos.dto.EventoMinDTO;
 import com.ufms.eventos.model.Categoria;
 import com.ufms.eventos.model.Departamento;
-import com.ufms.eventos.ui.HomebarFXMLController.FilterData; // Importa a classe de dados do filtro
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,8 +11,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;

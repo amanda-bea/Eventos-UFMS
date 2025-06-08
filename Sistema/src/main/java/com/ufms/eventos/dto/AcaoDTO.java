@@ -22,9 +22,9 @@ public class AcaoDTO {
     private String departamento;
     private String contato; // Formato: telefone ou e-mail
     private String modalidade;
-    private String imagem;
     private String link;
     private String capacidade;
+    private String avisoVagas;
 
     public AcaoDTO(String evento, String nome, String data, String descricao, String local, String horarioInicio,
                    String horarioFim, String departamento, String contato, String modalidade,
@@ -39,7 +39,6 @@ public class AcaoDTO {
         this.departamento = departamento;
         this.contato = contato;
         this.modalidade = modalidade;
-        this.imagem = imagem;
         this.link = link;
         this.capacidade = capacidade;
     }
@@ -57,7 +56,6 @@ public class AcaoDTO {
         this.departamento = departamento;
         this.contato = contato;
         this.modalidade = modalidade;
-        this.imagem = imagem;
         this.link = link;
         this.capacidade = Integer.toString(capacidade);
     }
@@ -73,7 +71,6 @@ public class AcaoDTO {
         this.departamento = acao.getDepartamento();
         this.contato = acao.getContato();
         this.modalidade = acao.getModalidade();
-        this.imagem = acao.getImagem();
         this.link = acao.getLink();
         this.capacidade = acao.getCapacidade();
     }
@@ -89,53 +86,11 @@ public class AcaoDTO {
         this.departamento = acao.getDepartamento().name();
         this.contato = acao.getContato();
         this.modalidade = acao.getModalidade();
-        this.imagem = acao.getImagem();
         this.link = acao.getLink();
         this.capacidade = Integer.toString(acao.getCapacidade());
     }
 
     public AcaoDTO() {
         // Construtor padrão
-    }
-
-    public boolean validate(){
-        // Implementar validação dos campos
-        if (nome == null || nome.isEmpty()) {
-            return false;
-        }
-        if (data == null || data.isEmpty()) {
-            return false;
-        }
-        if (descricao == null || descricao.isEmpty()) {
-            return false;
-        }
-        if (local == null || local.isEmpty()) {
-            return false;
-        }
-        if (horarioInicio == null || horarioInicio.isEmpty()) {
-            return false;
-        }
-        if (horarioFim == null || horarioFim.isEmpty()) {
-            return false;
-        }
-        if (departamento == null || departamento.isEmpty()) {
-            return false;
-        }
-        if (contato == null || contato.isEmpty()) {
-            return false;
-        }
-        if (modalidade == null || modalidade.isEmpty()) {
-            return false;
-        }
-        if (imagem == null || imagem.isEmpty()) {
-            return false;
-        }
-        if (link == null || link.isEmpty()) {
-            return false;
-        }
-        if (capacidade == null || capacidade.isEmpty()) {
-            return false;
-        }
-        return true;
     }
 }

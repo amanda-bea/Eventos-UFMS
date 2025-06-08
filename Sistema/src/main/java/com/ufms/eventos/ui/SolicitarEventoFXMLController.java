@@ -167,9 +167,6 @@ public class SolicitarEventoFXMLController {
         controles.modalidadeAcaoComboBox.setItems(FXCollections.observableArrayList("Presencial", "Online"));
         controles.modalidadeAcaoComboBox.setPromptText("Selecione a Modalidade");
         containerAcao.getChildren().addAll(new Label("Modalidade da Ação*"), controles.modalidadeAcaoComboBox);
-        controles.imagemAcaoField = new TextField();
-        controles.imagemAcaoField.setPromptText("https://exemplo.com/imagem_acao.png");
-        containerAcao.getChildren().addAll(new Label("Imagem da Ação (URL)"), controles.imagemAcaoField);
         controles.linkAcaoField = new TextField();
         controles.linkAcaoField.setPromptText("Link adicional para a ação");
         containerAcao.getChildren().addAll(new Label("Link da Ação"), controles.linkAcaoField);
@@ -288,7 +285,6 @@ public class SolicitarEventoFXMLController {
                 acaoDTO.setDepartamento(deptoAcao.name());
                 acaoDTO.setContato(contatoAcao.trim());
                 acaoDTO.setModalidade(modalidadeAcao);
-                acaoDTO.setImagem(controles.imagemAcaoField.getText() != null ? controles.imagemAcaoField.getText().trim() : "");
                 acaoDTO.setLink(controles.linkAcaoField.getText() != null ? controles.linkAcaoField.getText().trim() : "");
                 String capacidadeStr = controles.capacidadeAcaoField.getText();
                 acaoDTO.setCapacidade(capacidadeStr != null && !capacidadeStr.trim().isEmpty() ? capacidadeStr.trim() : "0");
@@ -378,7 +374,6 @@ public class SolicitarEventoFXMLController {
         dataInicioField.setValue(null);
         dataFimField.setValue(null);
         descricaoArea.clear();
-        imagemField.clear();
         linkField.clear();
         if (categoriaComboBox != null) categoriaComboBox.getSelectionModel().clearSelection();
         if (departamentoComboBox != null) departamentoComboBox.getSelectionModel().clearSelection();
@@ -425,7 +420,6 @@ public class SolicitarEventoFXMLController {
         ComboBox<Departamento> departamentoAcaoComboBox;
         TextField contatoAcaoField;
         ComboBox<String> modalidadeAcaoComboBox;
-        TextField imagemAcaoField;
         TextField linkAcaoField;
         TextField capacidadeAcaoField;
         

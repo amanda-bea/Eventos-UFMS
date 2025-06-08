@@ -19,7 +19,6 @@ public class Acao {
     private Departamento departamento;
     private String contato; // Formato: telefone ou e-mail
     private String modalidade; // Presencial
-    private String imagem; // URL da imagem do evento
     private String link; // Link para mais informações (opcional)
     private String status; // Ativo, Inativo, Cancelado, Aguardando aprovação, Lotado, Rejeitado.
     private int capacidade; // Capacidade do evento (opcional)
@@ -38,7 +37,6 @@ public class Acao {
         this.departamento = departamento;
         this.contato = contato;
         this.modalidade = modalidade;
-        this.imagem = imagem;
         this.link = link;
         this.capacidade = capacidade;
         this.status = status;
@@ -58,7 +56,6 @@ public class Acao {
         this.departamento = Departamento.valueOf(acaoDTO.getDepartamento());
         this.contato = acaoDTO.getContato();
         this.modalidade = acaoDTO.getModalidade();
-        this.imagem = acaoDTO.getImagem();
         this.link = acaoDTO.getLink();
         this.capacidade = Integer.parseInt(acaoDTO.getCapacidade());
     }

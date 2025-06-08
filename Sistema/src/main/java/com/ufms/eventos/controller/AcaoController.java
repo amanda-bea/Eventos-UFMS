@@ -55,8 +55,12 @@ public class AcaoController {
         return acaoService.listarAcoesPorEventoMin(eventoId);
     }
 
-    public List<AcaoMinDTO> listarAcoesPorEventoComAvisos(Long eventoId) {
+    public List<AcaoDTO> listarAcoesPorEventoComAvisos(Long eventoId) {
         return acaoService.listarAcoesPorEventoComAvisos(eventoId);
+    }
+
+    public List<AcaoDTO> listarAcoesCompletasPorEvento(Long eventoId) {
+        return acaoService.listarAcoesCompletasPorEvento(eventoId);
     }
 
 }

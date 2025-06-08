@@ -161,12 +161,12 @@ public class AcaoService {
         acaoRepository.updateAcao(acao); // Salva a mudança de status se houver
     }
 
-    public List<AcaoMinDTO> listarAcoesPorEventoComAvisos(Long eventoId) {
+    public List<AcaoDTO> listarAcoesPorEventoComAvisos(Long eventoId) {
         List<Acao> acoesDoEvento = acaoRepository.findByEventoId(eventoId);
 
         return acoesDoEvento.stream().map(acao -> {
-            // Converte a entidade para o DTO
-            AcaoMinDTO dto = new AcaoMinDTO(acao);
+            // Converte a entidade para o DTO COMPLETO
+            AcaoDTO dto = new AcaoDTO(acao);
             
             // Lógica para adicionar o aviso de vagas
             if (acao.getCapacidade() > 0 && !"Lotado".equalsIgnoreCase(acao.getStatus())) {
@@ -182,5 +182,15 @@ public class AcaoService {
             
             return dto;
         }).collect(Collectors.toList());
+    }
+
+    public List<AcaoDTO> listarAcoesCompletasPorEvento(Long eventoId) {
+        // Reutiliza o método que já busca as entidades Acao pelo ID do evento
+        List<Acao> acoesDoEvento = acaoRepository.findByEventoId(eventoId);
+
+        // Converte a lista de entidades para uma lista de DTOs COMPLETOS
+        return acoesDoEvento.stream()
+                .map(AcaoDTO::new) // Usa o construtor de AcaoDTO que aceita Acao
+                .collect(Collectors.toList());
     }
 }

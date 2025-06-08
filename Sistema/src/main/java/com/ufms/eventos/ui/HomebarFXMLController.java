@@ -179,15 +179,33 @@ public class HomebarFXMLController implements Initializable {
     @FXML private void handleNavigatePresencas(MouseEvent event) { navegarPara(event, "/com/ufms/eventos/view/PresencasConfirmadas.fxml", "Minhas Presenças"); }
     @FXML private void handleNavigateMeusEventos(MouseEvent event) { navegarPara(event, "/com/ufms/eventos/view/MeusEventos.fxml", "Meus Eventos"); }
 
+    /**
+     * MÉTODO CORRIGIDO:
+     * Agora ele guarda se a janela estava maximizada antes de trocar de tela e
+     * restaura esse estado depois.
+     */
     private void navegarPara(EventObject event, String fxmlPath, String title) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            // Pega a janela (Stage) a partir do componente que foi clicado (botão ou label)
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // 1. SALVA O ESTADO ATUAL DA JANELA
+            boolean estavaMaximizado = stage.isMaximized();
+
+            // 2. Carrega a nova tela
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+
+            // 3. Substitui o conteúdo da tela atual pelo novo
             stage.getScene().setRoot(root);
             stage.setTitle(title);
+
+            // 4. RESTAURA O ESTADO DA JANELA
+            stage.setMaximized(estavaMaximizado);
+
         } catch (IOException | NullPointerException e) {
+            System.err.println("Falha ao carregar a tela: " + fxmlPath);
             e.printStackTrace();
-            // Mostrar um alerta de erro aqui
+            // Aqui você pode mostrar um alerta de erro para o usuário
         }
     }
 }

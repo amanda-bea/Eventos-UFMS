@@ -3,23 +3,26 @@ package com.ufms.eventos.ui;
 import com.ufms.eventos.controller.AcaoController;
 import com.ufms.eventos.controller.AdminController;
 import com.ufms.eventos.controller.EventoController;
-import com.ufms.eventos.dto.AcaoMinDTO;
+import com.ufms.eventos.dto.AcaoDTO;
 import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.model.Admin;
 import com.ufms.eventos.model.Usuario;
 import com.ufms.eventos.util.SessaoUsuario;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.scene.Cursor;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.awt.Desktop;
@@ -44,6 +47,7 @@ public class DetalhesEventoFXMLController implements Initializable {
     @FXML private HBox painelAcoesAdmin;
     @FXML private Button btnAprovar;
     @FXML private Button btnRejeitar;
+    
 
     // --- CONTROLLERS DE LÓGICA ---
     private EventoController eventoController;
@@ -81,7 +85,7 @@ public class DetalhesEventoFXMLController implements Initializable {
             popularInfoPrincipais(evento);
 
             // Busca as ações JÁ COM OS AVISOS de vagas e popula a lista na UI
-            List<AcaoMinDTO> acoes = acaoController.listarAcoesPorEventoComAvisos(evento.getId());
+            List<AcaoDTO> acoes = acaoController.listarAcoesPorEventoComAvisos(evento.getId());
             popularAcoes(acoes);
 
         } catch (IllegalArgumentException e) {
@@ -120,64 +124,108 @@ public class DetalhesEventoFXMLController implements Initializable {
         }
     }
 
-    /**
-     * Limpa o container de ações e adiciona um "card" para cada ação da lista.
-     */
-    private void popularAcoes(List<AcaoMinDTO> acoes) {
+    private void popularAcoes(List<AcaoDTO> acoes) {
         acoesContainerVBox.getChildren().clear();
+
         if (acoes.isEmpty()) {
             acoesContainerVBox.getChildren().add(new Label("Nenhuma ação programada para este evento."));
             return;
         }
-        for (AcaoMinDTO acao : acoes) {
-            acoesContainerVBox.getChildren().add(criarCardAcao(acao));
+
+        for (AcaoDTO acao : acoes) {
+            // Cria um painel expansível para cada ação
+            acoesContainerVBox.getChildren().add(criarCardAcaoExpansivel(acao));
         }
     }
     
     /**
-     * Cria um painel HBox estilizado para representar uma única ação.
-     * Este método agora inclui a lógica para exibir a label de "Últimas Vagas".
+     * NOVO MÉTODO: Cria um TitledPane expansível para uma única ação.
      */
-    private HBox criarCardAcao(AcaoMinDTO acao) {
-        HBox card = new HBox(15);
-        card.setPadding(new Insets(10));
-        card.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        card.setStyle("-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-radius: 5; -fx-background-radius: 5;");
+    private TitledPane criarCardAcaoExpansivel(AcaoDTO acao) {
+        // O Título do painel mostra o nome e a data da ação
+        String titulo = acao.getNome() + "  -  " + acao.getData();
+        TitledPane titledPane = new TitledPane(titulo, null);
+        titledPane.setFont(Font.font("System", FontWeight.BOLD, 14));
+        titledPane.setExpanded(false); // Começa fechado
         
-        ImageView acaoImageView = new ImageView();
-        acaoImageView.setFitHeight(50);
-        acaoImageView.setFitWidth(50);
-        // ... (lógica de carregar imagem da ação)
+        // --- O Conteúdo que aparece ao expandir ---
+        // Usamos um GridPane para alinhar as informações de forma bonita
+        GridPane gridConteudo = new GridPane();
+        gridConteudo.setHgap(10);
+        gridConteudo.setVgap(8);
+        gridConteudo.setPadding(new Insets(15, 10, 10, 10));
 
-        VBox infoBox = new VBox(3);
-        Label nomeAcaoLabel = new Label(acao.getNome());
-        nomeAcaoLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
-        Label departamentoLabel = new Label("Departamento: " + acao.getDepartamento());
-        departamentoLabel.setTextFill(Color.rgb(100, 100, 100));
-        Label dataLabel = new Label("Data: " + acao.getData());
-        dataLabel.setTextFill(Color.rgb(100, 100, 100));
-        infoBox.getChildren().addAll(nomeAcaoLabel, departamentoLabel, dataLabel);
+        // Adiciona as informações detalhadas ao grid
+        gridConteudo.add(new Label("Descrição:"), 0, 0);
+        Label descLabel = new Label(acao.getDescricao());
+        descLabel.setWrapText(true);
+        gridConteudo.add(descLabel, 1, 0);
+
+        gridConteudo.add(new Label("Horário:"), 0, 1);
+        gridConteudo.add(new Label(acao.getHorarioInicio() + " - " + acao.getHorarioFim()), 1, 1);
         
-        // --- LÓGICA PARA EXIBIR A LABEL VERMELHA ---
-        if (acao.getAvisoVagas() != null && !acao.getAvisoVagas().isEmpty()) {
-            Label avisoLabel = new Label(acao.getAvisoVagas());
-            avisoLabel.setFont(Font.font("System", FontWeight.BOLD, 11));
-            avisoLabel.setTextFill(Color.RED);
-            avisoLabel.setPadding(new Insets(4, 0, 0, 0)); // Espaçamento superior
-            infoBox.getChildren().add(avisoLabel); // Adiciona o aviso abaixo das outras infos
+        gridConteudo.add(new Label("Local:"), 0, 2);
+        gridConteudo.add(new Label(acao.getLocal()), 1, 2);
+        
+        gridConteudo.add(new Label("Departamento:"), 0, 3);
+        gridConteudo.add(new Label(acao.getDepartamento()), 1, 3);
+        
+        gridConteudo.add(new Label("Modalidade:"), 0, 4);
+        gridConteudo.add(new Label(acao.getModalidade()), 1, 4);
+
+        gridConteudo.add(new Label("Capacidade:"), 0, 5);
+        String capacidade = "Ilimitada";
+        if (acao.getCapacidade() != null && !acao.getCapacidade().equals("0")) {
+            capacidade = acao.getCapacidade() + " vagas";
         }
+        gridConteudo.add(new Label(capacidade), 1, 5);
 
-        Button btnVerMais = new Button("Ver Detalhes");
-        btnVerMais.setCursor(Cursor.HAND);
-        btnVerMais.setStyle("-fx-background-color: #489ec1; -fx-text-fill: white; -fx-font-weight: bold;");
-        btnVerMais.setOnAction(e -> System.out.println("Clicou em Ver Detalhes da ação com ID: " + acao.getId()));
+        gridConteudo.add(new Label("Contato:"), 0, 6);
+        gridConteudo.add(new Label(acao.getContato()), 1, 6);
 
-        javafx.scene.layout.Region separator = new javafx.scene.layout.Region();
-        HBox.setHgrow(separator, javafx.scene.layout.Priority.ALWAYS);
+        // Define o grid como o conteúdo do painel expansível
+        titledPane.setContent(gridConteudo);
 
-        card.getChildren().addAll(acaoImageView, infoBox, separator, btnVerMais);
-        return card;
+        // Adiciona o botão "Inscrever-se" ao final do conteúdo
+        Button btnInscrever = new Button("Inscrever-se nesta Ação");
+        btnInscrever.setStyle("-fx-background-color: #489ec1; -fx-text-fill: white; -fx-font-weight: bold;");
+        btnInscrever.setOnAction(e -> handleInscrever(acao));
+        
+        // Adiciona o botão ao grid de conteúdo
+        // A coluna 0, e uma nova linha após a última informação (ex: linha 7)
+        gridConteudo.add(btnInscrever, 0, 7, 2, 1); // Ocupa 2 colunas e 1 linha
+
+        titledPane.setContent(gridConteudo);
+        
+        return titledPane;
+
     }
+
+    private void handleInscrever(AcaoDTO acao) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/FormularioInscricao.fxml"));
+            Parent root = loader.load();
+
+            // Pega o controller da tela de formulário
+            FormularioInscricaoFXMLController formController = loader.getController();
+            // Passa os dados da ação para ele saber qual formulário montar
+            formController.initData(acao);
+
+            Stage formStage = new Stage();
+            formStage.setTitle("Formulário de Inscrição");
+            formStage.setScene(new Scene(root));
+            formStage.initModality(Modality.APPLICATION_MODAL);
+            formStage.initOwner(acoesContainerVBox.getScene().getWindow());
+            formStage.showAndWait();
+
+            System.out.println("Janela de formulário fechada. Atualizando detalhes do evento...");
+            carregarDadosDoEvento(this.eventoIdAtual);
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
     
     // --- Métodos de Ação (Admin e Link) ---
 
