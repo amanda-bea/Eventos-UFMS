@@ -7,11 +7,12 @@ import com.ufms.eventos.model.Acao;
 
 @Data
 public class AcaoMinDTO {
-    private Integer id;
+    private Long id;
     private String nome;
     private String data;
     private String departamento;
     private String imagem;
+    private String avisoVagas;
 
     public AcaoMinDTO(String nome, String data, String departamento, String imagem) {
         this.nome = nome;

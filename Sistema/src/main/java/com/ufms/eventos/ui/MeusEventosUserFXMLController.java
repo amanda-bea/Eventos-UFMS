@@ -8,18 +8,20 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.Alert;
 import javafx.scene.layout.TilePane;
-import javafx.scene.paint.Color;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.paint.Color;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.Parent;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -180,7 +182,8 @@ public class MeusEventosUserFXMLController implements Initializable {
 
         cardPane.setOnMouseClicked(mouseEvent -> {
             System.out.println("Clicou no evento '" + evento.getNome() + "' com ID: " + evento.getId());
-            // TODO: Implementar navegação para a tela de detalhes do evento, passando o ID.
+            // Chama o método de navegação, passando o ID do evento e o evento do mouse
+            navegarParaDetalhes(evento.getId(), mouseEvent);
         });
 
         return cardPane;
@@ -216,6 +219,45 @@ public class MeusEventosUserFXMLController implements Initializable {
         } catch (IOException e) {
             System.err.println("Falha ao carregar a tela de solicitação de evento.");
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Lógica para navegar para a tela de detalhes do evento.
+     * @param eventoId O ID do evento para carregar na próxima tela.
+     * @param mouseEvent O evento de clique, usado para obter a janela atual.
+     */
+    private void navegarParaDetalhes(Long eventoId, MouseEvent mouseEvent) {
+        try {
+            // 1. Cria o loader para o FXML de destino.
+            //    IMPORTANTE: Verifique se o caminho para o seu FXML está correto!
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/DetalhesEvento.fxml"));
+            
+            // 2. Carrega o FXML em um nó raiz (Parent).
+            Parent root = loader.load();
+
+            // 3. Pega a instância do controller da TELA DE DESTINO.
+            DetalhesEventoFXMLController detalhesController = loader.getController();
+            
+            // 4. CHAMA O MÉTODO PÚBLICO para carregar os dados do evento específico.
+            detalhesController.carregarDadosDoEvento(eventoId);
+
+            // 5. Pega o "palco" (a janela) atual a partir do nó que foi clicado.
+            Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
+            
+            // 6. Substitui o conteúdo da janela atual pela nova tela.
+            stage.getScene().setRoot(root);
+            stage.setTitle("Detalhes do Evento"); // Atualiza o título da janela
+
+        } catch (IOException e) {
+            System.err.println("Falha ao carregar a tela de detalhes do evento: " + e.getMessage());
+            e.printStackTrace();
+            // Opcional: Mostrar um alerta de erro para o usuário.
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erro de Navegação");
+            alert.setHeaderText("Não foi possível abrir os detalhes do evento.");
+            alert.setContentText("Ocorreu um erro ao tentar carregar a tela. Verifique o console para mais detalhes.");
+            alert.showAndWait();
         }
     }
 }

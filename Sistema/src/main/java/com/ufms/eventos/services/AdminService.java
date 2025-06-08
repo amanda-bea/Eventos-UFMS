@@ -34,8 +34,8 @@ public class AdminService {
     /**
      * Aprova um evento, atualizando seu status e o de suas ações para "Ativo".
      */
-    public boolean aprovarEvento(String nomeEvento) {
-        Evento evento = er.getEvento(nomeEvento);
+    public boolean aprovarEvento(Long eventoId) {
+        Evento evento = er.findById(eventoId);
         if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
             evento.setStatus("Ativo");
             er.updateEvento(evento);
@@ -55,11 +55,10 @@ public class AdminService {
     /**
      * Rejeita um evento, atualizando seu status e salvando o motivo.
      */
-    public boolean rejeitarEvento(String nomeEvento, String motivo) {
-        Evento evento = er.getEvento(nomeEvento);
+    public boolean rejeitarEvento(Long eventoId, String motivo) {
+        Evento evento = er.findById(eventoId);
         if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
             evento.setStatus("Rejeitado");
-            evento.setMensagemRejeicao(motivo);
             er.updateEvento(evento);
 
             // Rejeita também as ações associadas

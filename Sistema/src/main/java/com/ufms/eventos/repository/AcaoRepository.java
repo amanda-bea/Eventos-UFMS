@@ -1,9 +1,12 @@
 package com.ufms.eventos.repository;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import com.ufms.eventos.model.Acao;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class AcaoRepository {
     private HashSet<Acao> acoes;
@@ -61,11 +64,36 @@ public class AcaoRepository {
 
     public Acao buscarPorNome(String nome) {
         for (Acao acao : acoes) {
-        if (acao.getNome().equalsIgnoreCase(nome)) {
-            return acao;
+            if (acao.getNome().equalsIgnoreCase(nome)) {
+                return acao;
+            }
         }
+        return null;
     }
-    return null;
+
+    public List<Acao> findByEventoId(Long eventoId) {
+        if (eventoId == null) {
+            return new ArrayList<>(); // Retorna lista vazia se o ID for nulo
+        }
+        
+        return this.acoes.stream()
+                // Filtra as ações, mantendo apenas aquelas cujo evento associado tem o ID correto.
+                .filter(acao -> acao.getEvento() != null && eventoId.equals(acao.getEvento().getId()))
+                .collect(Collectors.toList());
+    }
+
+    public Acao findById(Long id) {
+        if (id == null) {
+            return null;
+        }
+        
+        for (Acao acao : acoes) {
+            if (id.equals(acao.getId())) {
+                return acao;
+            }
+        }
+        
+        return null;
     }
 }
 

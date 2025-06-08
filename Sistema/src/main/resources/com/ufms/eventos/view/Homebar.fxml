@@ -8,21 +8,15 @@
 
 <AnchorPane maxHeight="40.0" prefHeight="40.0" style="-fx-background-color: #489ec1;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ufms.eventos.ui.HomebarFXMLController">
    <children>
-   
-      <Label fx:id="analiseLabel" onMouseClicked="#handleNavigateAnalise" layoutX="24.0" layoutY="11.0" style="-fx-cursor: hand;" text="Eventos Pendentes" textFill="white" visible="false" managed="false">
+      <Label fx:id="homeLabel" onMouseClicked="#handleNavigateHome" layoutX="24.0" layoutY="11.0" style="-fx-cursor: hand;" text="Home" textFill="white">
          <font><Font name="System Bold" size="14.0" /></font>
       </Label>
-
-      <Label fx:id="homeLabel" onMouseClicked="#handleNavigateHome" layoutX="175.0" layoutY="12.0" style="-fx-cursor: hand;" text="Home" textFill="#2f4a51">
+      <Label fx:id="presencasLabel" onMouseClicked="#handleNavigatePresencas" layoutX="90.0" layoutY="11.0" style="-fx-cursor: hand;" text="Minhas Presenças" textFill="#2f4a51">
          <font><Font name="System Bold" size="12.0" /></font>
       </Label>
-      <Label fx:id="presencasLabel" onMouseClicked="#handleNavigatePresencas" layoutX="235.0" layoutY="12.0" style="-fx-cursor: hand;" text="Minhas Presenças" textFill="#2f4a51">
+      <Label fx:id="meusEventosLabel" onMouseClicked="#handleNavigateMeusEventos" layoutX="220.0" layoutY="11.0" style="-fx-cursor: hand;" text="Meus Eventos" textFill="#2f4a51">
          <font><Font name="System Bold" size="12.0" /></font>
       </Label>
-      <Label fx:id="meusEventosLabel" onMouseClicked="#handleNavigateMeusEventos" layoutX="365.0" layoutY="12.0" style="-fx-cursor: hand;" text="Meus Eventos" textFill="#2f4a51">
-         <font><Font name="System Bold" size="12.0" /></font>
-      </Label>
-      
       <Button fx:id="searchButton" mnemonicParsing="false" onAction="#handleSearch" prefHeight="25.0" prefWidth="51.0" style="-fx-background-color: #2f4a51;" text="Buscar" textFill="WHITE" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="6.0" />
       <TextField fx:id="searchTextField" prefHeight="25.0" prefWidth="180.0" promptText="Pesquisar Evento" AnchorPane.rightAnchor="70.0" AnchorPane.topAnchor="6.0" />
    </children>

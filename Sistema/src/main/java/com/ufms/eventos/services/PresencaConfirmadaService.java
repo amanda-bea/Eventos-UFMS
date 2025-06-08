@@ -6,9 +6,10 @@ import com.ufms.eventos.model.Usuario;
 
 import com.ufms.eventos.repository.AcaoRepository;
 import com.ufms.eventos.repository.PresencaConfirmadaRepository;
-
+import com.ufms.eventos.dto.EventoMinDTO;
 import com.ufms.eventos.dto.PresencaConfirmadaDTO; // If you use this DTO elsewhere
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -64,17 +65,25 @@ public class PresencaConfirmadaService {
         }
     }
 
-    public List<PresencaConfirmadaDTO> listarPresencasPorUsuario(String nomeUsuario) {
-        List<PresencaConfirmada> presencas = pr.getPresencasConfirmadas()
-            .stream()
-            .filter(p -> p.getUsuario().getNome().equalsIgnoreCase(nomeUsuario))
-            .filter(p -> "Ativo".equalsIgnoreCase(p.getAcao().getStatus())) // Considere se "Lotado" também deve ser listado se o usuário já estiver inscrito.
-            .collect(Collectors.toList());
+    public int contarPresencasConfirmadas(Long idAcao) {
+        return (int) pr.countByAcaoId(idAcao);
+    }
 
-        return presencas.stream()
-            .map(p -> new PresencaConfirmadaDTO(
-                p.getUsuario().getNome(),
-                p.getAcao().getNome()))
-            .collect(Collectors.toList());
+    public List<EventoMinDTO> listarEventosComPresencaConfirmada(Usuario usuario) {
+        if (usuario == null) {
+            return new ArrayList<>();
+        }
+
+        return pr.getPresencasConfirmadas().stream()
+                // 1. Filtra as presenças que são do usuário logado
+                .filter(presenca -> usuario.equals(presenca.getUsuario()))
+                // 2. Para cada presença, pega o Evento pai da Ação
+                .map(presenca -> presenca.getAcao().getEvento())
+                // 3. Garante que cada evento apareça apenas uma vez na lista
+                .distinct()
+                // 4. Converte os objetos Evento para EventoMinDTO
+                .map(EventoMinDTO::new)
+                // 5. Coleta tudo em uma lista
+                .collect(Collectors.toList());
     }
 }

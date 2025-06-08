@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class AcaoService {
     private AcaoRepository acaoRepository;
     private EventoRepository eventoRepository;
+    private PresencaConfirmadaService presencaService = new PresencaConfirmadaService();
 
     public AcaoService() {
         this.acaoRepository = new AcaoRepository();
@@ -130,17 +131,56 @@ public class AcaoService {
                 });
     }
 
-     /*
+    public List<AcaoMinDTO> listarAcoesPorEventoMin(Long eventoId) {
+        // 1. Busca as entidades completas do repositório
+        List<Acao> acoesDoEvento = acaoRepository.findByEventoId(eventoId);
 
-    public void verificarStatusVagas(Long idAcao) {
+        // 2. Converte a lista de entidades para uma lista de DTOs e a retorna
+        return acoesDoEvento.stream()
+                .map(AcaoMinDTO::new) // Para cada Acao, cria um novo AcaoMinDTO
+                .collect(Collectors.toList());
+    }
+    
 
-        Acao acao = acaoRepository.findById(idAcao);
-        int confirmados = contarPresencasConfirmadas(idAcao);
-        int capacidade = acao.getCapacidade();
-        if (confirmados >= capacidade) {
-            acao.setStatus("Lotado");
-        } else if (capacidade - confirmados <= 10) {
-            String label = Últimas vagas
-    }
-     */
+    public void verificarStatusVagas(Long idAcao) {
+        Acao acao = acaoRepository.findById(idAcao); // Supondo que você tenha findById no repo
+        if (acao == null || acao.getCapacidade() <= 0) {
+            // Não faz nada se a ação não existe ou tem capacidade ilimitada (<=0)
+            return;
+        }
+
+        int confirmados = presencaService.contarPresencasConfirmadas(idAcao);
+        int capacidade = acao.getCapacidade();
+
+        if (confirmados >= capacidade) {
+            acao.setStatus("Lotado");
+        }
+        // Nota: O status "Últimas vagas" não é um status real da Ação, 
+        // é uma informação para a UI. Vamos lidar com isso no DTO.
+
+        acaoRepository.updateAcao(acao); // Salva a mudança de status se houver
+    }
+
+    public List<AcaoMinDTO> listarAcoesPorEventoComAvisos(Long eventoId) {
+        List<Acao> acoesDoEvento = acaoRepository.findByEventoId(eventoId);
+
+        return acoesDoEvento.stream().map(acao -> {
+            // Converte a entidade para o DTO
+            AcaoMinDTO dto = new AcaoMinDTO(acao);
+            
+            // Lógica para adicionar o aviso de vagas
+            if (acao.getCapacidade() > 0 && !"Lotado".equalsIgnoreCase(acao.getStatus())) {
+                int confirmados = presencaService.contarPresencasConfirmadas(acao.getId());
+                int vagasRestantes = acao.getCapacidade() - confirmados;
+
+                if (vagasRestantes > 0 && vagasRestantes <= 10) {
+                    dto.setAvisoVagas("ÚLTIMAS VAGAS (" + vagasRestantes + ")");
+                }
+            } else if ("Lotado".equalsIgnoreCase(acao.getStatus())) {
+                dto.setAvisoVagas("ESGOTADO");
+            }
+            
+            return dto;
+        }).collect(Collectors.toList());
+    }
 }

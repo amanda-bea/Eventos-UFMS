@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class EventoMinDTO {
-    private Integer id;
+    private Long id;
     private String nome;
     private String dataInicio;
     private String categoria; // Ex: Cultura, Educação, Saúde, etc.

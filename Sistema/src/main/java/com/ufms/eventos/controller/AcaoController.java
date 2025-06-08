@@ -19,12 +19,6 @@ public class AcaoController {
         this.acaoService = new AcaoService();
     }
 
-    /*
-     * O método 'solicitarAcao' foi REMOVIDO. Ele era redundante.
-     * Use 'adicionarAcaoEmEventoExistente' para adicionar ações a um evento que já existe.
-     * A criação de um evento com sua primeira ação é feita pelo 'EventoController'.
-     */
-
     /**
      * Adiciona uma nova ação a um evento existente.
      * A assinatura agora recebe o 'Usuario' logado para verificação de permissão.
@@ -56,15 +50,13 @@ public class AcaoController {
     public AcaoDTO getAcaoDtoPorNome(String nome) {
         return acaoService.getAcaoDtoPorNome(nome);
     }
-    
-    /**
-     * Lista todas as ações de um evento específico.
-     */
-    public List<AcaoMinDTO> listarAcoesPorEventoMin(String nomeEvento) {
-        return acaoService.listarAcoesPorEventoMin(nomeEvento);
+
+    public List<AcaoMinDTO> listarAcoesPorEventoMin(Long eventoId) {
+        return acaoService.listarAcoesPorEventoMin(eventoId);
     }
 
-    /* O método 'listarAcoes' foi removido por ser muito genérico.
-     * É mais útil e performático listar ações de um evento específico.
-     * Se precisar dele, pode adicionar de volta. */
+    public List<AcaoMinDTO> listarAcoesPorEventoComAvisos(Long eventoId) {
+        return acaoService.listarAcoesPorEventoComAvisos(eventoId);
+    }
+
 }

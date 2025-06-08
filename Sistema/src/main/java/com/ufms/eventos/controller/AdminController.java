@@ -27,20 +27,12 @@ public class AdminController {
         return adminService.listarEventosAguardando();
     }
 
-    /**
-     * Aprova um evento pendente.
-     */
-    public boolean aprovarEvento(String nomeEvento) {
-        // MUDANÇA: Chama o método do adminService
-        return adminService.aprovarEvento(nomeEvento);
+    public boolean aprovarEvento(Long eventoId) {
+        return adminService.aprovarEvento(eventoId);
     }
 
-    /**
-     * Rejeita um evento pendente, com um motivo.
-     */
-    public boolean rejeitarEvento(String nomeEvento, String motivo) {
-        // MUDANÇA: Chama o método do adminService
-        return adminService.rejeitarEvento(nomeEvento, motivo);
+    public boolean rejeitarEvento(Long eventoId, String motivo) {
+        return adminService.rejeitarEvento(eventoId, motivo);
     }
 
     /**

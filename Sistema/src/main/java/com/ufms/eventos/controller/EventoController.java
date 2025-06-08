@@ -6,6 +6,7 @@ import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.dto.EventoMinDTO;
 import com.ufms.eventos.model.Categoria;
 import com.ufms.eventos.model.Departamento;
+import com.ufms.eventos.model.Evento;
 import com.ufms.eventos.model.Usuario;
 import com.ufms.eventos.services.EventoService;
 
@@ -66,5 +67,13 @@ public class EventoController {
 
     public List<EventoMinDTO> buscarEventosComFiltro(String termoBusca, Categoria categoria, Departamento departamento, String modalidade) {
         return eventoService.buscarEventosComFiltro(termoBusca, categoria, departamento, modalidade);
+    }
+
+    public EventoDTO buscarDtoPorNome(String nome) {
+        return eventoService.buscarDtoPorNome(nome);
+    }
+
+    public Evento buscarEventoPorId(Long id) {
+        return eventoService.buscarEventoPorId(id);
     }
 }

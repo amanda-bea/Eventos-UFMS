@@ -22,16 +22,13 @@ public class PresencaConfirmadaRepository {
     public boolean removePresencaConfirmada(PresencaConfirmada presencaConfirmada) {
         return this.presencasConfirmadas.remove(presencaConfirmada);
     }
-    /* 
-    public int contarPresencasConfirmadas(Long idAcao) {
-        // Conta quantas presenças confirmadas existem para a ação informada
-        return (int) presencasConfirmadas
-            .stream()
-            .filter(presenca -> presenca.getAcao() != null
-                && presenca.getAcao().getId() != null
-                && presenca.getAcao().getId().equals(idAcao))
-            .count();
+
+    public long countByAcaoId(Long idAcao) {
+        if (idAcao == null) return 0;
+        
+        return this.presencasConfirmadas.stream()
+                .filter(presenca -> presenca.getAcao() != null && idAcao.equals(presenca.getAcao().getId()))
+                .count();
     }
-    */
 
 }

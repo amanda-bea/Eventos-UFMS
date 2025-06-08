@@ -27,6 +27,7 @@ public class EventoService {
     private EventoRepository er;
     private OrganizadorRepository or;
     private AcaoRepository ar;
+    private AcaoService acaoService = new AcaoService();
 
     public EventoService() {
         this.er = new EventoRepository();
@@ -48,8 +49,8 @@ public class EventoService {
             criadorDoEvento.getNome(), criadorDoEvento.getEmail(),
             criadorDoEvento.getSenha(), criadorDoEvento.getTelefone()
         );
-        // Em um sistema real, você salvaria/atualizaria este registro de organizador no banco.
-        // or.salvar(organizadorDoEvento);
+        // Salva/atualiza o registro do organizador no repositório
+        or.salvar(organizadorDoEvento);
 
         Evento evento = new Evento(eventoDTO);
         evento.setStatus("Aguardando aprovação");
@@ -83,6 +84,14 @@ public class EventoService {
             return true;
         }
         return false;
+    }
+
+    public EventoDTO buscarDtoPorNome(String nome) {
+        Evento evento = er.getEvento(nome);
+        if (evento == null) {
+            throw new IllegalArgumentException("Evento com nome '" + nome + "' não encontrado.");
+        }
+        return new EventoDTO(evento);
     }
     
     /**
@@ -213,12 +222,53 @@ public class EventoService {
     }
 
     private boolean temAcaoComModalidade(Evento evento, String modalidade) {
-    // Busca em TODAS as ações do repositório
-    return ar.getAcoes().stream()
-            // Filtra as ações que pertencem ao evento em questão
-            .filter(acao -> acao.getEvento().equals(evento))
-            // Verifica se ALGUMA das ações filtradas tem a modalidade correta (ignorando maiúsculas/minúsculas)
-            .anyMatch(acao -> modalidade.equalsIgnoreCase(acao.getModalidade()));
-}
+        // Busca em TODAS as ações do repositório
+        return ar.getAcoes().stream()
+                // Filtra as ações que pertencem ao evento em questão
+                .filter(acao -> acao.getEvento().equals(evento))
+                // Verifica se ALGUMA das ações filtradas tem a modalidade correta (ignorando maiúsculas/minúsculas)
+                .anyMatch(acao -> modalidade.equalsIgnoreCase(acao.getModalidade()));
+    }
+
+    public Evento buscarEventoPorId(Long id) {
+        return er.findById(id); 
+    }
+
+    /**
+     * Rotina completa para ser executada na inicialização do sistema.
+     * Primeiro inativa as ações expiradas e depois verifica se os eventos
+     * pais também devem ser inativados.
+     */
+    public void atualizarStatusDeEventosEAcoes() {
+        // 1. Inativa todas as ações que já passaram da data
+        acaoService.atualizarAcoesExpiradas();
+
+        // 2. Pega todos os eventos que ainda estão "Ativos"
+        List<Evento> eventosAtivos = er.getEventos().stream()
+            .filter(e -> "Ativo".equalsIgnoreCase(e.getStatus()))
+            .collect(Collectors.toList());
+
+        // 3. Para cada evento ativo, verifica o status de suas ações
+        for (Evento evento : eventosAtivos) {
+            // Pega todas as ações associadas a este evento
+            List<Acao> acoesDoEvento = ar.getAcoes().stream()
+                .filter(a -> a.getEvento().equals(evento))
+                .collect(Collectors.toList());
+            
+            if (acoesDoEvento.isEmpty()) {
+                continue; // Pula eventos que não têm ações
+            }
+
+            // Verifica se TODAS as ações deste evento estão inativas ou canceladas
+            boolean todasAcoesInativas = acoesDoEvento.stream()
+                .allMatch(a -> "Inativo".equalsIgnoreCase(a.getStatus()) || "Cancelado".equalsIgnoreCase(a.getStatus()));
+
+            if (todasAcoesInativas) {
+                System.out.println("Inativando evento '" + evento.getNome() + "' pois todas as suas ações expiraram.");
+                evento.setStatus("Inativo");
+                er.updateEvento(evento);
+            }
+        }
+    }
 
 }

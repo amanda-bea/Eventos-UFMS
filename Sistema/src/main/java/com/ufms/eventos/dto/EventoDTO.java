@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class EventoDTO {
-    private Integer id;
+    private Long id;
     private String nome;
     private String descricao;
     private String dataInicio;
@@ -15,9 +15,10 @@ public class EventoDTO {
     private String categoria; // Ex: Cultura, Educação, Saúde, etc.
     private String imagem; // URL da imagem do evento
     private String link;
+    private String status;
 
     public EventoDTO(String nome, String dataInicio, String dataFim, String descricao,String departamento, String categoria, 
-                     String imagem, String link) {
+                     String imagem, String link, String status) {
         this.nome = nome;
         this.dataInicio = dataInicio;
         this.dataFim = dataFim;
@@ -26,6 +27,7 @@ public class EventoDTO {
         this.categoria = categoria;
         this.imagem = imagem;
         this.link = link;
+        this.status = status;
     }
 
     public EventoDTO(EventoDTO evento){
@@ -37,6 +39,7 @@ public class EventoDTO {
         this.categoria = evento.getCategoria();
         this.imagem = evento.getImagem();
         this.link = evento.getLink();
+        this.status = evento.getStatus();
     }
 
     public EventoDTO(Evento evento) {
@@ -44,7 +47,7 @@ public class EventoDTO {
         this.descricao = evento.getDescricao();
         this.dataInicio = evento.getDataInicio().toString();
         this.dataFim = evento.getDataFim().toString();
-        // Converte enums para String usando .name()
+        this.status = evento.getStatus();
         this.departamento = evento.getDepartamento().name();
         this.categoria = evento.getCategoria().name();
         this.imagem = evento.getImagem();
@@ -61,30 +64,7 @@ public class EventoDTO {
         this.categoria = evento.getCategoria();
         this.imagem = evento.getImagem();
         this.link = evento.getLink();
-    }
 
-    public boolean validate() {
-        // Implementar validações necessárias
-        if (nome == null || nome.isEmpty()) {
-            throw new IllegalArgumentException("Nome do evento não pode ser vazio.");
-        }
-        if (dataInicio == null) {
-            throw new IllegalArgumentException("Data do evento não pode ser nula.");
-        }
-        if (dataFim == null) {
-            throw new IllegalArgumentException("Data do evento não pode ser nula.");
-        }
-        if (descricao == null || descricao.isEmpty()) {
-            throw new IllegalArgumentException("Descrição do evento não pode ser vazia.");
-        }
-        if (departamento == null || departamento.isEmpty()) {
-            throw new IllegalArgumentException("Departamento do evento não pode ser vazio.");
-        }
-        if (categoria == null || categoria.isEmpty()) {
-            throw new IllegalArgumentException("Categoria do evento não pode ser vazia.");
-        }
-
-        return true;
     }
 
 
