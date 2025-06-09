@@ -12,7 +12,7 @@ import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.model.Usuario;
 import com.ufms.eventos.repository.AcaoRepositoryJDBC;
 import com.ufms.eventos.repository.EventoRepositoryJDBC;
-import com.ufms.eventos.repository.OrganizadorRepositoryJDBC;
+import com.ufms.eventos.util.SessaoUsuario;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -25,13 +25,11 @@ import java.util.stream.Collectors;
  */
 public class EventoService {
     private EventoRepositoryJDBC eventoRepositoryJDBC;
-    private OrganizadorRepositoryJDBC or;
     private AcaoRepositoryJDBC ar;
     private AcaoService acaoService;
 
     public EventoService() {
         this.eventoRepositoryJDBC = new EventoRepositoryJDBC();
-        this.or = new OrganizadorRepositoryJDBC();
         this.ar = new AcaoRepositoryJDBC();
         this.acaoService = new AcaoService();
     }
@@ -45,24 +43,59 @@ public class EventoService {
      * como o organizador do evento.
      */
     public boolean solicitarEventoComAcoes(EventoDTO eventoDTO, List<AcaoDTO> listaAcoesDTO, Usuario criadorDoEvento) {
-        try {
-            // Converte o Usuario em um objeto Organizador para o contexto do evento.
-            Organizador organizadorDoEvento = new Organizador(
-                criadorDoEvento.getNome(), criadorDoEvento.getEmail(),
-                criadorDoEvento.getSenha(), criadorDoEvento.getTelefone()
-            );
-            // Salva/atualiza o registro do organizador no repositório
-            or.salvar(organizadorDoEvento);
+        if (eventoDTO == null || listaAcoesDTO == null || listaAcoesDTO.isEmpty() || criadorDoEvento == null) {
+            System.err.println("Erro: dados inválidos para criação de evento");
+            return false;
+        }
+        
+        // Verifica se o usuário já é organizador ou precisa se tornar um
+        Organizador organizador;
+        
+        if (criadorDoEvento instanceof Organizador) {
+            // Já é um organizador
+            organizador = (Organizador) criadorDoEvento;
+        } else {
+            try {
+                // Transformar o usuário em organizador
+                OrganizadorService organizadorService = new OrganizadorService();
+                
+                // Cria um organizador com os mesmos dados do usuário
+                organizador = new Organizador(
+                    criadorDoEvento.getNome(), 
+                    criadorDoEvento.getEmail(), 
+                    criadorDoEvento.getSenha(), 
+                    criadorDoEvento.getTelefone()
+                );
+                
+                // Cadastra o organizador no sistema
+                boolean sucesso = organizadorService.salvarOrganizador(organizador);
+                
+                if (!sucesso) {
+                    System.err.println("Erro ao converter usuário em organizador: " + criadorDoEvento.getNome());
+                    return false;
+                }
+                
+                // Atualiza a sessão
+                SessaoUsuario.getInstancia().login(organizador);
+                System.out.println("Usuário " + criadorDoEvento.getNome() + " promovido para organizador");
+                
+            } catch (Exception e) {
+                System.err.println("Erro ao transformar usuário em organizador: " + e.getMessage());
+                e.printStackTrace();
+                return false;
+            }
+        }
 
+        try {
             Evento evento = new Evento(eventoDTO);
             evento.setStatus("Aguardando aprovação");
-            evento.setOrganizador(organizadorDoEvento);
-            
+            evento.setOrganizador(organizador);
+                
             // Verifica se já existe um evento com este nome
             if (buscarPorNome(evento.getNome()) == null) {
                 // Salva o evento usando o repositório JDBC
                 eventoRepositoryJDBC.salvar(evento);
-                
+                    
                 // Cria as ações associadas ao evento
                 for (AcaoDTO acaoDTO : listaAcoesDTO) {
                     Acao acao = new Acao(acaoDTO);
@@ -74,6 +107,7 @@ public class EventoService {
             }
             return false;
         } catch (Exception e) {
+            System.err.println("Erro ao salvar evento ou ações: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -151,23 +185,34 @@ public class EventoService {
         }
     }
 
-    /**
-     * Busca eventos associados a um usuário específico usando JDBC.
-     */
     public List<EventoMinDTO> buscarEventosPorUsuario(Usuario usuario) {
-        if (usuario == null) return new ArrayList<>();
-
+        List<EventoMinDTO> eventosMiniDTO = new ArrayList<>();
         try {
-            List<Evento> todosEventos = eventoRepositoryJDBC.listarTodos();
-            return todosEventos.stream()
-                    .filter(evento -> evento.getOrganizador() != null && 
-                                     evento.getOrganizador().getNome().equals(usuario.getNome()))
-                    .map(EventoMinDTO::new)
-                    .collect(Collectors.toList());
+            List<Evento> eventos = eventoRepositoryJDBC.buscarPorOrganizador(usuario.getNome());
+            
+            for (Evento evento : eventos) {
+                EventoMinDTO dto = new EventoMinDTO();
+                // IMPORTANTE: Certifique-se de definir o ID!
+                dto.setId(evento.getId());  // Aqui está a correção principal
+                dto.setNome(evento.getNome());
+                dto.setStatus(evento.getStatus());
+                dto.setCategoria(evento.getCategoria().toString());
+                dto.setDataInicio(evento.getDataInicio().toString());
+                dto.setImagem(evento.getImagem());
+                
+                // Verificação adicional para garantir que o ID está sendo definido
+                if (dto.getId() == null) {
+                    System.err.println("ALERTA: O evento " + dto.getNome() + 
+                                    " tem ID nulo no objeto original! ID no banco: " + evento.getId());
+                }
+                
+                eventosMiniDTO.add(dto);
+            }
         } catch (Exception e) {
+            System.err.println("Erro ao buscar eventos do usuário: " + e.getMessage());
             e.printStackTrace();
-            return new ArrayList<>();
         }
+        return eventosMiniDTO;
     }
 
     // ===================================================================

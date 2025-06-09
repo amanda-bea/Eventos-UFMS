@@ -6,6 +6,7 @@ import com.ufms.eventos.dto.AcaoDTO;
 import com.ufms.eventos.dto.AcaoMinDTO; // Adicionei este import, pois é útil
 import com.ufms.eventos.dto.EditarAcaoDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -56,6 +57,14 @@ public class AcaoController {
     }
 
     public List<AcaoDTO> listarAcoesPorEventoComAvisos(Long eventoId) {
+        // Adicione log para verificar o valor
+        System.out.println("AcaoController.listarAcoesPorEventoComAvisos recebeu ID: " + eventoId);
+        
+        if (eventoId == null) {
+            System.err.println("AVISO: AcaoController recebeu eventoId nulo");
+            return new ArrayList<>();
+        }
+        
         return acaoService.listarAcoesPorEventoComAvisos(eventoId);
     }
 

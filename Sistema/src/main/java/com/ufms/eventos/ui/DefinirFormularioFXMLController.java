@@ -27,6 +27,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+/**
+ * Controlador para a tela de definição de formulários personalizados para eventos.
+ * Permite configurar quais campos serão exigidos dos participantes.
+ */
 public class DefinirFormularioFXMLController {
 
     @FXML private Label lblTituloEvento;
@@ -39,29 +43,48 @@ public class DefinirFormularioFXMLController {
     private EventoDTO eventoAtual;
     private ConfiguracaoFormularioController configuracaoLogicController;
     private List<HBox> camposPersonalizadosRows = new ArrayList<>();
-
+    private ConfiguracaoFormularioDTO configuracaoTemporaria;
+    
     private Consumer<Boolean> onCloseCallback;
     private boolean configuracaoSalvaComSucesso = false;
 
+    /**
+     * Inicializa o controlador após o carregamento do FXML.
+     */
     public void initialize() {
         this.configuracaoLogicController = new ConfiguracaoFormularioController();
+        // Valores padrão para novos formulários
         chkUsarNome.setSelected(true);
         chkUsarEmail.setSelected(true);
     }
 
-
+    /**
+     * Define o evento para o qual o formulário será configurado e o callback para quando a tela for fechada.
+     * @param evento O evento para configuração do formulário
+     * @param callback O callback que será chamado quando a tela fechar (recebe true se o formulário foi salvo)
+     */
     public void setEventoParaDefinicao(EventoDTO evento, Consumer<Boolean> callback) {
         this.eventoAtual = evento;
         this.onCloseCallback = callback;
+        
+        System.out.println("Definindo formulário para evento: " + (evento != null ? evento.getNome() : "nulo"));
 
         if (eventoAtual != null && eventoAtual.getNome() != null && !eventoAtual.getNome().trim().isEmpty()) {
             lblTituloEvento.setText("Definir Formulário para Evento: " + eventoAtual.getNome());
-            // O identificador do evento será o nome do evento.
-            // Se você tiver um ID numérico, use eventoAtual.getId() ou similar.
-            carregarConfiguracaoExistente(eventoAtual.getNome());
+            
+            // Verificamos se já existe uma configuração (apenas para eventos existentes no banco)
+            try {
+                carregarConfiguracaoExistente(eventoAtual.getNome());
+            } catch (Exception e) {
+                System.out.println("Evento ainda não está no banco, usando configuração padrão: " + e.getMessage());
+                // Se o evento ainda não existe no banco, usamos a configuração padrão
+                // Isso é normal para novos eventos
+            }
         } else {
             lblTituloEvento.setText("Definir Formulário para Evento (Erro: Evento não especificado)");
-            mostrarAlerta("Erro Crítico", "Evento não especificado.", "Não é possível definir o formulário sem um evento associado.", AlertType.ERROR);
+            mostrarAlerta("Erro Crítico", "Evento não especificado", 
+                         "Não é possível definir o formulário sem um evento associado.", AlertType.ERROR);
+                         
             if (getStage() != null) { // Garante que a UI está pronta
                  ((Button) getStage().getScene().lookup("#btnFinalizarFormulario")).setDisable(true);
                  ((Button) getStage().getScene().lookup("#btnAdicionarCampoPersonalizado")).setDisable(true);
@@ -69,9 +92,23 @@ public class DefinirFormularioFXMLController {
         }
     }
 
+    /**
+     * Tenta carregar uma configuração de formulário existente para o evento.
+     * @param identificadorEvento O identificador do evento (nome)
+     */
     private void carregarConfiguracaoExistente(String identificadorEvento) {
-        ConfiguracaoFormularioDTO configExistente = configuracaoLogicController.buscarConfiguracao(identificadorEvento);
+        System.out.println("Tentando carregar configuração para: " + identificadorEvento);
+        ConfiguracaoFormularioDTO configExistente = null;
+        
+        try {
+            configExistente = configuracaoLogicController.buscarConfiguracao(identificadorEvento);
+        } catch (Exception e) {
+            System.out.println("Erro ao buscar configuração: " + e.getMessage());
+            return;
+        }
+        
         if (configExistente != null) {
+            System.out.println("Configuração encontrada para: " + identificadorEvento);
             chkUsarNome.setSelected(configExistente.isUsarNome());
             chkUsarEmail.setSelected(configExistente.isUsarEmail());
             chkUsarCpf.setSelected(configExistente.isUsarCpf());
@@ -84,14 +121,23 @@ public class DefinirFormularioFXMLController {
                     adicionarLinhaCampoPersonalizadoUI(nomeCampo);
                 }
             }
+        } else {
+            System.out.println("Nenhuma configuração encontrada para: " + identificadorEvento);
         }
     }
 
+    /**
+     * Manipula o evento de adicionar um novo campo personalizado.
+     */
     @FXML
     private void handleAdicionarCampoPersonalizado(ActionEvent event) {
         adicionarLinhaCampoPersonalizadoUI(null);
     }
 
+    /**
+     * Adiciona uma nova linha de campo personalizado à interface.
+     * @param nomeInicialCampo O nome inicial do campo (null para campo vazio)
+     */
     private void adicionarLinhaCampoPersonalizadoUI(String nomeInicialCampo) {
         HBox linhaCampo = new HBox(10);
         linhaCampo.setAlignment(Pos.CENTER_LEFT);
@@ -115,14 +161,20 @@ public class DefinirFormularioFXMLController {
         camposPersonalizadosRows.add(linhaCampo);
     }
 
+    /**
+     * Manipula o evento de finalização do formulário.
+     */
     @FXML
     private void handleFinalizarFormulario(ActionEvent event) {
         if (eventoAtual == null || eventoAtual.getNome() == null || eventoAtual.getNome().trim().isEmpty()) {
-            mostrarAlerta("Erro", "Evento não definido.", "Não é possível salvar o formulário sem um evento associado.", AlertType.ERROR);
+            mostrarAlerta("Erro", "Evento não definido", 
+                         "Não é possível salvar o formulário sem um evento associado.", AlertType.ERROR);
             return;
         }
         String identificadorEvento = eventoAtual.getNome(); // Usando o nome do evento como identificador
+        System.out.println("Finalizando formulário para evento: " + identificadorEvento);
 
+        // Coleta e valida os campos personalizados
         List<String> nomesCamposPersonalizados = new ArrayList<>();
         for (HBox row : camposPersonalizadosRows) {
             Node node = row.getChildren().get(1);
@@ -131,19 +183,20 @@ public class DefinirFormularioFXMLController {
                 if (nomeCampo != null && !nomeCampo.trim().isEmpty()) {
                     if (nomesCamposPersonalizados.contains(nomeCampo.trim())) {
                         mostrarAlerta("Campo Duplicado", "Nome de Campo Personalizado Repetido",
-                                      "O campo '" + nomeCampo.trim() + "' foi adicionado mais de uma vez. Por favor, use nomes únicos.", AlertType.WARNING);
+                                     "O campo '" + nomeCampo.trim() + "' foi adicionado mais de uma vez. Por favor, use nomes únicos.", AlertType.WARNING);
                         return;
                     }
                     nomesCamposPersonalizados.add(nomeCampo.trim());
                 } else {
                     mostrarAlerta("Campo Inválido", "Nome de Campo Personalizado Vazio",
-                                  "Preencha o nome de todos os campos personalizados ou remova os vazios.", AlertType.WARNING);
+                                 "Preencha o nome de todos os campos personalizados ou remova os vazios.", AlertType.WARNING);
                     return;
                 }
             }
         }
 
-        ConfiguracaoFormularioDTO configDTO = new ConfiguracaoFormularioDTO(
+        // Cria o DTO com a configuração do formulário
+        configuracaoTemporaria = new ConfiguracaoFormularioDTO(
             identificadorEvento,
             chkUsarNome.isSelected(),
             chkUsarEmail.isSelected(),
@@ -152,21 +205,15 @@ public class DefinirFormularioFXMLController {
             nomesCamposPersonalizados
         );
 
-        ConfiguracaoFormularioDTO resultadoOperacao;
-
-
-        resultadoOperacao = configuracaoLogicController.criarConfiguracaoFormulario(configDTO);
-
-        if (resultadoOperacao != null) {
-            mostrarAlerta("Sucesso!", "Configuração Salva", "A configuração do formulário para o evento '" + eventoAtual.getNome() + "' foi salva.", AlertType.INFORMATION);
-            configuracaoSalvaComSucesso = true;
-            fecharJanela();
-        } else {
-            mostrarAlerta("Erro", "Falha ao Salvar", "Não foi possível salvar a configuração do formulário.", AlertType.ERROR);
-            configuracaoSalvaComSucesso = false;
-        }
+        // Não salva agora, apenas marca como bem-sucedido e fecha
+        System.out.println("Configuração de formulário preparada para: " + identificadorEvento);
+        configuracaoSalvaComSucesso = true;
+        fecharJanela();
     }
 
+    /**
+     * Manipula o evento de cancelamento da configuração.
+     */
     @FXML
     private void handleCancelar(ActionEvent event) {
         Alert confirmacao = new Alert(AlertType.CONFIRMATION,
@@ -183,6 +230,9 @@ public class DefinirFormularioFXMLController {
         }
     }
 
+    /**
+     * Processa o evento de fechamento da janela, verificando se há alterações não salvas.
+     */
     public void processarFechamentoJanela(WindowEvent event) {
         if (!configuracaoSalvaComSucesso) {
             if (event != null) { // Fechamento pelo botão 'X' da janela
@@ -205,6 +255,9 @@ public class DefinirFormularioFXMLController {
         }
     }
 
+    /**
+     * Fecha a janela do formulário.
+     */
     private void fecharJanela() {
         processarFechamentoJanela(null); // Chama o callback
         Stage stage = getStage();
@@ -213,6 +266,9 @@ public class DefinirFormularioFXMLController {
         }
     }
     
+    /**
+     * Obtém a referência do Stage atual.
+     */
     private Stage getStage() {
          if (lblTituloEvento != null && lblTituloEvento.getScene() != null) {
             return (Stage) lblTituloEvento.getScene().getWindow();
@@ -220,6 +276,9 @@ public class DefinirFormularioFXMLController {
         return null;
     }
 
+    /**
+     * Mostra um alerta para o usuário.
+     */
     private void mostrarAlerta(String titulo, String cabecalho, String conteudo, AlertType tipo) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);
@@ -228,4 +287,51 @@ public class DefinirFormularioFXMLController {
         alert.initOwner(getStage());
         alert.showAndWait();
     }
-}
+    
+    /**
+     * Retorna a configuração temporária do formulário.
+     * Esta configuração deve ser salva depois que o evento for criado no banco.
+     */
+    public ConfiguracaoFormularioDTO getConfiguracaoTemporaria() {
+        return configuracaoTemporaria;
+    }
+    
+    /**
+     * Salva a configuração do formulário para um evento já existente no banco.
+     * Este método deve ser chamado após a criação do evento.
+     */
+    public boolean salvarConfiguracaoNoEvento() {
+        if (configuracaoTemporaria == null || eventoAtual == null) {
+            System.err.println("Erro: configuracaoTemporaria ou eventoAtual é nulo");
+            return false;
+        }
+        
+        String nomeEvento = eventoAtual.getNome();
+        
+        try {
+            // Aguarda um pouco para garantir que o evento esteja no banco
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            
+            System.out.println("Tentando salvar configuração para o evento: " + nomeEvento);
+                
+            ConfiguracaoFormularioDTO resultado = 
+                configuracaoLogicController.criarConfiguracaoFormulario(configuracaoTemporaria);
+                    
+            if (resultado != null) {
+                System.out.println("Configuração salva com sucesso para o evento: " + nomeEvento);
+                return true;
+            } else {
+                System.err.println("Falha ao salvar configuração: retorno nulo do controller");
+                return false;
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao salvar configuração do formulário: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+} 

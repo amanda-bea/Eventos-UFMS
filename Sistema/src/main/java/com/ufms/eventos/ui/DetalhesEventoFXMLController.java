@@ -70,8 +70,12 @@ public class DetalhesEventoFXMLController implements Initializable {
      * Ponto de entrada desta tela. Recebe o ID do evento e carrega todos os seus dados.
      */
     public void carregarDadosDoEvento(Long eventoId) {
-        this.eventoIdAtual = eventoId;
+
+        System.out.println("DetalhesEventoFXMLController.carregarDadosDoEvento recebeu ID: " + eventoId);
+
+        
         try {
+            this.eventoIdAtual = eventoId;
             EventoDTO evento = eventoController.buscarDtoPorId(eventoId);
 
             // Lógica de visibilidade dos botões do admin
@@ -87,8 +91,8 @@ public class DetalhesEventoFXMLController implements Initializable {
             // Popula as informações principais do evento na UI
             popularInfoPrincipais(evento);
 
-            // Busca as ações JÁ COM OS AVISOS de vagas e popula a lista na UI
-            List<AcaoDTO> acoes = acaoController.listarAcoesPorEventoComAvisos(evento.getId());
+            System.out.println("Antes de chamar listarAcoesPorEventoComAvisos, ID é: " + this.eventoIdAtual);
+            List<AcaoDTO> acoes = acaoController.listarAcoesPorEventoComAvisos(this.eventoIdAtual);
             popularAcoes(acoes);
 
         } catch (IllegalArgumentException e) {

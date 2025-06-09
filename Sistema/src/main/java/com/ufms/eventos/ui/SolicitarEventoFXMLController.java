@@ -1,6 +1,5 @@
 package com.ufms.eventos.ui;
 
-import com.ufms.eventos.controller.ConfiguracaoFormularioController;
 import com.ufms.eventos.controller.EventoController;
 import com.ufms.eventos.dto.AcaoDTO;
 import com.ufms.eventos.dto.EventoDTO;
@@ -64,6 +63,7 @@ public class SolicitarEventoFXMLController {
 
     private List<AcaoFormControls> listaControlesAcoes = new ArrayList<>();
     private int contadorAcao = 0;
+    
 
     private String caminhoImagemSalva;
 
@@ -249,63 +249,55 @@ public class SolicitarEventoFXMLController {
     @FXML
     private void handleSolicitarEventoFinal(ActionEvent event) {
         try {
-
-            // --- 1. BUSCA O USUÁRIO DIRETAMENTE DA SESSÃO ---
+            // --- 1. BUSCA O USUÁRIO DA SESSÃO ---
             Usuario criadorDoEvento = SessaoUsuario.getInstancia().getUsuarioLogado();
-
-            // --- 2. VERIFICA SE HÁ ALGUÉM LOGADO NA SESSÃO ---
             if (criadorDoEvento == null) {
                 mostrarAlerta("Erro de Autenticação", "Sessão Inválida", 
                             "Não foi possível identificar o usuário logado. Por favor, faça o login novamente.", AlertType.ERROR);
                 return;
             }
 
-            // 1. Validação dos campos do Evento Principal
+            // --- 2. VALIDAÇÃO BÁSICA DO EVENTO ---
             if (nomeField.getText() == null || nomeField.getText().trim().isEmpty() ||
                 dataInicioField.getValue() == null ||
                 categoriaComboBox.getValue() == null ||
                 departamentoComboBox.getValue() == null) {
                 mostrarAlerta("Erro de Validação", "Campos Obrigatórios do Evento",
-                              "Por favor, preencha: Nome do Evento, Data de Início, Categoria e Departamento.", AlertType.ERROR);
+                            "Por favor, preencha: Nome do Evento, Data de Início, Categoria e Departamento.", AlertType.ERROR);
                 return;
             }
+
             LocalDate dataInicioEv = dataInicioField.getValue();
             LocalDate dataFimEv = dataFimField.getValue();
             if (dataFimEv != null && dataInicioEv != null && dataFimEv.isBefore(dataInicioEv)) {
                 mostrarAlerta("Erro de Validação", "Datas do Evento Inválidas",
-                              "A data de fim do evento não pode ser anterior à data de início.", AlertType.ERROR);
+                            "A data de fim do evento não pode ser anterior à data de início.", AlertType.ERROR);
                 return;
             }
-
-            if (this.organizadorLogado == null) {
-            mostrarAlerta("Erro de Autenticação", "Usuário Não Logado",
-                          "Não foi possível identificar o organizador logado.", AlertType.ERROR);
-            return;
-        }
 
             if (listaControlesAcoes.isEmpty()) {
                 mostrarAlerta("Erro de Validação", "Nenhuma Ação Adicionada",
-                              "É necessário adicionar pelo menos uma ação ao evento antes de solicitar.", AlertType.ERROR);
+                            "É necessário adicionar pelo menos uma ação ao evento antes de solicitar.", AlertType.ERROR);
                 return;
             }
 
-            // 2. Criar EventoDTO (em memória)
+            // --- 3. CRIAÇÃO DO DTO DO EVENTO ---
             EventoDTO eventoDTO = new EventoDTO();
             eventoDTO.setNome(nomeField.getText().trim());
             eventoDTO.setDataInicio(dataInicioEv.toString());
-            eventoDTO.setDataFim(dataFimEv != null ? dataFimEv.toString() : "");
+            eventoDTO.setDataFim(dataFimEv != null ? dataFimEv.toString() : null);
             eventoDTO.setCategoria(categoriaComboBox.getValue().name());
             eventoDTO.setDescricao(descricaoArea.getText() != null ? descricaoArea.getText().trim() : "");
             eventoDTO.setDepartamento(departamentoComboBox.getValue().name());
             eventoDTO.setImagem(this.caminhoImagemSalva);
-            eventoDTO.setLink(linkField.getText() != null ? linkField.getText().trim() : "");
+            eventoDTO.setLink(linkField.getText() != null ? linkField.getText().trim() : null);
 
-            // 3. Coletar e Validar Ações (em memória)
+            // --- 4. COLETA E VALIDAÇÃO DAS AÇÕES ---
             List<AcaoDTO> listaAcoesDTO = new ArrayList<>();
             for (int i = 0; i < listaControlesAcoes.size(); i++) {
                 AcaoFormControls controles = listaControlesAcoes.get(i);
-                AcaoDTO acaoDTO = new AcaoDTO();
                 
+                // Validação dos campos obrigatórios da ação
                 String nomeAcao = controles.nomeAcaoField.getText();
                 LocalDate dataAcao = controles.dataAcaoPicker.getValue();
                 String localAcao = controles.localAcaoField.getText();
@@ -323,24 +315,29 @@ public class SolicitarEventoFXMLController {
                     contatoAcao == null || contatoAcao.trim().isEmpty() || 
                     modalidadeAcao == null || modalidadeAcao.isEmpty()) {
                     mostrarAlerta("Erro de Validação na Ação #" + (i+1), "Campos Obrigatórios da Ação Inválidos",
-                                  "Preencha todos os campos marcados com '*' para a Ação #" + (i+1) + ".", AlertType.ERROR);
+                                "Preencha todos os campos marcados com '*' para a Ação #" + (i+1) + ".", AlertType.ERROR);
                     return;
                 }
+                
+                // Validação e conversão dos horários
+                AcaoDTO acaoDTO = new AcaoDTO();
                 try {
                     LocalTime horarioInicioAcao = LocalTime.parse(horarioInicioStr);
                     LocalTime horarioFimAcao = LocalTime.parse(horarioFimStr);
                     if (horarioFimAcao.isBefore(horarioInicioAcao)) {
-                         mostrarAlerta("Erro de Validação na Ação #" + (i+1), "Horários da Ação Inválidos",
-                                       "O horário de fim não pode ser anterior ao de início para a Ação #" + (i+1) + ".", AlertType.ERROR);
+                        mostrarAlerta("Erro de Validação na Ação #" + (i+1), "Horários da Ação Inválidos",
+                                    "O horário de fim não pode ser anterior ao de início para a Ação #" + (i+1) + ".", AlertType.ERROR);
                         return;
                     }
                     acaoDTO.setHorarioInicio(horarioInicioAcao.toString());
                     acaoDTO.setHorarioFim(horarioFimAcao.toString());
                 } catch (DateTimeParseException e) {
-                     mostrarAlerta("Erro de Validação na Ação #" + (i+1), "Formato de Horário Inválido",
-                                       "Use o formato HH:mm para os horários da Ação #" + (i+1) + ".", AlertType.ERROR);
+                    mostrarAlerta("Erro de Validação na Ação #" + (i+1), "Formato de Horário Inválido",
+                                "Use o formato HH:mm para os horários da Ação #" + (i+1) + ".", AlertType.ERROR);
                     return;
                 }
+                
+                // Configuração do DTO da ação
                 acaoDTO.setEvento(eventoDTO.getNome());
                 acaoDTO.setNome(nomeAcao.trim());
                 acaoDTO.setData(dataAcao.toString());
@@ -349,87 +346,91 @@ public class SolicitarEventoFXMLController {
                 acaoDTO.setDepartamento(deptoAcao.name());
                 acaoDTO.setContato(contatoAcao.trim());
                 acaoDTO.setModalidade(modalidadeAcao);
-                acaoDTO.setLink(controles.linkAcaoField.getText() != null ? controles.linkAcaoField.getText().trim() : "");
+                acaoDTO.setLink(controles.linkAcaoField.getText() != null ? controles.linkAcaoField.getText().trim() : null);
+                
                 String capacidadeStr = controles.capacidadeAcaoField.getText();
                 acaoDTO.setCapacidade(capacidadeStr != null && !capacidadeStr.trim().isEmpty() ? capacidadeStr.trim() : "0");
+                
                 listaAcoesDTO.add(acaoDTO);
             }
 
-            // 4. Chamar a tela de definição de formulário para o evento
-            boolean configuracaoFormularioSalva = false;
-            final AtomicBoolean callbackResultadoDefinicaoForm = new AtomicBoolean(false);
+    // --- 5. DEFINIÇÃO DO FORMULÁRIO ---
+    final AtomicBoolean callbackResultadoDefinicaoForm = new AtomicBoolean(false);
+    DefinirFormularioFXMLController definirFormController = null;
 
-            try {
-                java.net.URL fxmlUrl = getClass().getResource("/com/ufms/eventos/view/definirFormulario.fxml"); // CAMINHO ALTERADO
-                if (fxmlUrl == null) {
-                    System.err.println("ERRO CRÍTICO: Arquivo FXML não encontrado em /com/ufms/eventos/view/definirFormulario.fxml");
-                    mostrarAlerta("Erro Crítico de UI", "Arquivo FXML Não Encontrado",
-                                "Não foi possível encontrar o arquivo de interface 'definirFormulario.fxml'.\nCaminho esperado: /com/ufms/eventos/view/definirFormulario.fxml", AlertType.ERROR);
-                    limparFormularioCompleto(); // Limpa para evitar nova submissão com erro
-                    return;
-                }
-                FXMLLoader loader = new FXMLLoader(fxmlUrl);
-                Parent root = loader.load();
+    try {
+        // Carrega a interface de definição de formulário
+        java.net.URL fxmlUrl = getClass().getResource("/com/ufms/eventos/view/definirFormulario.fxml");
+        if (fxmlUrl == null) {
+            System.err.println("ERRO CRÍTICO: Arquivo FXML não encontrado em /com/ufms/eventos/view/definirFormulario.fxml");
+            mostrarAlerta("Erro Crítico de UI", "Arquivo FXML Não Encontrado",
+                        "Não foi possível encontrar o arquivo de interface 'definirFormulario.fxml'.", AlertType.ERROR);
+            return;
+        }
+        
+        // Configura e exibe a tela de definição de formulário
+        FXMLLoader loader = new FXMLLoader(fxmlUrl);
+        Parent root = loader.load();
+        definirFormController = loader.getController();
+        definirFormController.setEventoParaDefinicao(eventoDTO, callbackResultadoDefinicaoForm::set);
 
-                DefinirFormularioFXMLController definirFormController = loader.getController();
-                definirFormController.setEventoParaDefinicao(eventoDTO, (salvoComSucesso) -> {
-                    callbackResultadoDefinicaoForm.set(salvoComSucesso);
-                });
+        Stage stageDefinicaoForm = new Stage();
+        stageDefinicaoForm.setTitle("Definir Formulário para Evento: " + eventoDTO.getNome());
+        stageDefinicaoForm.setScene(new Scene(root));
+        stageDefinicaoForm.initModality(Modality.APPLICATION_MODAL);
+        stageDefinicaoForm.initOwner(((Node) event.getSource()).getScene().getWindow());
+        stageDefinicaoForm.setOnCloseRequest(definirFormController::processarFechamentoJanela);
+        stageDefinicaoForm.showAndWait();
 
-                Stage stageDefinicaoForm = new Stage();
-                stageDefinicaoForm.setTitle("Definir Formulário para Evento: " + eventoDTO.getNome());
-                stageDefinicaoForm.setScene(new Scene(root));
-                stageDefinicaoForm.initModality(Modality.APPLICATION_MODAL);
-                stageDefinicaoForm.initOwner(((Node) event.getSource()).getScene().getWindow());
+    } catch (IOException e) {
+        System.err.println("IOException ao carregar definirFormulario.fxml: " + e.getMessage());
+        e.printStackTrace();
+        mostrarAlerta("Erro de UI", "Falha ao Carregar Interface",
+                    "Não foi possível carregar a interface para definir o formulário.", AlertType.ERROR);
+        return;
+    }
 
-                stageDefinicaoForm.setOnCloseRequest(windowEvent -> {
-                    definirFormController.processarFechamentoJanela(windowEvent);
-                });
-
-                stageDefinicaoForm.showAndWait();
-                configuracaoFormularioSalva = callbackResultadoDefinicaoForm.get();
-
-            } catch (IOException e) {
-                System.err.println("IOException ao carregar definirFormulario.fxml (após URL encontrada): " + e.getMessage());
-                e.printStackTrace();
-                mostrarAlerta("Erro de UI", "Falha ao Carregar Interface",
-                              "Não foi possível carregar a interface para definir o formulário: " + e.getMessage(), AlertType.ERROR);
-                limparFormularioCompleto();
-                return;
-            }
-
-            // 5. Se a configuração do formulário foi salva com sucesso, AGORA salvamos o evento e ações
-            if (configuracaoFormularioSalva) {
-                boolean sucessoCriacaoEventoEAcoes = eventoController.solicitarEventoComAcoes(eventoDTO, listaAcoesDTO, criadorDoEvento);
+        // --- 6. SALVAMENTO DO EVENTO E AÇÕES ---
+            if (callbackResultadoDefinicaoForm.get() && definirFormController != null) {
+                // Primeiro salve o evento e as ações
+                boolean sucessoCriacaoEventoEAcoes = eventoController.solicitarEventoComAcoes(
+                    eventoDTO, listaAcoesDTO, criadorDoEvento);
 
                 if (sucessoCriacaoEventoEAcoes) {
-                    mostrarAlerta("Sucesso Completo!", "Evento, Ações e Formulário Definido",
-                                  "Sua solicitação foi processada com sucesso.", AlertType.INFORMATION);
-                    limparFormularioCompleto();
-                } else {
-                    mostrarAlerta("Erro ao Salvar Evento", "Falha na Solicitação Final",
-                                  "A configuração do formulário foi salva, mas ocorreu um erro ao salvar os dados do evento/ações. ", AlertType.ERROR);
+                    // Agora que o evento e ações foram salvos, podemos salvar a configuração do formulário
+                    boolean sucessoSalvarFormulario = definirFormController.salvarConfiguracaoNoEvento();
                     
-                    ConfiguracaoFormularioController cfgCtrl = new ConfiguracaoFormularioController();
-                    boolean configDeletada = cfgCtrl.deletarConfiguracaoFormulario(eventoDTO.getNome());
-                    if (configDeletada) {
-                        System.out.println("Rollback da configuração do formulário executado para o evento: " + eventoDTO.getNome());
+                    if (sucessoSalvarFormulario) {
+                        // Sucesso completo - formulário e evento/ações salvos
+                        mostrarAlerta("Solicitação Enviada!", "Evento Criado com Sucesso",
+                                "Sua solicitação para o evento '" + eventoDTO.getNome() + "' foi enviada e está aguardando aprovação pelo administrador.", 
+                                AlertType.INFORMATION);
+                        limparFormularioCompleto();
                     } else {
-                        System.err.println("Falha no rollback da configuração do formulário para o evento: " + eventoDTO.getNome());
-                         mostrarAlerta("Atenção", "Configuração de Formulário Órfã",
-                                      "Não foi possível remover a configuração de formulário que havia sido salva.", AlertType.WARNING);
+                        // Evento/ações salvos, mas formulário falhou
+                        mostrarAlerta("Atenção", "Evento Criado com Configuração Parcial",
+                                "O evento foi criado, mas houve um problema ao salvar a configuração do formulário.", 
+                                AlertType.WARNING);
+                        limparFormularioCompleto();
                     }
+                } else {
+                    // Falha no salvamento do evento/ações
+                    mostrarAlerta("Erro ao Salvar Evento", "Falha na Solicitação",
+                            "Ocorreu um erro ao salvar os dados do evento '" + eventoDTO.getNome() + "' ou suas ações.", 
+                            AlertType.ERROR);
                 }
             } else {
+                // Usuário cancelou a definição do formulário ou houve erro
                 mostrarAlerta("Operação Cancelada", "Definição de Formulário Cancelada",
-                              "A definição do formulário para o evento foi cancelada. Nenhum dado foi salvo.", AlertType.INFORMATION);
-                limparFormularioCompleto();
+                        "A definição do formulário para o evento foi cancelada. Nenhum dado foi salvo.", 
+                        AlertType.INFORMATION);
             }
         } catch (Exception e) {
+            // Tratamento de exceções inesperadas
             System.err.println("Exceção inesperada em handleSolicitarEventoFinal: " + e.getMessage());
             e.printStackTrace();
-            mostrarAlerta("Erro Inesperado", "Ocorreu um Erro Grave",
-                          "Um erro inesperado ocorreu ao tentar solicitar o evento: " + e.getClass().getSimpleName() + " - " + e.getMessage(), AlertType.ERROR);
+            mostrarAlerta("Erro Inesperado", "Falha ao Processar Solicitação",
+                        "Um erro inesperado ocorreu: " + e.getMessage(), AlertType.ERROR);
         }
     }
 

@@ -181,6 +181,8 @@ public class AcaoService {
     }
 
     public List<AcaoDTO> listarAcoesPorEventoComAvisos(Long eventoId) {
+        System.out.println("AcaoService.listarAcoesPorEventoComAvisos recebeu ID: " + eventoId);
+        
         List<Acao> acoesDoEvento = acaoRepository.findByEventoId(eventoId);
 
         return acoesDoEvento.stream().map(acao -> {

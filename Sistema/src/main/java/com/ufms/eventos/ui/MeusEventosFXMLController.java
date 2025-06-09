@@ -11,6 +11,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Font;
@@ -22,8 +23,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -113,10 +117,13 @@ public class MeusEventosFXMLController implements Initializable {
         }
     }
     
-    /**
-     * Cria o card visual para um evento, incluindo uma etiqueta de status colorida.
-     */
     private AnchorPane criarCardMeuEvento(EventoMinDTO evento) {
+        // Adicione a verificação de segurança AQUI
+        if (evento.getId() == null) {
+            System.err.println("AVISO: Evento '" + evento.getNome() + "' tem ID nulo!");
+        } else {
+            System.out.println("Criando card para evento '" + evento.getNome() + "' (ID: " + evento.getId() + ")");
+        }
         AnchorPane cardPane = new AnchorPane();
         cardPane.setPrefSize(177, 208);
         cardPane.setStyle("-fx-background-color: #e9f5fa; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-background-radius: 5;");
@@ -128,65 +135,92 @@ public class MeusEventosFXMLController implements Initializable {
         imageView.setFitWidth(160.0);
         imageView.setLayoutX(8.0);
         imageView.setLayoutY(8.0);
+
         try {
-            imageView.setImage(new Image(evento.getImagem(), true));
+            String imagePath = evento.getImagem();
+            
+            if (imagePath != null && !imagePath.isEmpty()) {
+                File arquivoImagem = new File(imagePath);
+                
+                if (arquivoImagem.exists()) {
+                    imageView.setImage(new Image(new FileInputStream(arquivoImagem)));
+                } else {
+                    // Se o arquivo do evento não for encontrado, carrega o SEU placeholder
+                    System.err.println("Imagem do evento não encontrada em: " + imagePath);
+                    // ** MUDANÇA AQUI **
+                    imageView.setImage(new Image(new FileInputStream("Sistema/imagens_eventos/placeholder.png")));
+                }
+            } else {
+                // Se não houver imagem no banco, carrega o SEU placeholder
+                // ** MUDANÇA AQUI **
+                imageView.setImage(new Image(new FileInputStream("Sistema/imagens_eventos/placeholder.png")));
+            }
         } catch (Exception e) {
-            imageView.setImage(new Image(getClass().getResourceAsStream("/img/placeholder.png")));
+            // Em caso de qualquer erro, também carrega o SEU placeholder
+            System.err.println("Falha geral ao carregar imagem. Usando placeholder. Erro: " + e.getMessage());
+            try {
+                // ** MUDANÇA AQUI **
+                imageView.setImage(new Image(new FileInputStream("Sistema/imagens_eventos/placeholder.png")));
+            } catch (Exception ex) {
+                // Caso nem o placeholder seja encontrado
+                System.err.println("ERRO CRÍTICO: Imagem placeholder também não encontrada!");
+                ex.printStackTrace();
+            }
         }
 
-        // Textos: Nome, Categoria, Data
-        Label nomeLabel = new Label(evento.getNome());
-        nomeLabel.setLayoutX(10.0);
-        nomeLabel.setLayoutY(135.0);
-        nomeLabel.setFont(Font.font("System", FontWeight.BOLD, 13));
+            // Textos: Nome, Categoria, Data
+            Label nomeLabel = new Label(evento.getNome());
+            nomeLabel.setLayoutX(10.0);
+            nomeLabel.setLayoutY(135.0);
+            nomeLabel.setFont(Font.font("System", FontWeight.BOLD, 13));
 
-        Label categoriaLabel = new Label(evento.getCategoria());
-        categoriaLabel.setLayoutX(10.0);
-        categoriaLabel.setLayoutY(155.0);
-        categoriaLabel.setFont(Font.font("System", FontWeight.NORMAL, 12));
-        categoriaLabel.setTextFill(Color.web("#489ec1"));
+            Label categoriaLabel = new Label(evento.getCategoria());
+            categoriaLabel.setLayoutX(10.0);
+            categoriaLabel.setLayoutY(155.0);
+            categoriaLabel.setFont(Font.font("System", FontWeight.NORMAL, 12));
+            categoriaLabel.setTextFill(Color.web("#489ec1"));
 
-        Label dataLabel = new Label(evento.getDataInicio());
-        dataLabel.setLayoutX(10.0);
-        dataLabel.setLayoutY(180.0);
-        dataLabel.setFont(Font.font("System", FontWeight.NORMAL, 11));
-        
-        // Etiqueta de Status
-        Label statusLabel = new Label(evento.getStatus());
-        statusLabel.setFont(Font.font("System", FontWeight.BOLD, 10));
-        statusLabel.setTextFill(Color.WHITE);
-        statusLabel.setPadding(new Insets(2, 5, 2, 5));
-        statusLabel.setStyle("-fx-background-radius: 5;");
+            Label dataLabel = new Label(evento.getDataInicio());
+            dataLabel.setLayoutX(10.0);
+            dataLabel.setLayoutY(180.0);
+            dataLabel.setFont(Font.font("System", FontWeight.NORMAL, 11));
+            
+            // Etiqueta de Status
+            Label statusLabel = new Label(evento.getStatus());
+            statusLabel.setFont(Font.font("System", FontWeight.BOLD, 10));
+            statusLabel.setTextFill(Color.WHITE);
+            statusLabel.setPadding(new Insets(2, 5, 2, 5));
+            statusLabel.setStyle("-fx-background-radius: 5;");
 
-        // Define a cor da etiqueta baseada no status
-        switch (evento.getStatus().toLowerCase()) {
-            case "ativo":
-                statusLabel.setStyle(statusLabel.getStyle() + "-fx-background-color: #5cb85c;"); // Verde
-                break;
-            case "aguardando aprovação":
-                statusLabel.setStyle(statusLabel.getStyle() + "-fx-background-color: #f0ad4e;"); // Laranja
-                break;
-            case "rejeitado":
-            case "cancelado":
-                statusLabel.setStyle(statusLabel.getStyle() + "-fx-background-color: #d9534f;"); // Vermelho
-                break;
-            default: // Inativo, etc.
-                statusLabel.setStyle(statusLabel.getStyle() + "-fx-background-color: #777777;"); // Cinza
-                break;
-        }
+            // Define a cor da etiqueta baseada no status
+            switch (evento.getStatus().toLowerCase()) {
+                case "ativo":
+                    statusLabel.setStyle(statusLabel.getStyle() + "-fx-background-color: #5cb85c;"); // Verde
+                    break;
+                case "aguardando aprovação":
+                    statusLabel.setStyle(statusLabel.getStyle() + "-fx-background-color: #f0ad4e;"); // Laranja
+                    break;
+                case "rejeitado":
+                case "cancelado":
+                    statusLabel.setStyle(statusLabel.getStyle() + "-fx-background-color: #d9534f;"); // Vermelho
+                    break;
+                default: // Inativo, etc.
+                    statusLabel.setStyle(statusLabel.getStyle() + "-fx-background-color: #777777;"); // Cinza
+                    break;
+            }
 
-        AnchorPane.setTopAnchor(statusLabel, 10.0);
-        AnchorPane.setRightAnchor(statusLabel, 10.0);
+            AnchorPane.setTopAnchor(statusLabel, 10.0);
+            AnchorPane.setRightAnchor(statusLabel, 10.0);
 
-        cardPane.getChildren().addAll(imageView, nomeLabel, categoriaLabel, dataLabel, statusLabel);
+            cardPane.getChildren().addAll(imageView, nomeLabel, categoriaLabel, dataLabel, statusLabel);
 
-        cardPane.setOnMouseClicked(mouseEvent -> {
-            System.out.println("Clicou no evento '" + evento.getNome() + "' com ID: " + evento.getId());
-            // Chama o método de navegação, passando o ID do evento e o evento do mouse
-            navegarParaDetalhes(evento.getId(), mouseEvent);
-        });
+            cardPane.setOnMouseClicked(mouseEvent -> {
+                System.out.println("Clicou no evento '" + evento.getNome() + "' com ID: " + evento.getId());
+                // Chama o método de navegação, passando o ID do evento e o evento do mouse
+                navegarParaDetalhes(evento.getId(), mouseEvent);
+            });
 
-        return cardPane;
+            return cardPane;
     }
 
     /**
@@ -227,37 +261,62 @@ public class MeusEventosFXMLController implements Initializable {
      * @param eventoId O ID do evento para carregar na próxima tela.
      * @param mouseEvent O evento de clique, usado para obter a janela atual.
      */
-    private void navegarParaDetalhes(Long eventoId, MouseEvent mouseEvent) {
+    /**
+     * Navega para a tela de detalhes do evento quando o card é clicado.
+     */
+    private void navegarParaDetalhes(Long eventoId, MouseEvent event) {
         try {
-            // 1. Cria o loader para o FXML de destino.
-            //    IMPORTANTE: Verifique se o caminho para o seu FXML está correto!
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/DetalhesEvento.fxml"));
+            if (eventoId == null) {
+                System.err.println("ERRO: Não é possível navegar para detalhes - ID do evento é nulo");
+                mostrarAlerta("Erro", "Evento inválido", 
+                            "Não foi possível abrir os detalhes pois o ID do evento é inválido.", 
+                            AlertType.ERROR);
+                return;
+            }
             
-            // 2. Carrega o FXML em um nó raiz (Parent).
+            System.out.println("Navegando para detalhes do evento ID: " + eventoId);
+            
+            // Define o caminho correto do FXML
+            URL fxmlUrl = getClass().getResource("/com/ufms/eventos/view/EventoDetalhado.fxml");
+            if (fxmlUrl == null) {
+                System.err.println("ERRO: Arquivo FXML não encontrado em: /com/ufms/eventos/view/DetalhesEvento.fxml");
+                mostrarAlerta("Erro", "Arquivo não encontrado", 
+                            "O arquivo de interface para detalhes do evento não foi encontrado.", 
+                            AlertType.ERROR);
+                return;
+            }
+            
+            FXMLLoader loader = new FXMLLoader(fxmlUrl);
             Parent root = loader.load();
-
-            // 3. Pega a instância do controller da TELA DE DESTINO.
-            DetalhesEventoFXMLController detalhesController = loader.getController();
             
-            // 4. CHAMA O MÉTODO PÚBLICO para carregar os dados do evento específico.
-            detalhesController.carregarDadosDoEvento(eventoId);
-
-            // 5. Pega o "palco" (a janela) atual a partir do nó que foi clicado.
-            Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
+            // Passa o ID para o controller da tela de detalhes
+            DetalhesEventoFXMLController controller = loader.getController();
+            controller.carregarDadosDoEvento(eventoId);
             
-            // 6. Substitui o conteúdo da janela atual pela nova tela.
-            stage.getScene().setRoot(root);
-            stage.setTitle("Detalhes do Evento"); // Atualiza o título da janela
-
-        } catch (IOException e) {
-            System.err.println("Falha ao carregar a tela de detalhes do evento: " + e.getMessage());
+            // Cria e configura a nova cena
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setTitle("Detalhes do Evento");
+            stage.show();
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao navegar para detalhes: " + e.getMessage());
             e.printStackTrace();
-            // Opcional: Mostrar um alerta de erro para o usuário.
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Erro de Navegação");
-            alert.setHeaderText("Não foi possível abrir os detalhes do evento.");
-            alert.setContentText("Ocorreu um erro ao tentar carregar a tela. Verifique o console para mais detalhes.");
-            alert.showAndWait();
+            mostrarAlerta("Erro", "Falha na navegação", 
+                        "Não foi possível abrir a tela de detalhes: " + e.getMessage(), 
+                        AlertType.ERROR);
         }
+    }
+
+    /**
+     * Exibe um alerta para o usuário.
+     */
+    private void mostrarAlerta(String titulo, String cabecalho, String conteudo, AlertType tipo) {
+        Alert alerta = new Alert(tipo);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(cabecalho);
+        alerta.setContentText(conteudo);
+        alerta.showAndWait();
     }
 }

@@ -191,19 +191,35 @@ public class AcaoRepositoryJDBC implements AcaoRepository {
     @Override
     public List<Acao> findByEventoId(Long eventoId) {
         List<Acao> acoes = new ArrayList<>();
-        String sql = "SELECT * FROM acoes WHERE evento_id = ?";
-
+        
+        // Verifica se o ID é nulo antes de prosseguir
+        if (eventoId == null) {
+            System.err.println("AVISO: Tentativa de buscar ações com eventoId nulo");
+            return acoes; // Retorna lista vazia em vez de causar exceção
+        }
+        
+        String sql = "SELECT id, nome, descricao, data, status, evento_id, local, horario_inicio, " +
+             "horario_fim, departamento, contato, modalidade, link, capacidade, mensagem_rejeicao " +
+             "FROM acoes WHERE evento_id = ?";
+        
         try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setLong(1, eventoId);
-            ResultSet rs = pstmt.executeQuery();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, eventoId);
+            ResultSet rs = stmt.executeQuery();
+            
             while (rs.next()) {
-                acoes.add(mapResultSetToAcao(rs));
+                Acao acao = mapResultSetToAcao(rs);
+                acoes.add(acao);
             }
+        } catch (SQLException e) {
+            System.err.println("Erro SQL ao buscar ações por evento ID: " + e.getMessage());
+            e.printStackTrace();
         } catch (Exception e) {
+            System.err.println("Erro ao buscar ações por evento ID: " + e.getMessage());
             e.printStackTrace();
         }
+        
         return acoes;
     }
 

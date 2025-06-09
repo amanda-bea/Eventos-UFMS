@@ -132,6 +132,14 @@ public class EventoRepositoryJDBC implements EventoRepository {
     private Evento mapearEvento(ResultSet rs) throws SQLException {
         Evento evento = new Evento();
         evento.setId(rs.getLong("id"));
+
+        if (rs.wasNull()) {
+            System.err.println("AVISO DE BANCO: Campo 'id' é NULL para evento " + rs.getString("nome"));
+            // Mesmo com o aviso, não defina um valor arbitrário - isso causaria inconsistência
+        } else {
+            System.out.println("ID " + evento.getId() + " carregado para evento " + rs.getString("nome"));
+        }
+
         evento.setNome(rs.getString("nome"));
         evento.setDataInicio(rs.getDate("data_inicio").toLocalDate());
         evento.setDataFim(rs.getDate("data_fim").toLocalDate());
@@ -142,17 +150,6 @@ public class EventoRepositoryJDBC implements EventoRepository {
         if (organizadorNome != null) {
             Organizador organizador = new Organizador();
             organizador.setNome(organizadorNome);
-            
-            // Dados adicionais do usuário, se disponíveis do JOIN
-            String email = rs.getString("email");
-            String telefone = rs.getString("telefone");
-            if (email != null) {
-                organizador.setEmail(email);
-            }
-            if (telefone != null) {
-                organizador.setTelefone(telefone);
-            }
-            
             evento.setOrganizador(organizador);
         }
 
@@ -185,4 +182,29 @@ public class EventoRepositoryJDBC implements EventoRepository {
 
         return evento;
     }
+
+    public List<Evento> buscarPorOrganizador(String nomeOrganizador) throws Exception {
+        List<Evento> eventos = new ArrayList<>();
+        
+        // Verifique se 'id' está incluído na consulta
+        String sql = "SELECT id, nome, descricao, data_inicio, data_fim, status, imagem, link, " +
+            "categoria, organizador_nome, departamento, mensagem_rejeicao " +
+            "FROM eventos WHERE organizador_nome = ?";
+        
+        try (Connection conn = ConnectionFactory.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, nomeOrganizador);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                Evento evento = mapearEvento(rs);
+                eventos.add(evento);
+            }
+        }
+        
+        return eventos;
+    }
+
+
 }
