@@ -19,8 +19,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.Node;
+import javafx.scene.layout.StackPane;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -64,81 +70,159 @@ public class EventosPendentesFXMLController implements Initializable {
         }
     }
 
+    /**
+     * Cria um card para exibição de um evento pendente para análise.
+     * 
+     * @param evento O evento a ser exibido no card
+     * @return AnchorPane contendo o card formatado
+     */
     private AnchorPane criarCardDeAnalise(EventoMinDTO evento) {
-        AnchorPane cardPane = new AnchorPane();
-        cardPane.setPrefSize(177, 208);
-        cardPane.setStyle("-fx-background-color: #fdf5e6; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-background-radius: 5; -fx-cursor: hand;");
-
-        cardPane.setOnMouseEntered(e -> cardPane.setStyle("-fx-background-color: #f5efde; -fx-border-color: #489ec1; -fx-border-width: 1.5; -fx-border-radius: 5; -fx-background-radius: 5; -fx-cursor: hand;"));
-        cardPane.setOnMouseExited(e -> cardPane.setStyle("-fx-background-color: #fdf5e6; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-background-radius: 5; -fx-cursor: hand;"));
-        cardPane.setOnMouseClicked(e -> navegarParaDetalhes(evento.getId()));
-
-        // Imagem do evento
+        // Criação do card principal
+        AnchorPane card = new AnchorPane();
+        card.setPrefSize(177, 177);
+        card.setStyle("-fx-background-color: white; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0); -fx-background-radius: 5; -fx-border-radius: 5;");
+        
+        // Container para a imagem (usando StackPane para melhor centralização)
+        StackPane imageContainer = new StackPane();
+        imageContainer.setPrefSize(155, 90);
+        imageContainer.setLayoutX(11);
+        imageContainer.setLayoutY(10);
+        imageContainer.setStyle("-fx-background-color: #f5f5f5; -fx-background-radius: 3;");
+        
+        // Configuração da imagem
         ImageView imageView = new ImageView();
         imageView.setFitWidth(155);
         imageView.setFitHeight(90);
-        imageView.setLayoutX(11);
-        imageView.setLayoutY(10);
+        imageView.setPreserveRatio(true);
+        
+        // Adiciona a imagem ao container
+        imageContainer.getChildren().add(imageView);
+        
+        // Carrega a imagem
         try {
             if (evento.getImagem() != null && !evento.getImagem().isEmpty()) {
-                imageView.setImage(new Image(evento.getImagem(), true));
+                File imageFile = new File(evento.getImagem());
+                if (imageFile.exists() && imageFile.canRead()) {
+                    FileInputStream fis = new FileInputStream(imageFile);
+                    Image image = new Image(fis);
+                    imageView.setImage(image);
+                    fis.close();
+                } else {
+                    setPlaceholderImage(imageView);
+                    System.err.println("Arquivo de imagem não encontrado: " + evento.getImagem());
+                }
+            } else {
+                setPlaceholderImage(imageView);
             }
         } catch (Exception ex) {
-            // Se der erro, deixa sem imagem
+            System.err.println("Erro ao carregar imagem para evento " + evento.getNome() + ": " + ex.getMessage());
+            ex.printStackTrace();
+            setPlaceholderImage(imageView);
         }
-
-        // Nome do evento
+        
+        // Labels para informações do evento
         Label nomeLabel = new Label(evento.getNome());
         nomeLabel.setLayoutX(11);
-        nomeLabel.setLayoutY(110);
-        nomeLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 13;");
-
-        // Categoria
-        Label categoriaLabel = new Label("Categoria: " + evento.getCategoria());
-        categoriaLabel.setLayoutX(11);
-        categoriaLabel.setLayoutY(135);
-        categoriaLabel.setStyle("-fx-font-size: 12;");
-
-        // Data de início
-        Label dataLabel = new Label("Início: " + evento.getDataInicio());
+        nomeLabel.setLayoutY(105);
+        nomeLabel.setPrefWidth(155);
+        nomeLabel.setWrapText(true);
+        nomeLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        
+        Label dataLabel = new Label(evento.getDataInicio());
         dataLabel.setLayoutX(11);
-        dataLabel.setLayoutY(155);
-        dataLabel.setStyle("-fx-font-size: 12;");
-
-        cardPane.getChildren().addAll(imageView, nomeLabel, categoriaLabel, dataLabel);
-
-        return cardPane;
+        dataLabel.setLayoutY(130);
+        dataLabel.setPrefWidth(155);
+        dataLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666;");
+        
+        Label statusLabel = new Label("Aguardando Aprovação");
+        statusLabel.setLayoutX(11);
+        statusLabel.setLayoutY(150);
+        statusLabel.setPrefWidth(155);
+        statusLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #e74c3c; -fx-font-style: italic;");
+        
+        // Adiciona todos os elementos ao card
+        card.getChildren().addAll(imageContainer, nomeLabel, dataLabel, statusLabel);
+        
+        // Adiciona a funcionalidade de clique para visualizar os detalhes
+        card.setOnMouseClicked(e -> {
+            // Verifica se o ID é válido antes de navegar
+            if (evento.getId() != null) {
+                System.out.println("Clicou para ver detalhes do evento ID: " + evento.getId());
+                navegarParaDetalhes(e, evento.getId());
+            } else {
+                mostrarAlerta(Alert.AlertType.ERROR, "Erro", "ID do evento não encontrado.");
+            }
+        });
+        
+        return card;
     }
 
-    private void navegarParaDetalhes(Long eventoId) {
+    /**
+     * Carrega uma imagem placeholder quando a imagem do evento não pode ser carregada
+     */
+    private void setPlaceholderImage(ImageView imageView) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/EventoDetalhado.fxml"));
-            Parent root = loader.load();
-
-            DetalhesEventoFXMLController detalhesController = loader.getController();
-            detalhesController.carregarDadosDoEvento(eventoId);
-
-            Stage detalheStage = new Stage();
-            detalheStage.setTitle("Análise de Evento");
-            detalheStage.setScene(new Scene(root));
-            detalheStage.initModality(Modality.APPLICATION_MODAL);
-            detalheStage.initOwner(eventoContainer.getScene().getWindow());
-
-            detalheStage.showAndWait();
-
-            carregarEventosParaAnalise();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            mostrarAlerta(Alert.AlertType.ERROR, "Erro de Navegação", "Não foi possível abrir a tela de detalhes do evento.");
+            // Primeiro, tenta carregar do recurso (dentro do JAR)
+            InputStream is = getClass().getResourceAsStream("/img/placeholder.png");
+            if (is != null) {
+                imageView.setImage(new Image(is));
+                is.close();
+                return;
+            }
+            
+            // Se não encontrou no classpath, tenta carregar como arquivo
+            File placeholderFile = new File("imagem_eventos/placeholder.png");
+            if (placeholderFile.exists()) {
+                FileInputStream fis = new FileInputStream(placeholderFile);
+                imageView.setImage(new Image(fis));
+                fis.close();
+            } else {
+                System.err.println("Imagem placeholder não encontrada");
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao carregar imagem placeholder: " + e.getMessage());
         }
     }
 
-    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String conteudo) {
-        Alert alert = new Alert(tipo);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(conteudo);
-        alert.showAndWait();
+    /**
+     * Navega para a tela de detalhes do evento
+     */
+    private void navegarParaDetalhes(javafx.scene.input.MouseEvent event, Long eventoId) {
+        try {
+            System.out.println("Navegando para detalhes do evento ID: " + eventoId);
+            
+            if (eventoId == null) {
+                mostrarAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível abrir o evento: ID inválido.");
+                return;
+            }
+            
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/EventoDetalhado.fxml"));
+            Parent root = loader.load();
+            
+            DetalhesEventoFXMLController controller = loader.getController();
+            if (controller == null) {
+                mostrarAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível inicializar a tela de detalhes.");
+                return;
+            }
+            
+            controller.carregarDadosDoEvento(eventoId);
+            
+            Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+            mostrarAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível abrir a tela de detalhes: " + e.getMessage());
+        }
+    }
+
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensagem) {
+        Alert alerta = new Alert(tipo);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensagem);
+        alerta.showAndWait();
     }
 }

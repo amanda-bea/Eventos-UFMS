@@ -8,28 +8,37 @@ import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.model.Admin;
 import com.ufms.eventos.model.Usuario;
 import com.ufms.eventos.util.SessaoUsuario;
+
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import javafx.scene.Node;
 
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
@@ -50,6 +59,7 @@ public class DetalhesEventoFXMLController implements Initializable {
     @FXML private HBox painelAcoesAdmin;
     @FXML private Button btnAprovar;
     @FXML private Button btnRejeitar;
+    @FXML private StackPane imagemContainer;
     
 
     // --- CONTROLLERS DE LÓGICA ---
@@ -64,29 +74,67 @@ public class DetalhesEventoFXMLController implements Initializable {
         this.eventoController = new EventoController();
         this.acaoController = new AcaoController();
         this.adminController = new AdminController();
+        // Configura tamanho e posicionamento ideal para a imagem
+        // Configuração responsiva para a imagem
+        Platform.runLater(() -> {
+            // Garante que o container tenha altura fixa
+            double headerHeight = 250.0;
+            imagemContainer.setPrefHeight(headerHeight);
+            imagemContainer.setMinHeight(headerHeight);
+            
+            // Configura o ImageView para ocupar o StackPane adequadamente
+            bannerImageView.fitWidthProperty().bind(imagemContainer.widthProperty());
+            bannerImageView.setFitHeight(headerHeight);
+            
+            // Adiciona listener para ajustar em tela cheia
+            configureFullscreenHandling();
+        });
+    }
+
+    private void configureFullscreenHandling() {
+        Scene scene = imagemContainer.getScene();
+        if (scene != null) {
+            Stage stage = (Stage) scene.getWindow();
+            
+            // Listener para tela cheia
+            stage.fullScreenProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) { // Está em tela cheia
+                    // Ajusta a altura para melhor proporção em tela cheia
+                    double screenHeight = Screen.getPrimary().getBounds().getHeight() * 0.3;
+                    imagemContainer.setPrefHeight(screenHeight);
+                    bannerImageView.setFitHeight(screenHeight);
+                } else {
+                    // Volta ao tamanho normal quando sair da tela cheia
+                    imagemContainer.setPrefHeight(250);
+                    bannerImageView.setFitHeight(250);
+                }
+            });
+        }
     }
 
     /**
      * Ponto de entrada desta tela. Recebe o ID do evento e carrega todos os seus dados.
      */
     public void carregarDadosDoEvento(Long eventoId) {
-
         System.out.println("DetalhesEventoFXMLController.carregarDadosDoEvento recebeu ID: " + eventoId);
 
+        if (eventoId == null) {
+            mostrarAlerta(Alert.AlertType.ERROR, "Erro", "ID do evento não foi fornecido.");
+            return;
+        }
         
         try {
             this.eventoIdAtual = eventoId;
             EventoDTO evento = eventoController.buscarDtoPorId(eventoId);
-
-            // Lógica de visibilidade dos botões do admin
-            Usuario usuarioLogado = SessaoUsuario.getInstancia().getUsuarioLogado();
-            if (usuarioLogado instanceof Admin && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
-                painelAcoesAdmin.setVisible(true);
-                painelAcoesAdmin.setManaged(true);
-            } else {
-                painelAcoesAdmin.setVisible(false);
-                painelAcoesAdmin.setManaged(false);
+            
+            // Verifica se o evento foi encontrado
+            if (evento == null) {
+                mostrarAlerta(Alert.AlertType.ERROR, "Erro", "Evento não encontrado na base de dados.");
+                return;
             }
+
+            // Configura a visibilidade das ações baseado no status do evento
+            configurarAcoesPorStatusEvento(evento);
 
             // Popula as informações principais do evento na UI
             popularInfoPrincipais(evento);
@@ -94,11 +142,14 @@ public class DetalhesEventoFXMLController implements Initializable {
             System.out.println("Antes de chamar listarAcoesPorEventoComAvisos, ID é: " + this.eventoIdAtual);
             List<AcaoDTO> acoes = acaoController.listarAcoesPorEventoComAvisos(this.eventoIdAtual);
             popularAcoes(acoes);
+            
+            // Chama novamente para verificar os botões de inscrição após popular as ações
+            configurarAcoesPorStatusEvento(evento);
 
-        } catch (IllegalArgumentException e) {
-            nomeEventoLabel.setText("Evento não encontrado");
-            descricaoLabel.setText("O evento com o ID " + eventoId + " não existe ou foi removido.");
-            System.err.println(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarAlerta(Alert.AlertType.ERROR, "Erro", 
+                    "Ocorreu um erro ao carregar os dados do evento: " + e.getMessage());
         }
     }
 
@@ -121,41 +172,122 @@ public class DetalhesEventoFXMLController implements Initializable {
             infoHyperlink.setDisable(true);
         }
 
-        // Carrega a imagem do banner a partir do caminho do arquivo
+        // Carrega a imagem do banner
         try {
             String imagePath = evento.getImagem();
             if (imagePath != null && !imagePath.isEmpty()) {
-                // Cria um objeto File com o caminho salvo
                 File arquivoImagem = new File(imagePath);
                 
-                // Verifica se o arquivo realmente existe antes de tentar carregar
                 if (arquivoImagem.exists()) {
-                    // Carrega a imagem a partir de um fluxo de arquivo
+                    // Carrega a imagem
                     Image image = new Image(new FileInputStream(arquivoImagem));
+                    
+                    // Aplica a imagem e configura para display apropriado
                     bannerImageView.setImage(image);
+                    
+                    // Ajusta o modo de visualização para melhor posicionamento
+                    if (image.getWidth() / image.getHeight() > 1.5) {
+                        // Para imagens muito largas, foca no centro
+                        bannerImageView.setViewport(new Rectangle2D(
+                            (image.getWidth() - image.getHeight() * 1.5) / 2, 
+                            0, 
+                            image.getHeight() * 1.5, 
+                            image.getHeight()
+                        ));
+                    } else {
+                        // Para imagens normais ou verticais, mostra tudo preservando proporção
+                        bannerImageView.setViewport(null);
+                    }
+                    
+                    // Garante que a imagem preencha o espaço disponível
+                    bannerImageView.setPreserveRatio(true);
                 } else {
-                    // Se o arquivo não for encontrado (ex: em outro computador), usa o placeholder
                     System.err.println("Imagem não encontrada no caminho: " + imagePath);
-                    bannerImageView.setImage(new Image(getClass().getResourceAsStream("/img/placeholder.png")));
+                    carregarImagemPlaceholder();
                 }
             } else {
-                // Usa a imagem padrão se não houver caminho no banco
-                bannerImageView.setImage(new Image(getClass().getResourceAsStream("/img/placeholder.png")));
+                carregarImagemPlaceholder();
             }
-        } catch (FileNotFoundException e) {
-            System.err.println("Erro de arquivo não encontrado ao carregar a imagem.");
-            bannerImageView.setImage(new Image(getClass().getResourceAsStream("/img/placeholder.png")));
+        } catch (Exception e) {
+            System.err.println("Erro ao carregar imagem: " + e.getMessage());
+            carregarImagemPlaceholder();
         }
     }
-
+    /**
+     * Configura a visibilidade dos botões de ação baseado no status do evento e tipo de usuário
+     */
+    private void configurarAcoesPorStatusEvento(EventoDTO evento) {
+        Usuario usuarioLogado = SessaoUsuario.getInstancia().getUsuarioLogado();
+        boolean isAdmin = usuarioLogado instanceof Admin;
+        
+        // Configuração para painel de ações admin (aprovar/rejeitar)
+        if (isAdmin && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
+            painelAcoesAdmin.setVisible(true);
+            painelAcoesAdmin.setManaged(true);
+        } else {
+            painelAcoesAdmin.setVisible(false);
+            painelAcoesAdmin.setManaged(false);
+        }
+        
+        // Oculta opções de inscrição para eventos pendentes
+        if ("Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
+            // Percorre todas as ações e desativa botões de inscrição
+            for (Node node : acoesContainerVBox.getChildren()) {
+                if (node instanceof VBox) {
+                    VBox acaoBox = (VBox) node;
+                    for (Node child : acaoBox.getChildren()) {
+                        if (child instanceof Button) {
+                            Button btn = (Button) child;
+                            if (btn.getText().contains("Inscrever") || btn.getText().contains("inscrição")) {
+                                btn.setVisible(false);
+                                btn.setManaged(false);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * Carrega uma imagem placeholder quando a imagem principal não está disponível
+     */
+    private void carregarImagemPlaceholder() {
+        try {
+            // Tenta carregar o placeholder de recursos
+            InputStream is = getClass().getResourceAsStream("/img/placeholder.png");
+            if (is != null) {
+                bannerImageView.setImage(new Image(is));
+            } else {
+                System.err.println("Arquivo placeholder.png não encontrado nos recursos");
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao carregar imagem placeholder: " + e.getMessage());
+        }
+    }
+    
     private void popularAcoes(List<AcaoDTO> acoes) {
         acoesContainerVBox.getChildren().clear();
 
         if (acoes.isEmpty()) {
-            acoesContainerVBox.getChildren().add(new Label("Nenhuma ação programada para este evento."));
+            Label msgLabel = new Label("Nenhuma ação programada para este evento.");
+            msgLabel.setStyle("-fx-font-style: italic; -fx-text-fill: #666;");
+            acoesContainerVBox.getChildren().add(msgLabel);
             return;
         }
+        
+        // Verifica o status do evento
+        EventoDTO evento = eventoController.buscarDtoPorId(this.eventoIdAtual);
+        
+        // Adiciona um label explicativo para eventos pendentes
+        if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
+            Label statusLabel = new Label("Evento aguardando aprovação - Inscrições serão liberadas após aprovação");
+            statusLabel.setStyle("-fx-background-color: #fff3cd; -fx-padding: 5 10; -fx-text-fill: #856404; " + 
+                                "-fx-border-color: #ffeeba; -fx-border-radius: 3; -fx-background-radius: 3;");
+            acoesContainerVBox.getChildren().add(statusLabel);
+            VBox.setMargin(statusLabel, new Insets(0, 0, 10, 0));
+        }
 
+        // Cria os cards para as ações
         for (AcaoDTO acao : acoes) {
             // Cria um painel expansível para cada ação
             acoesContainerVBox.getChildren().add(criarCardAcaoExpansivel(acao));
@@ -164,6 +296,8 @@ public class DetalhesEventoFXMLController implements Initializable {
     
     /**
      * NOVO MÉTODO: Cria um TitledPane expansível para uma única ação.
+     * @param acao A ação para exibir
+     * @return Um TitledPane configurado com os detalhes da ação
      */
     private TitledPane criarCardAcaoExpansivel(AcaoDTO acao) {
         // O Título do painel mostra o nome e a data da ação
@@ -210,19 +344,27 @@ public class DetalhesEventoFXMLController implements Initializable {
         // Define o grid como o conteúdo do painel expansível
         titledPane.setContent(gridConteudo);
 
-        // Adiciona o botão "Inscrever-se" ao final do conteúdo
-        Button btnInscrever = new Button("Inscrever-se nesta Ação");
-        btnInscrever.setStyle("-fx-background-color: #489ec1; -fx-text-fill: white; -fx-font-weight: bold;");
-        btnInscrever.setOnAction(e -> handleInscrever(acao));
+        // Verifica o status do evento antes de adicionar o botão de inscrição
+        EventoDTO evento = eventoController.buscarDtoPorId(this.eventoIdAtual);
+        boolean eventoPendente = evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus());
         
-        // Adiciona o botão ao grid de conteúdo
-        // A coluna 0, e uma nova linha após a última informação (ex: linha 7)
-        gridConteudo.add(btnInscrever, 0, 7, 2, 1); // Ocupa 2 colunas e 1 linha
-
-        titledPane.setContent(gridConteudo);
+        // Só adiciona o botão se o evento não estiver pendente
+        if (!eventoPendente) {
+            // Adiciona o botão "Inscrever-se" ao final do conteúdo
+            Button btnInscrever = new Button("Inscrever-se nesta Ação");
+            btnInscrever.setStyle("-fx-background-color: #489ec1; -fx-text-fill: white; -fx-font-weight: bold;");
+            btnInscrever.setOnAction(e -> handleInscrever(acao));
+            
+            // Adiciona o botão ao grid de conteúdo
+            gridConteudo.add(btnInscrever, 0, 7, 2, 1); // Ocupa 2 colunas e 1 linha
+        } else {
+            // Adiciona uma mensagem informativa para eventos pendentes
+            Label pendingLabel = new Label("Inscrições disponíveis após aprovação do evento");
+            pendingLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-style: italic;");
+            gridConteudo.add(pendingLabel, 0, 7, 2, 1);
+        }
         
         return titledPane;
-
     }
 
     private void handleInscrever(AcaoDTO acao) {
@@ -257,7 +399,8 @@ public class DetalhesEventoFXMLController implements Initializable {
     private void handleAprovar() {
         if (adminController.aprovarEvento(this.eventoIdAtual)) {
             mostrarAlerta(Alert.AlertType.INFORMATION, "Sucesso", "O evento foi aprovado e agora está ativo.");
-            fecharJanela();
+            // Recarregar os dados para atualizar a interface
+            carregarDadosDoEvento(this.eventoIdAtual);
         } else {
             mostrarAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível aprovar o evento.");
         }
@@ -278,7 +421,8 @@ public class DetalhesEventoFXMLController implements Initializable {
             }
             if (adminController.rejeitarEvento(this.eventoIdAtual, motivo)) {
                 mostrarAlerta(Alert.AlertType.INFORMATION, "Sucesso", "O evento foi rejeitado.");
-                fecharJanela();
+                // Recarregar os dados para atualizar a interface
+                carregarDadosDoEvento(this.eventoIdAtual);
             } else {
                 mostrarAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível rejeitar o evento.");
             }

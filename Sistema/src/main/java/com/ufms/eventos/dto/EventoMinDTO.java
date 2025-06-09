@@ -14,8 +14,9 @@ public class EventoMinDTO {
     private String status;
     private String modalidade;
 
-    public EventoMinDTO(String nome, String dataInicio, String categoria, String imagem, String status) {
+    public EventoMinDTO(Long id, String nome, String dataInicio, String categoria, String imagem, String status) {
         this.nome = nome;
+        this.id = id;
         this.dataInicio = dataInicio;
         this.categoria = categoria;
         this.imagem = imagem;
@@ -23,6 +24,7 @@ public class EventoMinDTO {
     }
 
     public EventoMinDTO(EventoDTO evento){
+        this.id = evento.getId();
         this.nome = evento.getNome();
         this.dataInicio = evento.getDataInicio();
         this.categoria = evento.getCategoria();
@@ -31,6 +33,7 @@ public class EventoMinDTO {
     }
 
     public EventoMinDTO(Evento evento) {
+        this.id = evento.getId();
         this.nome = evento.getNome();
         this.dataInicio = evento.getDataInicio().toString();
         this.categoria = evento.getCategoria().name();

@@ -1,18 +1,18 @@
 package com.ufms.eventos.ui;
 
+import com.ufms.eventos.controller.ConfiguracaoFormularioController;
 import com.ufms.eventos.controller.EventoController;
 import com.ufms.eventos.dto.AcaoDTO;
 import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.model.Categoria;
 import com.ufms.eventos.model.Departamento;
-import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.model.Usuario;
 import com.ufms.eventos.util.SessaoUsuario;
-
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -30,6 +30,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,419 +43,228 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.ResourceBundle;
 
-public class SolicitarEventoFXMLController {
+public class SolicitarEventoFXMLController implements Initializable {
 
+    // --- CAMPOS FXML ---
     @FXML private TextField nomeField;
     @FXML private DatePicker dataInicioField;
     @FXML private DatePicker dataFimField;
     @FXML private TextArea descricaoArea;
-    @FXML private TextField imagemField;
+    @FXML private Label nomeArquivoLabel;
     @FXML private TextField linkField;
     @FXML private ComboBox<Categoria> categoriaComboBox;
     @FXML private ComboBox<Departamento> departamentoComboBox;
-
     @FXML private VBox acoesContainerVBox;
-    @FXML private Button btnAdicionarAcao;
     @FXML private Button btnSolicitarEventoFinal;
 
-    private EventoController eventoController = new EventoController();
-    private Organizador organizadorLogado;
 
+    // --- DADOS E CONTROLLERS ---
+    private EventoController eventoController;
+    private String caminhoImagemSalva;
     private List<AcaoFormControls> listaControlesAcoes = new ArrayList<>();
     private int contadorAcao = 0;
-    
 
-    private String caminhoImagemSalva;
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        this.eventoController = new EventoController();
+        categoriaComboBox.setItems(FXCollections.observableArrayList(Categoria.values()));
+        departamentoComboBox.setItems(FXCollections.observableArrayList(Departamento.values()));
+        btnSolicitarEventoFinal.setVisible(false);
+        btnSolicitarEventoFinal.setManaged(false);
+    }
 
+    //Função para voltar à tela de Meus Eventos Add commentMore actions
     @FXML
-    private Label nomeArquivoLabel;
+    private void voltar(javafx.scene.input.MouseEvent event) {
+        try {
+            // Obtém o stage atual
+            Node source = (Node) event.getSource();
+            Stage stage = (Stage) source.getScene().getWindow();
 
+            // Carrega o novo conteúdo
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/MeusEventos.fxml"));
+            Parent root = loader.load();
 
-    @FXML
-    public void initialize() {
-        if (categoriaComboBox != null) {
-            categoriaComboBox.getItems().setAll(Categoria.values());
+            // Troca o conteúdo da janela atual
+            stage.setScene(new Scene(root));
+            stage.setTitle("Meus Eventos");
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Erro ao abrir MeusEventos.fxml: " + e.getMessage());
+            e.printStackTrace();
+            mostrarAlerta("Erro", "Falha ao abrir Meus Eventos", Alert.AlertType.ERROR);
         }
-        if (departamentoComboBox != null) {
-            departamentoComboBox.getItems().setAll(Departamento.values());
-        }
-        if (btnSolicitarEventoFinal != null) {
-            btnSolicitarEventoFinal.setVisible(false);
-            btnSolicitarEventoFinal.setManaged(false);
-        }
-    }
-    /**
-     * Chamado pelo botão "Escolher Arquivo...".
-     * Abre uma janela para o usuário selecionar uma imagem, copia para a pasta
-     * do projeto e armazena o caminho relativo.
-     */
-    @FXML
-    private void handleEscolherImagem(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Escolher Imagem do Evento");
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Imagens (*.png, *.jpg)", "*.png", "*.jpg", "*.jpeg");
-        fileChooser.getExtensionFilters().add(extFilter);
-
-        File arquivoSelecionado = fileChooser.showOpenDialog(((Node) event.getSource()).getScene().getWindow());
-
-        if (arquivoSelecionado != null) {
-            try {
-                // Gera um nome de arquivo único para evitar colisões
-                String extensao = getFileExtension(arquivoSelecionado.getName());
-                String nomeUnico = UUID.randomUUID().toString() + "." + extensao;
-                
-                // Define o caminho de destino dentro da pasta do projeto
-                Path caminhoDestino = Paths.get("imagens_eventos/" + nomeUnico);
-                
-                // Cria a pasta se ela não existir
-                Files.createDirectories(caminhoDestino.getParent());
-                
-                // Copia o arquivo selecionado para o destino
-                Files.copy(arquivoSelecionado.toPath(), caminhoDestino, StandardCopyOption.REPLACE_EXISTING);
-
-                // Guarda o caminho RELATIVO para ser salvo no banco
-                this.caminhoImagemSalva = caminhoDestino.toString();
-                
-                // Dá um feedback visual para o usuário
-                nomeArquivoLabel.setText(arquivoSelecionado.getName());
-                
-                System.out.println("Imagem salva em: " + this.caminhoImagemSalva);
-
-            } catch (IOException e) {
-                System.err.println("Erro ao salvar a imagem.");
-                e.printStackTrace();
-                // Mostrar um alerta de erro
-            }
-        }
-    }
-
-    // Pequeno método auxiliar para pegar a extensão do arquivo
-    private String getFileExtension(String filename) {
-        return Optional.ofNullable(filename)
-                .filter(f -> f.contains("."))
-                .map(f -> f.substring(filename.lastIndexOf(".") + 1))
-                .orElse("");
-    }
-
-//Função para voltar à tela de Meus Eventos 
- @FXML
-private void voltar(javafx.scene.input.MouseEvent event) {
-    try {
-        // Obtém o stage atual
-        Node source = (Node) event.getSource();
-        Stage stage = (Stage) source.getScene().getWindow();
-
-        // Carrega o novo conteúdo
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/MeusEventos.fxml"));
-        Parent root = loader.load();
-
-        // Troca o conteúdo da janela atual
-        stage.setScene(new Scene(root));
-        stage.setTitle("Meus Eventos");
-        stage.show();
-    } catch (IOException e) {
-        System.err.println("Erro ao abrir MeusEventos.fxml: " + e.getMessage());
-        e.printStackTrace();
-        mostrarAlerta("Erro", "Falha ao abrir Meus Eventos", "Não foi possível abrir a tela Meus Eventos.", Alert.AlertType.ERROR);
-    }
-}
-
-    @FXML
-    private void handleVoltar(javafx.scene.input.MouseEvent event) {
-        Node source = (Node) event.getSource();
-        Stage stage = (Stage) source.getScene().getWindow();
-        stage.close();
-    }
-
-    @FXML
-    private void handleAdicionarAcao(ActionEvent event) {
-        contadorAcao++;
-        AcaoFormControls novosControlesAcao = criarFormularioAcaoUI(contadorAcao);
-        listaControlesAcoes.add(novosControlesAcao);
-        acoesContainerVBox.getChildren().add(novosControlesAcao.getContainer());
-
-        if (btnSolicitarEventoFinal != null && !listaControlesAcoes.isEmpty()) {
-            btnSolicitarEventoFinal.setText("Concluir e Solicitar Evento");
-            btnSolicitarEventoFinal.setVisible(true);
-            btnSolicitarEventoFinal.setManaged(true);
-        }
-    }
-
-    private void removerAcaoForm(VBox containerAcao) {
-        Alert confirmacao = new Alert(AlertType.CONFIRMATION, "Tem certeza que deseja remover esta ação?", ButtonType.YES, ButtonType.NO);
-        confirmacao.setTitle("Confirmar Remoção");
-        confirmacao.setHeaderText("Remover Ação");
-        confirmacao.initOwner(getStage());
-        Optional<ButtonType> resultado = confirmacao.showAndWait();
-
-        if (resultado.isPresent() && resultado.get() == ButtonType.YES) {
-            acoesContainerVBox.getChildren().remove(containerAcao);
-            listaControlesAcoes.removeIf(controles -> controles.getContainer() == containerAcao);
-
-            if (btnSolicitarEventoFinal != null && listaControlesAcoes.isEmpty()) {
-                btnSolicitarEventoFinal.setVisible(false);
-                btnSolicitarEventoFinal.setManaged(false);
-            }
-        }
-    }
-    
-    private AcaoFormControls criarFormularioAcaoUI(int numeroAcao) {
-        VBox containerAcao = new VBox(10);
-        containerAcao.setPadding(new Insets(15, 10, 15, 10));
-        containerAcao.setStyle("-fx-border-color: #cccccc; -fx-border-width: 1px; -fx-border-radius: 5px; -fx-background-color: #f9f9f9;");
-
-        Label tituloAcao = new Label("Dados da Ação #" + numeroAcao);
-        tituloAcao.setFont(Font.font("System", FontWeight.BOLD, 14));
-        tituloAcao.setTextFill(javafx.scene.paint.Color.web("#2f4a51"));
-        Button btnRemoverAcao = new Button("Remover Ação #" + numeroAcao);
-        btnRemoverAcao.setStyle("-fx-background-color: #d9534f; -fx-text-fill: white; -fx-cursor: hand;");
-        btnRemoverAcao.setOnAction(e -> removerAcaoForm(containerAcao));
-
-        HBox tituloBox = new HBox(10, tituloAcao, btnRemoverAcao);
-        HBox.setHgrow(tituloAcao, Priority.ALWAYS);
-        containerAcao.getChildren().add(tituloBox);
-
-        AcaoFormControls controles = new AcaoFormControls();
-        controles.setContainer(containerAcao);
-
-        controles.nomeAcaoField = new TextField();
-        controles.nomeAcaoField.setPromptText("Nome da Ação #" + numeroAcao);
-        containerAcao.getChildren().addAll(new Label("Nome da Ação*"), controles.nomeAcaoField);
-        controles.descricaoAcaoArea = new TextArea();
-        controles.descricaoAcaoArea.setPromptText("Descrição da Ação #" + numeroAcao);
-        controles.descricaoAcaoArea.setPrefHeight(60);
-        containerAcao.getChildren().addAll(new Label("Descrição da Ação"), controles.descricaoAcaoArea);
-        controles.dataAcaoPicker = new DatePicker();
-        controles.dataAcaoPicker.setPromptText("dd/MM/yyyy");
-        containerAcao.getChildren().addAll(new Label("Data da Ação*"), controles.dataAcaoPicker);
-        controles.localAcaoField = new TextField();
-        controles.localAcaoField.setPromptText("Local da Ação #" + numeroAcao);
-        containerAcao.getChildren().addAll(new Label("Local da Ação*"), controles.localAcaoField);
-        HBox horariosBox = new HBox(10);
-        controles.horarioInicioAcaoField = new TextField();
-        controles.horarioInicioAcaoField.setPromptText("HH:mm");
-        VBox inicioBox = new VBox(5, new Label("Horário Início* (HH:mm)"), controles.horarioInicioAcaoField);
-        controles.horarioFimAcaoField = new TextField();
-        controles.horarioFimAcaoField.setPromptText("HH:mm");
-        VBox fimBox = new VBox(5, new Label("Horário Fim* (HH:mm)"), controles.horarioFimAcaoField);
-        HBox.setHgrow(inicioBox, Priority.ALWAYS); HBox.setHgrow(fimBox, Priority.ALWAYS);
-        horariosBox.getChildren().addAll(inicioBox, fimBox);
-        containerAcao.getChildren().add(horariosBox);
-        controles.departamentoAcaoComboBox = new ComboBox<>();
-        if (departamentoComboBox != null && departamentoComboBox.getItems() != null) {
-             controles.departamentoAcaoComboBox.setItems(FXCollections.observableArrayList(Departamento.values()));
-        }
-        controles.departamentoAcaoComboBox.setPromptText("Selecione Depto. da Ação");
-        containerAcao.getChildren().addAll(new Label("Departamento da Ação*"), controles.departamentoAcaoComboBox);
-        controles.contatoAcaoField = new TextField();
-        controles.contatoAcaoField.setPromptText("Telefone ou Email para contato");
-        containerAcao.getChildren().addAll(new Label("Contato da Ação*"), controles.contatoAcaoField);
-        controles.modalidadeAcaoComboBox = new ComboBox<>();
-        controles.modalidadeAcaoComboBox.setItems(FXCollections.observableArrayList("Presencial", "Online"));
-        controles.modalidadeAcaoComboBox.setPromptText("Selecione a Modalidade");
-        containerAcao.getChildren().addAll(new Label("Modalidade da Ação*"), controles.modalidadeAcaoComboBox);
-        controles.linkAcaoField = new TextField();
-        controles.linkAcaoField.setPromptText("Link adicional para a ação");
-        containerAcao.getChildren().addAll(new Label("Link da Ação"), controles.linkAcaoField);
-        controles.capacidadeAcaoField = new TextField();
-        controles.capacidadeAcaoField.setPromptText("Ex: 50 (0 para ilimitado)");
-        controles.capacidadeAcaoField.textProperty().addListener((obs, ov, nv) -> {
-            if (!nv.matches("\\d*")) {
-                controles.capacidadeAcaoField.setText(nv.replaceAll("[^\\d]", ""));
-            }
-        });
-        containerAcao.getChildren().addAll(new Label("Capacidade (Nº Vagas)"), controles.capacidadeAcaoField);
-        
-        return controles;
     }
 
     @FXML
     private void handleSolicitarEventoFinal(ActionEvent event) {
         try {
-            // --- 1. BUSCA O USUÁRIO DA SESSÃO ---
             Usuario criadorDoEvento = SessaoUsuario.getInstancia().getUsuarioLogado();
             if (criadorDoEvento == null) {
-                mostrarAlerta("Erro de Autenticação", "Sessão Inválida", 
-                            "Não foi possível identificar o usuário logado. Por favor, faça o login novamente.", AlertType.ERROR);
-                return;
+                throw new ValidationException("Sessão inválida. Faça o login novamente.");
             }
 
-            // --- 2. VALIDAÇÃO BÁSICA DO EVENTO ---
-            if (nomeField.getText() == null || nomeField.getText().trim().isEmpty() ||
-                dataInicioField.getValue() == null ||
-                categoriaComboBox.getValue() == null ||
-                departamentoComboBox.getValue() == null) {
-                mostrarAlerta("Erro de Validação", "Campos Obrigatórios do Evento",
-                            "Por favor, preencha: Nome do Evento, Data de Início, Categoria e Departamento.", AlertType.ERROR);
-                return;
-            }
+            EventoDTO eventoDTO = criarEventoDTO();
+            List<AcaoDTO> listaAcoesDTO = coletarAcoesDTO(eventoDTO.getNome());
 
-            LocalDate dataInicioEv = dataInicioField.getValue();
-            LocalDate dataFimEv = dataFimField.getValue();
-            if (dataFimEv != null && dataInicioEv != null && dataFimEv.isBefore(dataInicioEv)) {
-                mostrarAlerta("Erro de Validação", "Datas do Evento Inválidas",
-                            "A data de fim do evento não pode ser anterior à data de início.", AlertType.ERROR);
-                return;
-            }
+            boolean formularioFoiSalvo = abrirJanelaParaDefinirFormulario(eventoDTO, event);
 
-            if (listaControlesAcoes.isEmpty()) {
-                mostrarAlerta("Erro de Validação", "Nenhuma Ação Adicionada",
-                            "É necessário adicionar pelo menos uma ação ao evento antes de solicitar.", AlertType.ERROR);
-                return;
-            }
-
-            // --- 3. CRIAÇÃO DO DTO DO EVENTO ---
-            EventoDTO eventoDTO = new EventoDTO();
-            eventoDTO.setNome(nomeField.getText().trim());
-            eventoDTO.setDataInicio(dataInicioEv.toString());
-            eventoDTO.setDataFim(dataFimEv != null ? dataFimEv.toString() : null);
-            eventoDTO.setCategoria(categoriaComboBox.getValue().name());
-            eventoDTO.setDescricao(descricaoArea.getText() != null ? descricaoArea.getText().trim() : "");
-            eventoDTO.setDepartamento(departamentoComboBox.getValue().name());
-            eventoDTO.setImagem(this.caminhoImagemSalva);
-            eventoDTO.setLink(linkField.getText() != null ? linkField.getText().trim() : null);
-
-            // --- 4. COLETA E VALIDAÇÃO DAS AÇÕES ---
-            List<AcaoDTO> listaAcoesDTO = new ArrayList<>();
-            for (int i = 0; i < listaControlesAcoes.size(); i++) {
-                AcaoFormControls controles = listaControlesAcoes.get(i);
-                
-                // Validação dos campos obrigatórios da ação
-                String nomeAcao = controles.nomeAcaoField.getText();
-                LocalDate dataAcao = controles.dataAcaoPicker.getValue();
-                String localAcao = controles.localAcaoField.getText();
-                String horarioInicioStr = controles.horarioInicioAcaoField.getText();
-                String horarioFimStr = controles.horarioFimAcaoField.getText();
-                Departamento deptoAcao = controles.departamentoAcaoComboBox.getValue();
-                String contatoAcao = controles.contatoAcaoField.getText();
-                String modalidadeAcao = controles.modalidadeAcaoComboBox.getValue();
-
-                if (nomeAcao == null || nomeAcao.trim().isEmpty() || dataAcao == null ||
-                    localAcao == null || localAcao.trim().isEmpty() || 
-                    horarioInicioStr == null || horarioInicioStr.trim().isEmpty() ||
-                    horarioFimStr == null || horarioFimStr.trim().isEmpty() || 
-                    deptoAcao == null ||
-                    contatoAcao == null || contatoAcao.trim().isEmpty() || 
-                    modalidadeAcao == null || modalidadeAcao.isEmpty()) {
-                    mostrarAlerta("Erro de Validação na Ação #" + (i+1), "Campos Obrigatórios da Ação Inválidos",
-                                "Preencha todos os campos marcados com '*' para a Ação #" + (i+1) + ".", AlertType.ERROR);
-                    return;
-                }
-                
-                // Validação e conversão dos horários
-                AcaoDTO acaoDTO = new AcaoDTO();
-                try {
-                    LocalTime horarioInicioAcao = LocalTime.parse(horarioInicioStr);
-                    LocalTime horarioFimAcao = LocalTime.parse(horarioFimStr);
-                    if (horarioFimAcao.isBefore(horarioInicioAcao)) {
-                        mostrarAlerta("Erro de Validação na Ação #" + (i+1), "Horários da Ação Inválidos",
-                                    "O horário de fim não pode ser anterior ao de início para a Ação #" + (i+1) + ".", AlertType.ERROR);
-                        return;
-                    }
-                    acaoDTO.setHorarioInicio(horarioInicioAcao.toString());
-                    acaoDTO.setHorarioFim(horarioFimAcao.toString());
-                } catch (DateTimeParseException e) {
-                    mostrarAlerta("Erro de Validação na Ação #" + (i+1), "Formato de Horário Inválido",
-                                "Use o formato HH:mm para os horários da Ação #" + (i+1) + ".", AlertType.ERROR);
-                    return;
-                }
-                
-                // Configuração do DTO da ação
-                acaoDTO.setEvento(eventoDTO.getNome());
-                acaoDTO.setNome(nomeAcao.trim());
-                acaoDTO.setData(dataAcao.toString());
-                acaoDTO.setDescricao(controles.descricaoAcaoArea.getText() != null ? controles.descricaoAcaoArea.getText().trim() : "");
-                acaoDTO.setLocal(localAcao.trim());
-                acaoDTO.setDepartamento(deptoAcao.name());
-                acaoDTO.setContato(contatoAcao.trim());
-                acaoDTO.setModalidade(modalidadeAcao);
-                acaoDTO.setLink(controles.linkAcaoField.getText() != null ? controles.linkAcaoField.getText().trim() : null);
-                
-                String capacidadeStr = controles.capacidadeAcaoField.getText();
-                acaoDTO.setCapacidade(capacidadeStr != null && !capacidadeStr.trim().isEmpty() ? capacidadeStr.trim() : "0");
-                
-                listaAcoesDTO.add(acaoDTO);
-            }
-
-    // --- 5. DEFINIÇÃO DO FORMULÁRIO ---
-    final AtomicBoolean callbackResultadoDefinicaoForm = new AtomicBoolean(false);
-    DefinirFormularioFXMLController definirFormController = null;
-
-    try {
-        // Carrega a interface de definição de formulário
-        java.net.URL fxmlUrl = getClass().getResource("/com/ufms/eventos/view/definirFormulario.fxml");
-        if (fxmlUrl == null) {
-            System.err.println("ERRO CRÍTICO: Arquivo FXML não encontrado em /com/ufms/eventos/view/definirFormulario.fxml");
-            mostrarAlerta("Erro Crítico de UI", "Arquivo FXML Não Encontrado",
-                        "Não foi possível encontrar o arquivo de interface 'definirFormulario.fxml'.", AlertType.ERROR);
-            return;
-        }
-        
-        // Configura e exibe a tela de definição de formulário
-        FXMLLoader loader = new FXMLLoader(fxmlUrl);
-        Parent root = loader.load();
-        definirFormController = loader.getController();
-        definirFormController.setEventoParaDefinicao(eventoDTO, callbackResultadoDefinicaoForm::set);
-
-        Stage stageDefinicaoForm = new Stage();
-        stageDefinicaoForm.setTitle("Definir Formulário para Evento: " + eventoDTO.getNome());
-        stageDefinicaoForm.setScene(new Scene(root));
-        stageDefinicaoForm.initModality(Modality.APPLICATION_MODAL);
-        stageDefinicaoForm.initOwner(((Node) event.getSource()).getScene().getWindow());
-        stageDefinicaoForm.setOnCloseRequest(definirFormController::processarFechamentoJanela);
-        stageDefinicaoForm.showAndWait();
-
-    } catch (IOException e) {
-        System.err.println("IOException ao carregar definirFormulario.fxml: " + e.getMessage());
-        e.printStackTrace();
-        mostrarAlerta("Erro de UI", "Falha ao Carregar Interface",
-                    "Não foi possível carregar a interface para definir o formulário.", AlertType.ERROR);
-        return;
-    }
-
-        // --- 6. SALVAMENTO DO EVENTO E AÇÕES ---
-            if (callbackResultadoDefinicaoForm.get() && definirFormController != null) {
-                // Primeiro salve o evento e as ações
-                boolean sucessoCriacaoEventoEAcoes = eventoController.solicitarEventoComAcoes(
-                    eventoDTO, listaAcoesDTO, criadorDoEvento);
-
-                if (sucessoCriacaoEventoEAcoes) {
-                    // Agora que o evento e ações foram salvos, podemos salvar a configuração do formulário
-                    boolean sucessoSalvarFormulario = definirFormController.salvarConfiguracaoNoEvento();
-                    
-                    if (sucessoSalvarFormulario) {
-                        // Sucesso completo - formulário e evento/ações salvos
-                        mostrarAlerta("Solicitação Enviada!", "Evento Criado com Sucesso",
-                                "Sua solicitação para o evento '" + eventoDTO.getNome() + "' foi enviada e está aguardando aprovação pelo administrador.", 
-                                AlertType.INFORMATION);
-                        limparFormularioCompleto();
-                    } else {
-                        // Evento/ações salvos, mas formulário falhou
-                        mostrarAlerta("Atenção", "Evento Criado com Configuração Parcial",
-                                "O evento foi criado, mas houve um problema ao salvar a configuração do formulário.", 
-                                AlertType.WARNING);
-                        limparFormularioCompleto();
-                    }
+            if (formularioFoiSalvo) {
+                boolean sucessoCriacao = eventoController.solicitarEventoComAcoes(eventoDTO, listaAcoesDTO, criadorDoEvento);
+                if (sucessoCriacao) {
+                    mostrarAlerta("Sucesso!", "Sua solicitação de evento foi enviada para análise.", AlertType.INFORMATION);
+                    limparFormularioCompleto();
                 } else {
-                    // Falha no salvamento do evento/ações
-                    mostrarAlerta("Erro ao Salvar Evento", "Falha na Solicitação",
-                            "Ocorreu um erro ao salvar os dados do evento '" + eventoDTO.getNome() + "' ou suas ações.", 
-                            AlertType.ERROR);
+                    mostrarAlerta("Erro Crítico", "Ocorreu um erro ao salvar o evento no banco de dados. A configuração do formulário será revertida.", AlertType.ERROR);
+                    new ConfiguracaoFormularioController().deletarConfiguracaoFormulario(eventoDTO.getNome());
                 }
             } else {
-                // Usuário cancelou a definição do formulário ou houve erro
-                mostrarAlerta("Operação Cancelada", "Definição de Formulário Cancelada",
-                        "A definição do formulário para o evento foi cancelada. Nenhum dado foi salvo.", 
-                        AlertType.INFORMATION);
+                mostrarAlerta("Operação Cancelada", "A criação do evento foi cancelada.", AlertType.WARNING);
             }
+
+        } catch (ValidationException ve) {
+            mostrarAlerta("Erro de Validação", ve.getMessage(), AlertType.WARNING);
         } catch (Exception e) {
-            // Tratamento de exceções inesperadas
-            System.err.println("Exceção inesperada em handleSolicitarEventoFinal: " + e.getMessage());
             e.printStackTrace();
-            mostrarAlerta("Erro Inesperado", "Falha ao Processar Solicitação",
-                        "Um erro inesperado ocorreu: " + e.getMessage(), AlertType.ERROR);
+            mostrarAlerta("Erro Inesperado", "Ocorreu uma falha geral no sistema: " + e.getMessage(), AlertType.ERROR);
         }
+    }
+
+    private EventoDTO criarEventoDTO() throws ValidationException {
+        if (nomeField.getText().trim().isEmpty() || dataInicioField.getValue() == null || categoriaComboBox.getValue() == null || departamentoComboBox.getValue() == null) {
+            throw new ValidationException("Preencha todos os campos obrigatórios (*) do Evento.");
+        }
+        LocalDate dataInicioEv = dataInicioField.getValue();
+        LocalDate dataFimEv = dataFimField.getValue();
+        if (dataFimEv != null && dataFimEv.isBefore(dataInicioEv)) {
+            throw new ValidationException("A data de fim do evento não pode ser anterior à data de início.");
+        }
+
+        EventoDTO dto = new EventoDTO();
+        dto.setNome(nomeField.getText().trim());
+        dto.setDataInicio(dataInicioEv.toString());
+        dto.setDataFim(dataFimEv != null ? dataFimEv.toString() : dataInicioEv.toString());
+        dto.setCategoria(categoriaComboBox.getValue().name());
+        dto.setDepartamento(departamentoComboBox.getValue().name());
+        dto.setDescricao(descricaoArea.getText());
+        dto.setLink(linkField.getText());
+        dto.setImagem(this.caminhoImagemSalva);
+        return dto;
+    }
+
+    private List<AcaoDTO> coletarAcoesDTO(String nomeEventoPai) throws ValidationException {
+        if (listaControlesAcoes.isEmpty()) {
+            throw new ValidationException("Adicione pelo menos uma ação ao evento.");
+        }
+        List<AcaoDTO> lista = new ArrayList<>();
+        for (AcaoFormControls controles : listaControlesAcoes) {
+            lista.add(controles.toDTO(nomeEventoPai));
+        }
+        return lista;
+    }
+
+    @FXML
+    private void handleAdicionarAcao() {
+        contadorAcao++;
+        AcaoFormControls novosControles = criarFormularioAcaoUI(contadorAcao);
+        listaControlesAcoes.add(novosControles);
+        acoesContainerVBox.getChildren().add(novosControles.getContainer());
+        btnSolicitarEventoFinal.setVisible(true);
+        btnSolicitarEventoFinal.setManaged(true);
+    }
+    
+    private void removerAcaoForm(VBox containerAcao, AcaoFormControls controlesParaRemover) {
+        acoesContainerVBox.getChildren().remove(containerAcao);
+        listaControlesAcoes.remove(controlesParaRemover);
+        if (listaControlesAcoes.isEmpty()) {
+            btnSolicitarEventoFinal.setVisible(false);
+            btnSolicitarEventoFinal.setManaged(false);
+        }
+    }
+    
+    private AcaoFormControls criarFormularioAcaoUI(int numeroAcao) {
+        VBox containerAcao = new VBox(10);
+        containerAcao.setPadding(new Insets(15));
+        containerAcao.setStyle("-fx-border-color: #cccccc; -fx-border-width: 1px; -fx-border-radius: 5px;");
+        AcaoFormControls controles = new AcaoFormControls(containerAcao);
+
+        Label tituloAcao = new Label("Dados da Ação #" + numeroAcao);
+        tituloAcao.setFont(Font.font("System", FontWeight.BOLD, 14));
+        Button btnRemover = new Button("X");
+        btnRemover.setStyle("-fx-background-color: #d9534f; -fx-text-fill: white; -fx-cursor: hand;");
+        btnRemover.setOnAction(e -> removerAcaoForm(containerAcao, controles));
+        HBox cabecalho = new HBox(tituloAcao, new javafx.scene.layout.Region(), btnRemover);
+        HBox.setHgrow(cabecalho.getChildren().get(1), Priority.ALWAYS);
+        
+        controles.nomeAcaoField.setPromptText("Ex: Palestra de Abertura");
+        controles.descricaoAcaoArea.setPromptText("Detalhes sobre a ação...");
+        controles.localAcaoField.setPromptText("Ex: Anfiteatro 1");
+        controles.contatoAcaoField.setPromptText("Telefone ou e-mail de contato");
+        controles.linkAcaoField.setPromptText("Link para material ou sala online");
+        controles.capacidadeAcaoField.setPromptText("0 para ilimitado");
+        
+        containerAcao.getChildren().addAll(
+            cabecalho,
+            new Label("Nome da Ação*"), controles.nomeAcaoField,
+            new Label("Descrição"), controles.descricaoAcaoArea,
+            new Label("Data da Ação*"), controles.dataAcaoPicker,
+            new Label("Local da Ação*"), controles.localAcaoField,
+            new HBox(10, 
+                new VBox(5, new Label("Horário Início* (HH:mm)"), controles.horarioInicioAcaoField),
+                new VBox(5, new Label("Horário Fim* (HH:mm)"), controles.horarioFimAcaoField)),
+            new Label("Departamento da Ação*"), controles.departamentoAcaoComboBox,
+            new Label("Contato da Ação*"), controles.contatoAcaoField,
+            new Label("Modalidade da Ação*"), controles.modalidadeAcaoComboBox,
+            new Label("Link da Ação"), controles.linkAcaoField,
+            new Label("Capacidade (Nº Vagas)"), controles.capacidadeAcaoField
+        );
+        return controles;
+    }
+
+    @FXML
+    private void handleEscolherImagem(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Escolher Imagem do Evento");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Imagens (*.png, *.jpg)", "*.png", "*.jpg", "*.jpeg"));
+        File arquivoSelecionado = fileChooser.showOpenDialog(((Node) event.getSource()).getScene().getWindow());
+
+        if (arquivoSelecionado != null) {
+            try {
+                String extensao = getFileExtension(arquivoSelecionado.getName());
+                String nomeUnico = UUID.randomUUID().toString() + "." + extensao;
+                Path caminhoDestino = Paths.get("imagens_eventos/" + nomeUnico);
+                Files.createDirectories(caminhoDestino.getParent());
+                Files.copy(arquivoSelecionado.toPath(), caminhoDestino, StandardCopyOption.REPLACE_EXISTING);
+                this.caminhoImagemSalva = caminhoDestino.toString().replace("\\", "/");
+                nomeArquivoLabel.setText(arquivoSelecionado.getName());
+            } catch (IOException e) {
+                e.printStackTrace();
+                mostrarAlerta("Erro", "Falha ao salvar a imagem selecionada.", AlertType.ERROR);
+            }
+        }
+    }
+
+    private String getFileExtension(String filename) {
+        return Optional.ofNullable(filename).filter(f -> f.contains(".")).map(f -> f.substring(filename.lastIndexOf(".") + 1)).orElse("");
+    }
+
+    private boolean abrirJanelaParaDefinirFormulario(EventoDTO eventoDTO, ActionEvent event) throws IOException {
+        final AtomicBoolean resultado = new AtomicBoolean(false);
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/DefinirFormulario.fxml"));
+        Parent root = loader.load();
+        DefinirFormularioFXMLController controller = loader.getController();
+        controller.setEventoParaDefinicao(eventoDTO, resultado::set);
+        
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle("Definir Formulário de Inscrição");
+        stage.setScene(new Scene(root));
+        stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+        stage.showAndWait();
+        
+        return resultado.get();
     }
 
     private void limparFormularioCompleto() {
@@ -462,62 +272,86 @@ private void voltar(javafx.scene.input.MouseEvent event) {
         dataInicioField.setValue(null);
         dataFimField.setValue(null);
         descricaoArea.clear();
+        nomeArquivoLabel.setText("Nenhum arquivo selecionado");
+        caminhoImagemSalva = null;
         linkField.clear();
-        if (categoriaComboBox != null) categoriaComboBox.getSelectionModel().clearSelection();
-        if (departamentoComboBox != null) departamentoComboBox.getSelectionModel().clearSelection();
-
+        categoriaComboBox.setValue(null);
+        departamentoComboBox.setValue(null);
         acoesContainerVBox.getChildren().clear();
         listaControlesAcoes.clear();
         contadorAcao = 0;
-
-        if (btnSolicitarEventoFinal != null) {
-            btnSolicitarEventoFinal.setVisible(false);
-            btnSolicitarEventoFinal.setManaged(false);
-        }
-    }
-    
-    private Stage getStage() {
-         if (nomeField != null && nomeField.getScene() != null && nomeField.getScene().getWindow() != null) {
-            return (Stage) nomeField.getScene().getWindow();
-        }
-        // System.err.println("Não foi possível obter o Stage a partir do nomeField em getStage()."); // Removido para não poluir console em casos normais
-        return null; 
+        btnSolicitarEventoFinal.setVisible(false);
+        btnSolicitarEventoFinal.setManaged(false);
     }
 
-    private void mostrarAlerta(String titulo, String cabecalho, String conteudo, AlertType tipo) {
+    private void mostrarAlerta(String titulo, String cabecalho, AlertType tipo) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);
-        alert.setHeaderText(cabecalho);
-        alert.setContentText(conteudo);
-        
-        Stage currentStage = getStage();
-        if (currentStage != null) {
-            alert.initOwner(currentStage);
-        }
+        alert.setHeaderText(null);
+        alert.setContentText(cabecalho);
         alert.showAndWait();
     }
 
     private static class AcaoFormControls {
-        private VBox container;
-        TextField nomeAcaoField;
-        DatePicker dataAcaoPicker;
-        TextArea descricaoAcaoArea;
-        TextField localAcaoField;
-        TextField horarioInicioAcaoField;
-        TextField horarioFimAcaoField;
-        ComboBox<Departamento> departamentoAcaoComboBox;
-        TextField contatoAcaoField;
-        ComboBox<String> modalidadeAcaoComboBox;
-        TextField linkAcaoField;
-        TextField capacidadeAcaoField;
-        
-        public VBox getContainer() { return container; }
-        public void setContainer(VBox container) { this.container = container; }
-    }
+        private final VBox container;
+        final TextField nomeAcaoField = new TextField();
+        final DatePicker dataAcaoPicker = new DatePicker();
+        final TextArea descricaoAcaoArea = new TextArea();
+        final TextField localAcaoField = new TextField();
+        final TextField horarioInicioAcaoField = new TextField();
+        final TextField horarioFimAcaoField = new TextField();
+        final ComboBox<Departamento> departamentoAcaoComboBox = new ComboBox<>(FXCollections.observableArrayList(Departamento.values()));
+        final TextField contatoAcaoField = new TextField();
+        final ComboBox<String> modalidadeAcaoComboBox = new ComboBox<>(FXCollections.observableArrayList("Presencial", "Online"));
+        final TextField linkAcaoField = new TextField();
+        final TextField capacidadeAcaoField = new TextField("0");
 
-    // Método para receber o organizador da tela anterior
-    public void initData(Organizador organizador) {
-        this.organizadorLogado = organizador;
-        System.out.println("Tela de solicitação aberta para o organizador: " + this.organizadorLogado.getNome());
+        public AcaoFormControls(VBox container) { this.container = container; }
+        public VBox getContainer() { return container; }
+
+        public AcaoDTO toDTO(String nomeEventoPai) throws ValidationException {
+            String nomeAcao = nomeAcaoField.getText();
+            LocalDate dataAcao = dataAcaoPicker.getValue();
+            String localAcao = localAcaoField.getText();
+            String horarioInicioStr = horarioInicioAcaoField.getText();
+            String horarioFimStr = horarioFimAcaoField.getText();
+            Departamento deptoAcao = departamentoAcaoComboBox.getValue();
+            String contatoAcao = contatoAcaoField.getText();
+            String modalidadeAcao = modalidadeAcaoComboBox.getValue();
+
+            if (nomeAcao.trim().isEmpty() || dataAcao == null || localAcao.trim().isEmpty() || horarioInicioStr.trim().isEmpty() ||
+                horarioFimStr.trim().isEmpty() || deptoAcao == null || contatoAcao.trim().isEmpty() || modalidadeAcao == null) {
+                throw new ValidationException("Preencha todos os campos obrigatórios (*) da Ação: '" + (nomeAcao.isEmpty() ? "Ação sem nome" : nomeAcao) + "'");
+            }
+            
+            AcaoDTO dto = new AcaoDTO();
+            try {
+                LocalTime inicio = LocalTime.parse(horarioInicioStr);
+                LocalTime fim = LocalTime.parse(horarioFimStr);
+                if (fim.isBefore(inicio)) {
+                    throw new ValidationException("O horário de fim não pode ser anterior ao de início na ação '" + nomeAcao + "'.");
+                }
+                dto.setHorarioInicio(inicio.toString());
+                dto.setHorarioFim(fim.toString());
+            } catch (DateTimeParseException e) {
+                throw new ValidationException("Formato de horário inválido (use HH:mm) na ação '" + nomeAcao + "'.");
+            }
+            
+            dto.setEvento(nomeEventoPai);
+            dto.setNome(nomeAcao.trim());
+            dto.setData(dataAcao.toString());
+            dto.setDescricao(descricaoAcaoArea.getText());
+            dto.setLocal(localAcao.trim());
+            dto.setDepartamento(deptoAcao.name());
+            dto.setContato(contatoAcao.trim());
+            dto.setModalidade(modalidadeAcao);
+            dto.setLink(linkAcaoField.getText());
+            dto.setCapacidade(capacidadeAcaoField.getText().trim().isEmpty() ? "0" : capacidadeAcaoField.getText().trim());
+            return dto;
+        }
+    }
+    
+    private static class ValidationException extends Exception {
+        public ValidationException(String message) { super(message); }
     }
 }

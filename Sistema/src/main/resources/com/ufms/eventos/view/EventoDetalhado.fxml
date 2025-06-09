@@ -8,9 +8,9 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -25,10 +25,16 @@
                <content>
                   <VBox style="-fx-background-color: #f4f4f8;">
                      <children>
-                        <AnchorPane prefHeight="200.0">
+                        <!-- Substituindo AnchorPane por StackPane para melhor posicionamento -->
+                        <StackPane fx:id="imagemContainer" prefHeight="250.0">
                            <children>
-                              <ImageView fx:id="bannerImageView" fitHeight="200.0" fitWidth="800.0" pickOnBounds="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                              <VBox alignment="BOTTOM_LEFT" prefHeight="200.0" prefWidth="800.0" style="-fx-background-color: linear-gradient(to top, rgba(0,0,0,0.8), transparent);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <ImageView fx:id="bannerImageView" 
+                                    preserveRatio="true" 
+                                    smooth="true"
+                                    cache="true" />
+                              
+                              <!-- Gradiente sobre a imagem -->
+                              <VBox alignment="BOTTOM_LEFT" style="-fx-background-color: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
                                  <padding>
                                     <Insets bottom="15.0" left="20.0" right="15.0" top="15.0" />
                                  </padding>
@@ -40,7 +46,7 @@
                                  </children>
                               </VBox>
                            </children>
-                        </AnchorPane>
+                        </StackPane>
                         
                         <VBox alignment="TOP_CENTER" spacing="20.0">
                            <padding>
