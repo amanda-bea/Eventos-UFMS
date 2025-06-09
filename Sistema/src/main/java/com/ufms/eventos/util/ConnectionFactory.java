@@ -9,7 +9,7 @@ import javax.swing.JOptionPane;
 public class ConnectionFactory {
 
     private static final String LOGIN = "postgres";
-    private static final String SENHA = "postgres";
+    private static final String SENHA = "123";
     private static final String DATABASE = "dbeventos";
 
     public static Connection getConnection() throws SQLException {
@@ -221,6 +221,6 @@ public class ConnectionFactory {
         System.out.println("Tabela presencas_confirmadas criada com sucesso");
     }
 }
-// compilar: javac -cp "lib/postgresql-42.7.3.jar" -d bin src/main/java/com/ufms/eventos/util/ConnectionFactory.java
-// cd Sistema && javac -cp "lib/postgresql-42.7.3.jar" -d bin src/main/java/com/ufms/eventos/util/ConnectionFactory.java
+// compilar: 
+// cd Sistema && javac -cp "lib/postgresql-42.7.javac -cp "lib/postgresql-42.7.3.jar" -d bin src/main/java/com/ufms/eventos/util/ConnectionFactory.java3.jar" -d bin src/main/java/com/ufms/eventos/util/ConnectionFactory.java
 // java -cp "bin;lib/postgresql-42.7.3.jar" com.ufms.eventos.util.ConnectionFactory

@@ -137,6 +137,29 @@ public class SolicitarEventoFXMLController {
                 .orElse("");
     }
 
+//Função para voltar à tela de Meus Eventos 
+ @FXML
+private void voltar(javafx.scene.input.MouseEvent event) {
+    try {
+        // Obtém o stage atual
+        Node source = (Node) event.getSource();
+        Stage stage = (Stage) source.getScene().getWindow();
+
+        // Carrega o novo conteúdo
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/MeusEventos.fxml"));
+        Parent root = loader.load();
+
+        // Troca o conteúdo da janela atual
+        stage.setScene(new Scene(root));
+        stage.setTitle("Meus Eventos");
+        stage.show();
+    } catch (IOException e) {
+        System.err.println("Erro ao abrir MeusEventos.fxml: " + e.getMessage());
+        e.printStackTrace();
+        mostrarAlerta("Erro", "Falha ao abrir Meus Eventos", "Não foi possível abrir a tela Meus Eventos.", Alert.AlertType.ERROR);
+    }
+}
+
     @FXML
     private void handleVoltar(javafx.scene.input.MouseEvent event) {
         Node source = (Node) event.getSource();
