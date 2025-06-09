@@ -25,16 +25,23 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SolicitarEventoFXMLController {
@@ -58,6 +65,11 @@ public class SolicitarEventoFXMLController {
     private List<AcaoFormControls> listaControlesAcoes = new ArrayList<>();
     private int contadorAcao = 0;
 
+    private String caminhoImagemSalva;
+
+    @FXML
+    private Label nomeArquivoLabel;
+
 
     @FXML
     public void initialize() {
@@ -71,6 +83,58 @@ public class SolicitarEventoFXMLController {
             btnSolicitarEventoFinal.setVisible(false);
             btnSolicitarEventoFinal.setManaged(false);
         }
+    }
+    /**
+     * Chamado pelo botão "Escolher Arquivo...".
+     * Abre uma janela para o usuário selecionar uma imagem, copia para a pasta
+     * do projeto e armazena o caminho relativo.
+     */
+    @FXML
+    private void handleEscolherImagem(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Escolher Imagem do Evento");
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Imagens (*.png, *.jpg)", "*.png", "*.jpg", "*.jpeg");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        File arquivoSelecionado = fileChooser.showOpenDialog(((Node) event.getSource()).getScene().getWindow());
+
+        if (arquivoSelecionado != null) {
+            try {
+                // Gera um nome de arquivo único para evitar colisões
+                String extensao = getFileExtension(arquivoSelecionado.getName());
+                String nomeUnico = UUID.randomUUID().toString() + "." + extensao;
+                
+                // Define o caminho de destino dentro da pasta do projeto
+                Path caminhoDestino = Paths.get("imagens_eventos/" + nomeUnico);
+                
+                // Cria a pasta se ela não existir
+                Files.createDirectories(caminhoDestino.getParent());
+                
+                // Copia o arquivo selecionado para o destino
+                Files.copy(arquivoSelecionado.toPath(), caminhoDestino, StandardCopyOption.REPLACE_EXISTING);
+
+                // Guarda o caminho RELATIVO para ser salvo no banco
+                this.caminhoImagemSalva = caminhoDestino.toString();
+                
+                // Dá um feedback visual para o usuário
+                nomeArquivoLabel.setText(arquivoSelecionado.getName());
+                
+                System.out.println("Imagem salva em: " + this.caminhoImagemSalva);
+
+            } catch (IOException e) {
+                System.err.println("Erro ao salvar a imagem.");
+                e.printStackTrace();
+                // Mostrar um alerta de erro
+            }
+        }
+    }
+
+    // Pequeno método auxiliar para pegar a extensão do arquivo
+    private String getFileExtension(String filename) {
+        return Optional.ofNullable(filename)
+                .filter(f -> f.contains("."))
+                .map(f -> f.substring(filename.lastIndexOf(".") + 1))
+                .orElse("");
     }
 
     @FXML
@@ -233,7 +297,7 @@ public class SolicitarEventoFXMLController {
             eventoDTO.setCategoria(categoriaComboBox.getValue().name());
             eventoDTO.setDescricao(descricaoArea.getText() != null ? descricaoArea.getText().trim() : "");
             eventoDTO.setDepartamento(departamentoComboBox.getValue().name());
-            eventoDTO.setImagem(imagemField.getText() != null ? imagemField.getText().trim() : "");
+            eventoDTO.setImagem(this.caminhoImagemSalva);
             eventoDTO.setLink(linkField.getText() != null ? linkField.getText().trim() : "");
 
             // 3. Coletar e Validar Ações (em memória)

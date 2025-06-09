@@ -26,6 +26,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.awt.Desktop;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -114,12 +117,29 @@ public class DetalhesEventoFXMLController implements Initializable {
             infoHyperlink.setDisable(true);
         }
 
-        // Carrega a imagem do banner
+        // Carrega a imagem do banner a partir do caminho do arquivo
         try {
-            if (evento.getImagem() != null && !evento.getImagem().isEmpty()) {
-                bannerImageView.setImage(new Image(evento.getImagem(), true));
-            } else { throw new Exception("URL da imagem vazia."); }
-        } catch (Exception e) {
+            String imagePath = evento.getImagem();
+            if (imagePath != null && !imagePath.isEmpty()) {
+                // Cria um objeto File com o caminho salvo
+                File arquivoImagem = new File(imagePath);
+                
+                // Verifica se o arquivo realmente existe antes de tentar carregar
+                if (arquivoImagem.exists()) {
+                    // Carrega a imagem a partir de um fluxo de arquivo
+                    Image image = new Image(new FileInputStream(arquivoImagem));
+                    bannerImageView.setImage(image);
+                } else {
+                    // Se o arquivo não for encontrado (ex: em outro computador), usa o placeholder
+                    System.err.println("Imagem não encontrada no caminho: " + imagePath);
+                    bannerImageView.setImage(new Image(getClass().getResourceAsStream("/img/placeholder.png")));
+                }
+            } else {
+                // Usa a imagem padrão se não houver caminho no banco
+                bannerImageView.setImage(new Image(getClass().getResourceAsStream("/img/placeholder.png")));
+            }
+        } catch (FileNotFoundException e) {
+            System.err.println("Erro de arquivo não encontrado ao carregar a imagem.");
             bannerImageView.setImage(new Image(getClass().getResourceAsStream("/img/placeholder.png")));
         }
     }

@@ -107,10 +107,17 @@
                             </VBox>
                         </HBox>
 
-                        <Label text="Imagem do Evento (URL)" textFill="#2f4a51">
-                            <font><Font name="Nirmala UI Bold" size="12.0" /></font>
-                        </Label>
-                        <TextField fx:id="imagemField" promptText="Link da imagem do evento" prefHeight="30.0"/>
+                        <VBox spacing="5.0">
+                            <children>
+                                <Label text="Imagem do Evento" />
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <children>
+                                        <Button onAction="#handleEscolherImagem" text="Escolher Arquivo..." />
+                                        <Label fx:id="nomeArquivoLabel" text="Nenhum arquivo selecionado" style="-fx-text-fill: #555; -fx-font-style: italic;" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
 
                         <Label text="Link para mais informações (Evento)" textFill="#2f4a51">
                             <font><Font name="Nirmala UI Bold" size="12.0" /></font>
