@@ -60,6 +60,10 @@ public class Evento {
         this.link = evento.getLink();
     }
 
+    public Evento() {
+        // Construtor padrão necessário para algumas operações de serialização/deserialização
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

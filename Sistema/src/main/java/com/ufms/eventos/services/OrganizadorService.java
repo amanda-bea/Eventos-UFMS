@@ -1,51 +1,56 @@
 package com.ufms.eventos.services;
-
-import com.ufms.eventos.dto.EventoDTO;
-import com.ufms.eventos.model.Evento;
 import com.ufms.eventos.model.Organizador;
-import com.ufms.eventos.repository.EventoRepository;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.ufms.eventos.repository.OrganizadorRepositoryJDBC;
 
+/**
+ * Classe de serviço para operações relacionadas a organizadores.
+ */
 public class OrganizadorService {
 
-    private EventoRepository eventoRepository;
+    private final OrganizadorRepositoryJDBC organizadorRepository;
 
     public OrganizadorService() {
-        this.eventoRepository = new EventoRepository();
+        this.organizadorRepository = new OrganizadorRepositoryJDBC();
     }
-
-    public List<EventoDTO> listarEventosPorOrganizador(Organizador organizador) {
-        HashSet<Evento> eventos = eventoRepository.getEventos();
-        return eventos.stream()
-                .filter(e -> e.getOrganizador().equals(organizador))
-                .map(EventoDTO::new)
-                .collect(Collectors.toList());
+    
+    /**
+     * Busca um organizador pelo nome.
+     * @param nome O nome do organizador.
+     * @return O organizador encontrado ou null se não existir.
+     */
+    public Organizador buscarPorNome(String nome) {
+        return organizadorRepository.getOrganizador(nome);
     }
-
-    public List<EventoDTO> listarEventosPorStatus(Organizador organizador, String status) {
-        HashSet<Evento> eventos = eventoRepository.getEventos();
-        return eventos.stream()
-                .filter(e -> e.getOrganizador().equals(organizador))
-                .filter(e -> e.getStatus().equalsIgnoreCase(status))
-                .map(EventoDTO::new)
-                .collect(Collectors.toList());
+    
+    /**
+     * Salva ou atualiza um organizador.
+     * @param organizador O organizador a ser salvo.
+     * @return true se a operação foi bem-sucedida, false caso contrário.
+     */
+    public boolean salvarOrganizador(Organizador organizador) {
+        if (organizador == null) {
+            return false;
+        }
+        return organizadorRepository.salvar(organizador) != null;
     }
-
-    public List<EventoDTO> listarEventosAguardandoAprovacao(Organizador organizador) {
-        return listarEventosPorStatus(organizador, "Aguardando aprovação");
+    /**
+     * Verifica se um usuário é organizador pelo nome.
+     * @param nome O nome do usuário.
+     * @return true se for organizador, false caso contrário.
+     */
+    public boolean verificarOrganizador(String nome) {
+        return organizadorRepository.verificarOrganizador(nome);
     }
-
-    public List<EventoDTO> listarEventosCancelados(Organizador organizador) {
-        return listarEventosPorStatus(organizador, "Cancelado");
-    }
-
-    public List<EventoDTO> listarEventosAtivos(Organizador organizador) {
-        return listarEventosPorStatus(organizador, "Ativo");
-    }
-
-    public List<EventoDTO> listarEventosInativos(Organizador organizador) {
-        return listarEventosPorStatus(organizador, "Inativo");
+    
+    /**
+     * Adiciona um novo organizador.
+     * @param organizador O organizador a ser adicionado.
+     * @return true se a operação foi bem-sucedida, false caso contrário.
+     */
+    public boolean adicionarOrganizador(Organizador organizador) {
+        if (organizador == null) {
+            return false;
+        }
+        return organizadorRepository.addOrganizador(organizador);
     }
 }

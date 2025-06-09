@@ -6,11 +6,11 @@ import lombok.Data;
 
 @Data
 public class ConfiguracaoFormulario {
-    private Integer id; // Chave primária da tabela
+    private Long id; // Chave primária da tabela
     private Acao acao; // Referência correta usando o objeto
     private boolean usarNome = true; // Valores padrão podem ser definidos aqui
     private boolean usarEmail = true;
     private boolean usarCpf = false;
     private boolean usarCurso = false;
-    private List<String> nomesCamposPersonalizados = new ArrayList<>();
+    private List<String> camposPersonalizados = new ArrayList<>();
 }

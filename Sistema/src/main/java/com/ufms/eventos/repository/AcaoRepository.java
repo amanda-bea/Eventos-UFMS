@@ -1,99 +1,66 @@
 package com.ufms.eventos.repository;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import com.ufms.eventos.model.Acao;
-
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class AcaoRepository {
-    private HashSet<Acao> acoes;
-
-    public AcaoRepository() {
-        this.acoes = new HashSet<Acao>();
-    }
-
-    public HashSet<Acao> getAcoes(){
-        return new HashSet<Acao>(this.acoes);
-    }
-
-    public boolean addAcao(Acao acao){
-        return this.acoes.add(acao);
-    }
-
-    public boolean removeAcao(Acao acao){
-        return this.acoes.remove(acao);
-    }
-
-    public boolean updateAcao(Acao acao){ ///atualizar regra depois, apenas exemplo
-        if(this.acoes.contains(acao)){
-            this.acoes.remove(acao);
-            this.acoes.add(acao);
-            return true;
-        }
-        return false;
-    }
-
-    public Acao getAcao(String nome) { // mudar ideia depois
-        Iterator<Acao> iterator = this.acoes.iterator();
-
-        Acao acao = null;
-        while (iterator.hasNext()) {
-            Acao a = iterator.next();
-            if (a.getNome().equals(nome)) {
-                acao = a;
-                break;
-            }
-        }
-        return acao;
-    }
-
-    public boolean deleteAcao(String nome) {
-        Iterator<Acao> iterator = this.acoes.iterator();
-        while (iterator.hasNext()) {
-            Acao acao = iterator.next();
-            if (acao.getNome() == nome) {
-                iterator.remove();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public Acao buscarPorNome(String nome) {
-        for (Acao acao : acoes) {
-            if (acao.getNome().equalsIgnoreCase(nome)) {
-                return acao;
-            }
-        }
-        return null;
-    }
-
-    public List<Acao> findByEventoId(Long eventoId) {
-        if (eventoId == null) {
-            return new ArrayList<>(); // Retorna lista vazia se o ID for nulo
-        }
-        
-        return this.acoes.stream()
-                // Filtra as ações, mantendo apenas aquelas cujo evento associado tem o ID correto.
-                .filter(acao -> acao.getEvento() != null && eventoId.equals(acao.getEvento().getId()))
-                .collect(Collectors.toList());
-    }
-
-    public Acao findById(Long id) {
-        if (id == null) {
-            return null;
-        }
-        
-        for (Acao acao : acoes) {
-            if (id.equals(acao.getId())) {
-                return acao;
-            }
-        }
-        
-        return null;
-    }
+/**
+ * Interface que define as operações de um repositório de ações no banco de dados.
+ */
+public interface AcaoRepository {
+    
+    /**
+     * Retorna todas as ações armazenadas no banco de dados.
+     * @return Um conjunto de todas as ações.
+     */
+    HashSet<Acao> getAcoes();
+    
+    /**
+     * Adiciona uma nova ação ao banco de dados.
+     * @param acao A ação a ser adicionada.
+     * @return true se a operação foi bem-sucedida, false caso contrário.
+     */
+    boolean addAcao(Acao acao);
+    
+    /**
+     * Remove uma ação do banco de dados.
+     * @param acao A ação a ser removida.
+     * @return true se a operação foi bem-sucedida, false caso contrário.
+     */
+    boolean removeAcao(Acao acao);
+    
+    /**
+     * Atualiza uma ação existente no banco de dados.
+     * @param acao A ação com os dados atualizados.
+     * @return true se a operação foi bem-sucedida, false caso contrário.
+     */
+    boolean updateAcao(Acao acao);
+    
+    /**
+     * Busca uma ação pelo seu nome no banco de dados.
+     * @param nome O nome da ação a ser buscada.
+     * @return A ação correspondente ou null se não encontrada.
+     */
+    Acao getAcao(String nome);
+    
+    /**
+     * Remove uma ação pelo seu nome do banco de dados.
+     * @param nome O nome da ação a ser removida.
+     * @return true se a operação foi bem-sucedida, false caso contrário.
+     */
+    boolean deleteAcao(String nome);
+    
+    /**
+     * Busca uma ação pelo seu ID no banco de dados.
+     * @param id O ID da ação a ser buscada.
+     * @return A ação correspondente ou null se não encontrada.
+     */
+    Acao findById(Long id);
+    
+    /**
+     * Busca todas as ações associadas a um evento específico no banco de dados.
+     * @param eventoId O ID do evento.
+     * @return Lista de ações associadas ao evento.
+     */
+    List<Acao> findByEventoId(Long eventoId);
 }
-

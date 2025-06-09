@@ -1,10 +1,7 @@
 package com.ufms.eventos.controller;
 
 import com.ufms.eventos.dto.ConfiguracaoFormularioDTO;
-
 import com.ufms.eventos.services.ConfiguracaoFormularioService;
-
-import com.ufms.eventos.repository.ConfiguracaoFormularioRepository;
 
 import java.util.Optional; // Para lidar com retornos opcionais do service
 
@@ -13,7 +10,7 @@ public class ConfiguracaoFormularioController {
     private final ConfiguracaoFormularioService configuracaoFormularioService;
 
     public ConfiguracaoFormularioController() {
-        this.configuracaoFormularioService = new ConfiguracaoFormularioService(new ConfiguracaoFormularioRepository());
+        this.configuracaoFormularioService = new ConfiguracaoFormularioService();
     }
 
     // Construtor para injeção de dependências (melhor prática)
@@ -34,4 +31,7 @@ public class ConfiguracaoFormularioController {
         return configuracaoFormularioService.deletarConfiguracaoFormulario(nomeAcao);
     }
 
+    public boolean verificarExistenciaConfiguracao(String nomeAcao) {
+        return configuracaoFormularioService.existeConfiguracaoFormulario(nomeAcao);
+    }
 }

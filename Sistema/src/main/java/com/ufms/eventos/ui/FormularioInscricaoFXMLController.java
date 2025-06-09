@@ -55,7 +55,7 @@ public class FormularioInscricaoFXMLController {
         if (config.isUsarCpf()) adicionarCampo("CPF", "cpf", false);
         if (config.isUsarCurso()) adicionarCampo("Curso/Instituição", "curso", false);
 
-        for (String nomeCampo : config.getNomesCamposPersonalizados()) {
+        for (String nomeCampo : config.getCamposPersonalizados()) {
             adicionarCampo(nomeCampo, nomeCampo, false);
         }
     }

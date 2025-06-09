@@ -8,8 +8,8 @@ import com.ufms.eventos.model.Acao;
 import com.ufms.eventos.model.Evento;
 import com.ufms.eventos.model.Usuario;
 
-import com.ufms.eventos.repository.AcaoRepository;
-import com.ufms.eventos.repository.EventoRepository;
+import com.ufms.eventos.repository.AcaoRepositoryJDBC;
+import com.ufms.eventos.repository.EventoRepositoryJDBC;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -21,42 +21,51 @@ import java.util.stream.Collectors;
  * Camada de Serviço que contém a lógica de negócio para Ações de eventos.
  */
 public class AcaoService {
-    private AcaoRepository acaoRepository;
-    private EventoRepository eventoRepository;
+    private AcaoRepositoryJDBC acaoRepository;
+    private EventoRepositoryJDBC eventoRepository;
     private PresencaConfirmadaService presencaService = new PresencaConfirmadaService();
 
     public AcaoService() {
-        this.acaoRepository = new AcaoRepository();
-        this.eventoRepository = new EventoRepository();
+        this.acaoRepository = new AcaoRepositoryJDBC();
+        this.eventoRepository = new EventoRepositoryJDBC();
     }
 
     /**
      * CORRIGIDO: Adiciona uma nova ação a um evento que já existe.
      * Recebe o usuário logado para verificar se ele é o dono do evento.
      */
-    public boolean adicionarAcaoEmEventoExistente(String nomeEvento, AcaoDTO acaoDTO, Usuario usuarioLogado) {
-        Evento evento = eventoRepository.getEvento(nomeEvento);
-        if (evento == null) {
-            return false; // Evento não existe
-        }
-        
-        // A verificação de permissão agora usa .equals(), que compara os nomes
-        if (!evento.getOrganizador().equals(usuarioLogado)) {
-            return false; // Usuário não é o dono do evento
-        }
-        
-        // Sua verificação de ação duplicada (pode ser mantida ou alterada conforme sua regra)
-        boolean acaoJaExiste = acaoRepository.getAcoes().stream()
-                .anyMatch(a -> a.getEvento().equals(evento) && a.getNome().equalsIgnoreCase(acaoDTO.getNome()));
-        if (acaoJaExiste) {
+    public boolean adicionarAcaoEmEventoExistente(Long eventoId, AcaoDTO acaoDTO, Usuario usuarioLogado) {
+        try {
+            // Busca o evento pelo ID em vez do nome
+            Evento evento = eventoRepository.buscarPorId(eventoId);
+            if (evento == null) {
+                return false; // Evento não existe
+            }
+            
+            // Verificação de permissão com base no nome do organizador
+            if (!evento.getOrganizador().getNome().equals(usuarioLogado.getNome())) {
+                return false; // Usuário não é o dono do evento
+            }
+            
+            // Verifica se já existe uma ação com o mesmo nome neste evento
+            List<Acao> acoesDoEvento = acaoRepository.findByEventoId(eventoId);
+            boolean acaoJaExiste = acoesDoEvento.stream()
+                    .anyMatch(a -> a.getNome().equalsIgnoreCase(acaoDTO.getNome()));
+                    
+            if (acaoJaExiste) {
+                return false; // Ação com este nome já existe neste evento
+            }
+
+            // Cria e configura a nova ação
+            Acao novaAcao = new Acao(acaoDTO);
+            novaAcao.setEvento(evento);
+            novaAcao.setStatus("Aguardando aprovação");
+
+            return acaoRepository.addAcao(novaAcao);
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
-
-        Acao novaAcao = new Acao(acaoDTO);
-        novaAcao.setEvento(evento);
-        novaAcao.setStatus("Aguardando aprovação");
-
-        return acaoRepository.addAcao(novaAcao);
     }
 
     /**
@@ -108,14 +117,24 @@ public class AcaoService {
      * Lista todas as ações de um evento específico no formato Mínimo (DTO).
      */
     public List<AcaoMinDTO> listarAcoesPorEventoMin(String nomeEvento) {
-        Evento evento = eventoRepository.getEvento(nomeEvento);
-        if (evento == null) {
+        try {
+            // Busca todos os eventos e filtra pelo nome
+            List<Evento> eventos = eventoRepository.listarTodos();
+            Evento evento = eventos.stream()
+                .filter(e -> e.getNome().equals(nomeEvento))
+                .findFirst()
+                .orElse(null);
+                
+            if (evento == null) {
+                return new ArrayList<>();
+            }
+            
+            // Usa o método baseado em ID
+            return listarAcoesPorEventoMin(evento.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
             return new ArrayList<>();
         }
-        return acaoRepository.getAcoes().stream()
-                .filter(acao -> acao.getEvento().equals(evento))
-                .map(AcaoMinDTO::new)
-                .collect(Collectors.toList());
     }
 
     /**

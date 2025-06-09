@@ -10,9 +10,9 @@ import com.ufms.eventos.model.Departamento;
 import com.ufms.eventos.model.Evento;
 import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.model.Usuario;
-import com.ufms.eventos.repository.AcaoRepository;
-import com.ufms.eventos.repository.EventoRepository;
-import com.ufms.eventos.repository.OrganizadorRepository;
+import com.ufms.eventos.repository.AcaoRepositoryJDBC;
+import com.ufms.eventos.repository.EventoRepositoryJDBC;
+import com.ufms.eventos.repository.OrganizadorRepositoryJDBC;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,15 +24,16 @@ import java.util.stream.Collectors;
  * É utilizada tanto pelo EventoController quanto pelo AdminController.
  */
 public class EventoService {
-    private EventoRepository er;
-    private OrganizadorRepository or;
-    private AcaoRepository ar;
-    private AcaoService acaoService = new AcaoService();
+    private EventoRepositoryJDBC eventoRepositoryJDBC;
+    private OrganizadorRepositoryJDBC or;
+    private AcaoRepositoryJDBC ar;
+    private AcaoService acaoService;
 
     public EventoService() {
-        this.er = new EventoRepository();
-        this.or = new OrganizadorRepository();
-        this.ar = new AcaoRepository();
+        this.eventoRepositoryJDBC = new EventoRepositoryJDBC();
+        this.or = new OrganizadorRepositoryJDBC();
+        this.ar = new AcaoRepositoryJDBC();
+        this.acaoService = new AcaoService();
     }
 
     // ===================================================================
@@ -44,231 +45,345 @@ public class EventoService {
      * como o organizador do evento.
      */
     public boolean solicitarEventoComAcoes(EventoDTO eventoDTO, List<AcaoDTO> listaAcoesDTO, Usuario criadorDoEvento) {
-        // Converte o Usuario em um objeto Organizador para o contexto do evento.
-        Organizador organizadorDoEvento = new Organizador(
-            criadorDoEvento.getNome(), criadorDoEvento.getEmail(),
-            criadorDoEvento.getSenha(), criadorDoEvento.getTelefone()
-        );
-        // Salva/atualiza o registro do organizador no repositório
-        or.salvar(organizadorDoEvento);
+        try {
+            // Converte o Usuario em um objeto Organizador para o contexto do evento.
+            Organizador organizadorDoEvento = new Organizador(
+                criadorDoEvento.getNome(), criadorDoEvento.getEmail(),
+                criadorDoEvento.getSenha(), criadorDoEvento.getTelefone()
+            );
+            // Salva/atualiza o registro do organizador no repositório
+            or.salvar(organizadorDoEvento);
 
-        Evento evento = new Evento(eventoDTO);
-        evento.setStatus("Aguardando aprovação");
-        evento.setOrganizador(organizadorDoEvento);
-        
-        if (er.getEvento(evento.getNome()) == null) {
-            er.addEvento(evento);
+            Evento evento = new Evento(eventoDTO);
+            evento.setStatus("Aguardando aprovação");
+            evento.setOrganizador(organizadorDoEvento);
+            
+            // Verifica se já existe um evento com este nome
+            if (buscarPorNome(evento.getNome()) == null) {
+                // Salva o evento usando o repositório JDBC
+                eventoRepositoryJDBC.salvar(evento);
+                
+                // Cria as ações associadas ao evento
+                for (AcaoDTO acaoDTO : listaAcoesDTO) {
+                    Acao acao = new Acao(acaoDTO);
+                    acao.setEvento(evento);
+                    acao.setStatus("Aguardando aprovação");
+                    ar.addAcao(acao);
+                }
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-
-        for (AcaoDTO acaoDTO : listaAcoesDTO) {
-            Acao acao = new Acao(acaoDTO);
-            acao.setEvento(evento);
-            acao.setStatus("Aguardando aprovação");
-            ar.addAcao(acao);
-        }
-        return true;
     }
 
     /**
-     * CORRIGIDO: Edita um evento. Recebe o usuário logado para verificar a permissão.
+     * Busca um evento pelo nome usando o repositório JDBC.
      */
-    public boolean editarEvento(EditarEventoDTO dto, Usuario usuarioLogado) {
-        Evento evento = er.getEvento(dto.getNomeEvento());
-        
-        // A verificação agora é muito mais limpa e correta
-        if (evento != null && evento.getOrganizador().equals(usuarioLogado)) {
-            evento.setDataInicio(LocalDate.parse(dto.getNovaDataInicio()));
-            evento.setDataFim(LocalDate.parse(dto.getNovaDataFim()));
-            evento.setLink(dto.getNovoLink());
-            er.updateEvento(evento);
-            return true;
+    private Evento buscarPorNome(String nome) {
+        try {
+            List<Evento> eventos = eventoRepositoryJDBC.listarTodos();
+            return eventos.stream()
+                .filter(e -> e.getNome().equals(nome))
+                .findFirst().orElse(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-        return false;
     }
 
-    public EventoDTO buscarDtoPorNome(String nome) {
-        Evento evento = er.getEvento(nome);
-        if (evento == null) {
-            throw new IllegalArgumentException("Evento com nome '" + nome + "' não encontrado.");
+    /**
+     * Edita um evento. Recebe o usuário logado para verificar a permissão.
+     */
+    public boolean editarEvento(EditarEventoDTO dto, Usuario usuarioLogado) {
+        try {
+            Evento evento = buscarPorNome(dto.getNomeEvento());
+            
+            // A verificação agora é mais limpa e correta
+            if (evento != null && evento.getOrganizador().getNome().equals(usuarioLogado.getNome())) {
+                evento.setDataInicio(LocalDate.parse(dto.getNovaDataInicio()));
+                evento.setDataFim(LocalDate.parse(dto.getNovaDataFim()));
+                evento.setLink(dto.getNovoLink());
+                eventoRepositoryJDBC.atualizar(evento);
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-        return new EventoDTO(evento);
+    }
+
+    /**
+     * Busca DTO de evento por nome usando JDBC.
+     */
+    public EventoDTO buscarDtoPorNome(String nome) {
+        try {
+            Evento evento = buscarPorNome(nome);
+            if (evento == null) {
+                throw new IllegalArgumentException("Evento com nome '" + nome + "' não encontrado.");
+            }
+            return new EventoDTO(evento);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Erro ao buscar evento: " + e.getMessage());
+        }
     }
     
     /**
-     * CORRIGIDO: Exclui uma solicitação de evento. Recebe o usuário logado para verificar a permissão.
+     * Exclui uma solicitação de evento. Recebe o usuário logado para verificar a permissão.
      */
     public boolean excluirSolicitacaoEvento(String nomeEvento, Usuario usuarioLogado) {
-        Evento evento = er.getEvento(nomeEvento);
-        
-        if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())
-            && evento.getOrganizador().equals(usuarioLogado)) {
-            return er.removeEvento(evento);
+        try {
+            Evento evento = buscarPorNome(nomeEvento);
+            
+            if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())
+                && evento.getOrganizador().getNome().equals(usuarioLogado.getNome())) {
+                eventoRepositoryJDBC.deletar(evento.getId());
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     /**
-     * CORRIGIDO: Busca eventos associados a um usuário específico.
+     * Busca eventos associados a um usuário específico usando JDBC.
      */
     public List<EventoMinDTO> buscarEventosPorUsuario(Usuario usuario) {
         if (usuario == null) return new ArrayList<>();
 
-        return er.getEventos().stream()
-                .filter(evento -> evento.getOrganizador() != null && evento.getOrganizador().equals(usuario))
-                .map(EventoMinDTO::new)
-                .collect(Collectors.toList());
+        try {
+            List<Evento> todosEventos = eventoRepositoryJDBC.listarTodos();
+            return todosEventos.stream()
+                    .filter(evento -> evento.getOrganizador() != null && 
+                                     evento.getOrganizador().getNome().equals(usuario.getNome()))
+                    .map(EventoMinDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     // ===================================================================
     // MÉTODOS PARA ADMINS (Chamados pelo AdminController)
     // ===================================================================
 
+    /**
+     * Busca eventos por status usando JDBC.
+     */
     public List<EventoMinDTO> buscarEventosPorStatus(String status) {
-        return er.getEventos().stream()
-                .filter(e -> status.equalsIgnoreCase(e.getStatus()))
-                .map(EventoMinDTO::new)
-                .collect(Collectors.toList());
+        try {
+            List<Evento> eventos = eventoRepositoryJDBC.findByStatus(status);
+            return eventos.stream()
+                    .map(EventoMinDTO::new)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
+    /**
+     * Aprova um evento utilizando JDBC.
+     */
     public boolean aprovarEvento(String nomeEvento) {
-        Evento evento = er.getEvento(nomeEvento);
-        if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
-            evento.setStatus("Ativo");
-            er.updateEvento(evento);
-            // ... lógica para aprovar ações filhas ...
-            return true;
+        try {
+            Evento evento = buscarPorNome(nomeEvento);
+            if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
+                evento.setStatus("Ativo");
+                eventoRepositoryJDBC.atualizar(evento);
+                
+                // Aprovar ações filhas
+                List<Acao> acoesDoEvento = ar.findByEventoId(evento.getId());
+                for (Acao acao : acoesDoEvento) {
+                    acao.setStatus("Ativo");
+                    ar.updateAcao(acao);
+                }
+                
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
+    /**
+     * Rejeita um evento utilizando JDBC.
+     */
     public boolean rejeitarEvento(String nomeEvento, String motivo) {
-        Evento evento = er.getEvento(nomeEvento);
-        if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
-            evento.setStatus("Rejeitado");
-            evento.setMensagemRejeicao(motivo);
-            er.updateEvento(evento);
-            // ... lógica para rejeitar ações filhas ...
-            return true;
+        try {
+            Evento evento = buscarPorNome(nomeEvento);
+            if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
+                evento.setStatus("Rejeitado");
+                evento.setMensagemRejeicao(motivo);
+                eventoRepositoryJDBC.atualizar(evento);
+                
+                // Rejeitar ações filhas
+                List<Acao> acoesDoEvento = ar.findByEventoId(evento.getId());
+                for (Acao acao : acoesDoEvento) {
+                    acao.setStatus("Rejeitado");
+                    acao.setMensagemRejeicao("Evento principal rejeitado: " + motivo);
+                    ar.updateAcao(acao);
+                }
+                
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     // ===================================================================
     // MÉTODOS GERAIS
     // ===================================================================
 
+    /**
+     * Lista eventos ativos em formato resumido usando JDBC.
+     */
     public List<EventoMinDTO> listarEventosAtivosMin() {
-        return er.getEventos().stream()
-                .filter(e -> "Ativo".equalsIgnoreCase(e.getStatus()))
-                .map(EventoMinDTO::new)
-                .collect(Collectors.toList());
-    }
-
-    public EventoDTO buscarDtoPorId(Long id) {
-        Evento evento = er.findById(id);
-        if (evento == null) {
-            throw new IllegalArgumentException("Evento com ID " + id + " não encontrado.");
-        }
-        return new EventoDTO(evento);
-    }
-
-    public List<EventoMinDTO> buscarEventosComFiltro(String termoBusca, Categoria categoria, Departamento departamento, String modalidade) {
-    
-        // Pega todos os eventos com status "Ativo" como base
-        List<Evento> eventosFiltrados = this.listarEventosAtivos();
-        
-        // Aplica filtro de termo de busca
-        if (termoBusca != null && !termoBusca.trim().isEmpty()) {
-            String termoLowerCase = termoBusca.toLowerCase();
-            eventosFiltrados = eventosFiltrados.stream()
-                    .filter(e -> e.getNome().toLowerCase().contains(termoLowerCase) || 
-                                e.getDescricao().toLowerCase().contains(termoLowerCase))
+        try {
+            List<Evento> eventos = eventoRepositoryJDBC.findByStatus("Ativo");
+            return eventos.stream()
+                    .map(EventoMinDTO::new)
                     .collect(Collectors.toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
         }
-
-        // Aplica filtro de Categoria
-        if (categoria != null) {
-            eventosFiltrados = eventosFiltrados.stream()
-                    .filter(e -> e.getCategoria() == categoria)
-                    .collect(Collectors.toList());
-        }
-
-        // Aplica filtro de Departamento
-        if (departamento != null) {
-            eventosFiltrados = eventosFiltrados.stream()
-                    .filter(e -> e.getDepartamento() == departamento)
-                    .collect(Collectors.toList());
-        }
-
-        // Aplica filtro de Modalidade (lembre-se de adicionar o campo 'modalidade' na sua classe Evento)
-        if (modalidade != null && !modalidade.isEmpty()) {
-            eventosFiltrados = eventosFiltrados.stream()
-                    // Mantém na lista apenas os eventos que possuem pelo menos uma ação com a modalidade desejada.
-                    .filter(evento -> temAcaoComModalidade(evento, modalidade))
-                    .collect(Collectors.toList());
-        }
-
-        // Converte a lista final de entidades para DTOs
-        return eventosFiltrados.stream()
-                .map(EventoMinDTO::new)
-                .collect(Collectors.toList());
-    }
-
-
-    private List<Evento> listarEventosAtivos() {
-        return er.getEventos().stream()
-                .filter(e -> "Ativo".equalsIgnoreCase(e.getStatus()))
-                .collect(Collectors.toList());
-    }
-
-    private boolean temAcaoComModalidade(Evento evento, String modalidade) {
-        // Busca em TODAS as ações do repositório
-        return ar.getAcoes().stream()
-                // Filtra as ações que pertencem ao evento em questão
-                .filter(acao -> acao.getEvento().equals(evento))
-                // Verifica se ALGUMA das ações filtradas tem a modalidade correta (ignorando maiúsculas/minúsculas)
-                .anyMatch(acao -> modalidade.equalsIgnoreCase(acao.getModalidade()));
-    }
-
-    public Evento buscarEventoPorId(Long id) {
-        return er.findById(id); 
     }
 
     /**
-     * Rotina completa para ser executada na inicialização do sistema.
-     * Primeiro inativa as ações expiradas e depois verifica se os eventos
-     * pais também devem ser inativados.
+     * Busca DTO de evento por ID usando JDBC.
      */
-    public void atualizarStatusDeEventosEAcoes() {
-        // 1. Inativa todas as ações que já passaram da data
-        acaoService.atualizarAcoesExpiradas();
-
-        // 2. Pega todos os eventos que ainda estão "Ativos"
-        List<Evento> eventosAtivos = er.getEventos().stream()
-            .filter(e -> "Ativo".equalsIgnoreCase(e.getStatus()))
-            .collect(Collectors.toList());
-
-        // 3. Para cada evento ativo, verifica o status de suas ações
-        for (Evento evento : eventosAtivos) {
-            // Pega todas as ações associadas a este evento
-            List<Acao> acoesDoEvento = ar.getAcoes().stream()
-                .filter(a -> a.getEvento().equals(evento))
-                .collect(Collectors.toList());
-            
-            if (acoesDoEvento.isEmpty()) {
-                continue; // Pula eventos que não têm ações
+    public EventoDTO buscarDtoPorId(Long id) {
+        try {
+            Evento evento = eventoRepositoryJDBC.buscarPorId(id);
+            if (evento == null) {
+                throw new IllegalArgumentException("Evento com ID " + id + " não encontrado.");
             }
-
-            // Verifica se TODAS as ações deste evento estão inativas ou canceladas
-            boolean todasAcoesInativas = acoesDoEvento.stream()
-                .allMatch(a -> "Inativo".equalsIgnoreCase(a.getStatus()) || "Cancelado".equalsIgnoreCase(a.getStatus()));
-
-            if (todasAcoesInativas) {
-                System.out.println("Inativando evento '" + evento.getNome() + "' pois todas as suas ações expiraram.");
-                evento.setStatus("Inativo");
-                er.updateEvento(evento);
-            }
+            return new EventoDTO(evento);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Erro ao buscar evento: " + e.getMessage());
         }
     }
 
+    /**
+     * Busca eventos com filtros combinados usando JDBC.
+     */
+    public List<EventoMinDTO> buscarEventosComFiltro(String termoBusca, Categoria categoria, 
+                                                     Departamento departamento, String modalidade) {
+        try {
+            // Base: eventos ativos 
+            List<Evento> eventosAtivos = eventoRepositoryJDBC.findByStatus("Ativo");
+            List<Evento> eventosFiltrados = new ArrayList<>(eventosAtivos);
+            
+            // Filtra por termo de busca
+            if (termoBusca != null && !termoBusca.trim().isEmpty()) {
+                String termoLowerCase = termoBusca.toLowerCase();
+                eventosFiltrados = eventosFiltrados.stream()
+                        .filter(e -> (e.getNome() != null && e.getNome().toLowerCase().contains(termoLowerCase)) || 
+                                     (e.getDescricao() != null && e.getDescricao().toLowerCase().contains(termoLowerCase)))
+                        .collect(Collectors.toList());
+            }
+    
+            // Filtra por categoria
+            if (categoria != null) {
+                eventosFiltrados = eventosFiltrados.stream()
+                        .filter(e -> e.getCategoria() == categoria)
+                        .collect(Collectors.toList());
+            }
+    
+            // Filtra por departamento
+            if (departamento != null) {
+                eventosFiltrados = eventosFiltrados.stream()
+                        .filter(e -> e.getDepartamento() == departamento)
+                        .collect(Collectors.toList());
+            }
+    
+            // Filtra por modalidade das ações
+            if (modalidade != null && !modalidade.isEmpty()) {
+                eventosFiltrados = eventosFiltrados.stream()
+                        .filter(evento -> temAcaoComModalidade(evento, modalidade))
+                        .collect(Collectors.toList());
+            }
+    
+            // Retorna os DTOs
+            return eventosFiltrados.stream()
+                    .map(EventoMinDTO::new)
+                    .collect(Collectors.toList());
+                    
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Verifica se um evento tem alguma ação com a modalidade especificada.
+     */
+    private boolean temAcaoComModalidade(Evento evento, String modalidade) {
+        List<Acao> acoesDoEvento = ar.findByEventoId(evento.getId());
+        return acoesDoEvento.stream()
+                .anyMatch(acao -> modalidade.equalsIgnoreCase(acao.getModalidade()));
+    }
+
+    /**
+     * Busca evento por ID usando JDBC.
+     */
+    public Evento buscarEventoPorId(Long id) {
+        try {
+            return eventoRepositoryJDBC.buscarPorId(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Atualiza status de eventos e ações baseado na data atual, usando JDBC.
+     */
+    public void atualizarStatusDeEventosEAcoes() {
+        try {
+            // 1. Inativa todas as ações que já passaram da data
+            acaoService.atualizarAcoesExpiradas();
+    
+            // 2. Pega todos os eventos que ainda estão "Ativos"
+            List<Evento> eventosAtivos = eventoRepositoryJDBC.findByStatus("Ativo");
+    
+            // 3. Para cada evento ativo, verifica o status de suas ações
+            for (Evento evento : eventosAtivos) {
+                // Pega todas as ações associadas a este evento
+                List<Acao> acoesDoEvento = ar.findByEventoId(evento.getId());
+                
+                if (acoesDoEvento.isEmpty()) {
+                    continue; // Pula eventos que não têm ações
+                }
+    
+                // Verifica se TODAS as ações deste evento estão inativas ou canceladas
+                boolean todasAcoesInativas = acoesDoEvento.stream()
+                    .allMatch(a -> "Inativo".equalsIgnoreCase(a.getStatus()) || 
+                                  "Cancelado".equalsIgnoreCase(a.getStatus()));
+    
+                if (todasAcoesInativas) {
+                    System.out.println("Inativando evento '" + evento.getNome() + "' pois todas as suas ações expiraram.");
+                    evento.setStatus("Inativo");
+                    eventoRepositoryJDBC.atualizar(evento);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Erro ao atualizar status de eventos: " + e.getMessage());
+        }
+    }
 }

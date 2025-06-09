@@ -1,60 +1,51 @@
 package com.ufms.eventos.repository;
 
-import java.util.HashSet;
 import com.ufms.eventos.model.Organizador;
+import java.util.HashSet;
 
-public class OrganizadorRepository {
-    private HashSet<Organizador> organizadores;
-
-    public OrganizadorRepository() {
-        this.organizadores = new HashSet<Organizador>();
-    }
-
-    public HashSet<Organizador> getOrganizadores() {
-        return new HashSet<Organizador>(this.organizadores); //retorna uma cópia do conjunto de organizadores
-    }
-
-    public boolean addOrganizador(Organizador organizador) {
-        return this.organizadores.add(organizador);
-    }
-
-    public boolean removeOrganizador(Organizador organizador) {
-        return this.organizadores.remove(organizador);
-    }
-
-    public Organizador getOrganizador(String nome) { // mudar ideia depois
-        for (Organizador o : this.organizadores) {
-            if (o.getNome().equals(nome)) {
-                return o;
-            }
-        }
-        return null;
-    }
-
+/**
+ * Interface que define as operações do repositório de organizadores.
+ */
+public interface OrganizadorRepository {
+    
     /**
-     * Salva um organizador no repositório. Se já existir um organizador com o mesmo nome,
-     * ele será atualizado com os novos dados. Caso contrário, será adicionado como novo.
-     * 
-     * @param organizador O organizador a ser salvo
-     * @return O organizador salvo
+     * Retorna todos os organizadores cadastrados.
+     * @return Um conjunto de organizadores.
      */
-    public Organizador salvar(Organizador organizador) {
-        if (organizador == null) {
-            return null;
-        }
-        
-        // Busca se já existe um organizador com o mesmo nome
-        Organizador organizadorExistente = getOrganizador(organizador.getNome());
-        
-        if (organizadorExistente != null) {
-            // Se existir, remove para atualizar
-            this.organizadores.remove(organizadorExistente);
-        }
-        
-        // Adiciona o organizador (novo ou atualizado)
-        this.organizadores.add(organizador);
-        return organizador;
-    }
-
-
+    HashSet<Organizador> getOrganizadores();
+    
+    /**
+     * Adiciona um novo organizador.
+     * @param organizador O organizador a ser adicionado.
+     * @return true se a operação foi bem-sucedida, false caso contrário.
+     */
+    boolean addOrganizador(Organizador organizador);
+    
+    /**
+     * Remove um organizador.
+     * @param organizador O organizador a ser removido.
+     * @return true se a operação foi bem-sucedida, false caso contrário.
+     */
+    boolean removeOrganizador(Organizador organizador);
+    
+    /**
+     * Busca um organizador pelo nome.
+     * @param nome O nome do organizador.
+     * @return O organizador encontrado ou null se não existir.
+     */
+    Organizador getOrganizador(String nome);
+    
+    /**
+     * Salva ou atualiza um organizador.
+     * @param organizador O organizador a ser salvo.
+     * @return O organizador salvo ou null em caso de erro.
+     */
+    Organizador salvar(Organizador organizador);
+    
+    /**
+     * Verifica se existe um organizador com o nome especificado.
+     * @param nome Nome do organizador.
+     * @return true se existir, false caso contrário.
+     */
+    boolean verificarOrganizador(String nome);
 }

@@ -112,10 +112,10 @@
                         </Label>
                         <TextField fx:id="imagemField" promptText="Link da imagem do evento" prefHeight="30.0"/>
 
-                        <Label text="Link de Formulário/Inscrição (Evento)" textFill="#2f4a51">
+                        <Label text="Link para mais informações (Evento)" textFill="#2f4a51">
                             <font><Font name="Nirmala UI Bold" size="12.0" /></font>
                         </Label>
-                        <TextField fx:id="linkField" promptText="Link para inscrições ou mais informações" prefHeight="30.0"/>
+                        <TextField fx:id="linkField" promptText="Link para mais informações" prefHeight="30.0"/>
                         
                         <Label text="Ações do Evento" textFill="#489ec1d1">
                             <font><Font name="System Bold" size="16.0" /></font>

@@ -1,24 +1,37 @@
 package com.ufms.eventos.repository;
 
-import java.util.ArrayList;
+import com.ufms.eventos.model.RespostaFormulario;
 import java.util.List;
 
-import com.ufms.eventos.model.RespostaFormulario;
-
-public class RespostaFormularioRepository {
-    private List<RespostaFormulario> respostas = new ArrayList<>();
-
-    public void salvar(RespostaFormulario resposta) {
-        respostas.add(resposta);
-    }
-
-    public List<RespostaFormulario> listarPorAcao(String acaoNome) {
-        List<RespostaFormulario> resultado = new ArrayList<>();
-        for (RespostaFormulario r : respostas) {
-            if (r.getAcao().getNome().equalsIgnoreCase(acaoNome)) {
-                resultado.add(r);
-            }
-        }
-        return resultado;
-    }
+/**
+ * Interface para repositório de respostas de formulário.
+ */
+public interface RespostaFormularioRepository {
+    
+    /**
+     * Salva uma resposta de formulário.
+     * @param resposta A resposta a ser salva.
+     */
+    void salvar(RespostaFormulario resposta);
+    
+    /**
+     * Lista todas as respostas para uma ação específica.
+     * @param acaoNome O nome da ação.
+     * @return Lista de respostas de formulário.
+     */
+    List<RespostaFormulario> listarPorAcao(String acaoNome);
+    
+    /**
+     * Lista todas as respostas para uma ação específica.
+     * @param acaoId O ID da ação.
+     * @return Lista de respostas de formulário.
+     */
+    List<RespostaFormulario> listarPorAcaoId(Long acaoId);
+    
+    /**
+     * Exclui todas as respostas de uma ação específica.
+     * @param acaoId O ID da ação.
+     * @return true se a operação foi bem-sucedida, false caso contrário.
+     */
+    boolean excluirPorAcao(Long acaoId);
 }

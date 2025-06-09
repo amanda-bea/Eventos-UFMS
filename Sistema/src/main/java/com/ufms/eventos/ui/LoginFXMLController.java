@@ -2,6 +2,7 @@ package com.ufms.eventos.ui;
 
 import com.ufms.eventos.model.Admin;
 import com.ufms.eventos.model.Usuario;
+import com.ufms.eventos.services.UsuarioService;
 import com.ufms.eventos.util.SessaoUsuario;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -20,12 +21,14 @@ public class LoginFXMLController {
     @FXML private PasswordField senhaField;
     @FXML private Label mensagemLabel;
     @FXML private Button loginButton;
+    private UsuarioService usuarioService;
 
     @FXML
     public void initialize() {
         if (mensagemLabel != null) {
             mensagemLabel.setVisible(false);
         }
+        usuarioService = new UsuarioService();
     }
 
     @FXML
@@ -43,11 +46,47 @@ public class LoginFXMLController {
         
         // Verifica se é admin - APENAS este caso é especial
         if (nome.equalsIgnoreCase("admin") && senha.equals("admin")) {
-            usuarioAutenticado = new Admin(nome, senha);
+            // Cria um admin com dados completos
+            usuarioAutenticado = new Admin(nome, "admin@sistema.com", senha, "");
             System.out.println("Login como administrador");
+            
+            // Verifica se o admin já existe no banco
+            if (usuarioService.buscarPorNome(nome) == null) {
+                // Salva o admin no banco se ainda não existe
+                boolean sucesso = usuarioService.cadastrarUsuario(usuarioAutenticado);
+                if (sucesso) {
+                    System.out.println("Administrador salvo no banco de dados!");
+                } else {
+                    System.out.println("AVISO: Não foi possível salvar o administrador no banco de dados.");
+                }
+            }
         } else {
-            // Qualquer outra combinação de login/senha cria um usuário comum
-            usuarioAutenticado = new Usuario(nome, senha);
+            // Verifica se o usuário já existe no banco
+            usuarioAutenticado = usuarioService.buscarPorNome(nome);
+            
+            if (usuarioAutenticado == null) {
+                // Se não existe, cria um novo usuário e salva no banco
+                usuarioAutenticado = new Usuario();
+                usuarioAutenticado.setNome(nome);
+                usuarioAutenticado.setSenha(senha);
+                usuarioAutenticado.setEmail(nome + "@usuario.com");  // Email provisório
+                
+                boolean sucesso = usuarioService.cadastrarUsuario(usuarioAutenticado);
+                if (sucesso) {
+                    System.out.println("Novo usuário salvo no banco de dados: " + nome);
+                } else {
+                    System.out.println("AVISO: Não foi possível salvar o usuário no banco de dados.");
+                    
+                    // Em caso de falha ao salvar, ainda cria o usuário em memória
+                    usuarioAutenticado = new Usuario(nome, senha);
+                }
+            } else if (!usuarioAutenticado.getSenha().equals(senha)) {
+                // Se o usuário existe mas a senha está errada, atualiza a senha no modo provisório
+                usuarioAutenticado.setSenha(senha);
+                usuarioService.atualizarUsuario(usuarioAutenticado);
+                System.out.println("Senha atualizada para o usuário: " + nome);
+            }
+            
             System.out.println("Login como usuário comum: " + nome);
         }
         

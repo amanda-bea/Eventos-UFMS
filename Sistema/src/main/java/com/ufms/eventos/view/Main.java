@@ -11,21 +11,14 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
-        // --- LÓGICA DE INICIALIZAÇÃO DO SISTEMA ---
         System.out.println("Sistema iniciando... Verificando status de eventos e ações.");
-        
-        // Instancia o serviço principal
-        EventoService eventoService = new EventoService(); 
-        // Executa a rotina completa de atualização
-        eventoService.atualizarStatusDeEventosEAcoes(); 
-        
-        System.out.println("Verificação concluída. Carregando tela principal...");
-        // -----------------------------------------
 
-        // Carrega a primeira tela do seu sistema (ex: Login.fxml)
+        EventoService eventoService = new EventoService();
+        eventoService.atualizarStatusDeEventosEAcoes();
+
+        System.out.println("Verificação concluída. Carregando tela principal...");
+
         Parent root = FXMLLoader.load(getClass().getResource("/com/ufms/eventos/view/Login.fxml"));
-        
         primaryStage.setTitle("Sistema de Eventos");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();

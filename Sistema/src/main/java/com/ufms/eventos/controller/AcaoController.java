@@ -23,8 +23,8 @@ public class AcaoController {
      * Adiciona uma nova ação a um evento existente.
      * A assinatura agora recebe o 'Usuario' logado para verificação de permissão.
      */
-    public boolean adicionarAcaoEmEventoExistente(String nomeEvento, AcaoDTO acaoDTO, Usuario usuarioLogado) {
-        return acaoService.adicionarAcaoEmEventoExistente(nomeEvento, acaoDTO, usuarioLogado);
+    public boolean adicionarAcaoEmEventoExistente(Long eventoId, AcaoDTO acaoDTO, Usuario usuarioLogado) {
+        return acaoService.adicionarAcaoEmEventoExistente(eventoId, acaoDTO, usuarioLogado);
     }
 
     /**

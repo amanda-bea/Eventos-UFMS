@@ -79,8 +79,8 @@ public class DefinirFormularioFXMLController {
 
             camposPersonalizadosContainer.getChildren().clear();
             camposPersonalizadosRows.clear();
-            if (configExistente.getNomesCamposPersonalizados() != null) {
-                for (String nomeCampo : configExistente.getNomesCamposPersonalizados()) {
+            if (configExistente.getCamposPersonalizados() != null) {
+                for (String nomeCampo : configExistente.getCamposPersonalizados()) {
                     adicionarLinhaCampoPersonalizadoUI(nomeCampo);
                 }
             }

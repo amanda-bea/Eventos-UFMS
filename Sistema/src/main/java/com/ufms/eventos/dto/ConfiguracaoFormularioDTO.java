@@ -15,5 +15,5 @@ public class ConfiguracaoFormularioDTO {
     private boolean usarEmail;
     private boolean usarCpf;
     private boolean usarCurso;
-    private List<String> nomesCamposPersonalizados = new ArrayList<>();
+    private List<String> camposPersonalizados = new ArrayList<>();
 }

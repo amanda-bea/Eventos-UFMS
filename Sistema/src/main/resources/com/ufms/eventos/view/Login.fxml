@@ -7,75 +7,66 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:controller="com.ufms.eventos.ui.LoginFXMLController"
-            prefWidth="700.0" prefHeight="500.0"
-            style="-fx-background-color: #489ec1;"
-            xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
-
-    <left>
-        <VBox alignment="CENTER" BorderPane.alignment="CENTER"
-              style="-fx-background-color: transparent;">
-            <padding>
-                <Insets top="40" right="40" bottom="40" left="40"/>
-            </padding>
+<HBox prefHeight="500.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ufms.eventos.ui.LoginFXMLController">
+   <children>
+   
+      <VBox alignment="CENTER" prefWidth="350.0" style="-fx-background-color: #489ec1;">
+         <children>
             <ImageView fitHeight="165.0" fitWidth="176.0" pickOnBounds="true" preserveRatio="true">
-                <image>
-                    <Image url="@/img/logo.png" /> </image>
-                <VBox.margin>
-                    <Insets/>
-                </VBox.margin>
+               <image>
+                  <Image url="@/img/logo.png" />
+               </image>
             </ImageView>
-        </VBox>
-    </left>
-
-    <center>
-        <VBox alignment="CENTER" spacing="20" BorderPane.alignment="CENTER">
-            <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
-            </padding>
-            <VBox fx:id="formVBox" spacing="18" alignment="CENTER" maxWidth="380.0"
-                  style="-fx-background-color: #ffffff; -fx-background-radius: 12px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 15, 0.5, 0, 0);">
-                <padding>
-                    <Insets top="30" right="40" bottom="30" left="40"/>
-                </padding>
-
-                <Label text="Login" alignment="CENTER"
-                       style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333; -fx-padding-bottom: 15px;"/>
-
-                <VBox spacing="8">
-                    <Label text="Passaporte" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #555;"/>
-                    <StackPane>
-                        <TextField fx:id="nomeField" promptText="Insira seu passaporte"
-                                   style="-fx-padding: 8px 8px 8px 35px; -fx-background-radius: 5px; -fx-border-color: #ccc; -fx-border-radius: 5px; -fx-prompt-text-fill: #aaa;"/>
-                        <Label text="👤" StackPane.alignment="CENTER_LEFT"
-                               style="-fx-font-size: 16px; -fx-text-fill: #888; -fx-padding: 0 0 0 10px; -fx-opacity: 0.7;"/>
-                    </StackPane>
-                </VBox>
-
-                <VBox spacing="8">
-                    <Label text="Senha" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #555;"/>
-                    <StackPane>
-                        <PasswordField fx:id="senhaField" promptText="Insira sua senha"
-                                       style="-fx-padding: 8px 8px 8px 35px; -fx-background-radius: 5px; -fx-border-color: #ccc; -fx-border-radius: 5px; -fx-prompt-text-fill: #aaa;"/>
-                        <Label text="🔑" StackPane.alignment="CENTER_LEFT"
-                               style="-fx-font-size: 16px; -fx-text-fill: #888; -fx-padding: 0 0 0 10px; -fx-opacity: 0.7;"/>
-                    </StackPane>
-                </VBox>
-
-                <Button fx:id="loginButton" mnemonicParsing="false" onAction="#autenticar" text="Entrar" maxWidth="Infinity"
-                        style="-fx-background-color: #489ec1; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10px 0px; -fx-background-radius: 5px; -fx-cursor: hand;"/>
-
-                <Label fx:id="mensagemLabel" alignment="CENTER" layoutX="50.0" layoutY="300.0" prefWidth="250.0" text="Mensagem de Erro/Sucesso" textFill="RED" visible="false">
-                    <font>
-                        <Font name="System Italic" size="12.0" />
-                    </font>
-                </Label>
+         </children>
+      </VBox>
+      
+      <VBox alignment="CENTER" spacing="20.0" style="-fx-background-color: #f4f4f8;" HBox.hgrow="ALWAYS">
+         <children>
+            <VBox fx:id="formVBox" alignment="CENTER" maxWidth="380.0" spacing="18.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 15, 0.5, 0, 0);">
+               <padding>
+                  <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
+               </padding>
+               <children>
+                  <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333; -fx-padding-bottom: 15px;" text="Login" />
+                  <VBox spacing="8.0">
+                     <children>
+                        <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #555;" text="Usuário" />
+                        <StackPane>
+                           <children>
+                              <TextField fx:id="nomeField" promptText="Insira seu usuário" style="-fx-padding: 8px 8px 8px 35px; -fx-background-radius: 5px; -fx-border-color: #ccc; -fx-border-radius: 5px; -fx-prompt-text-fill: #aaa;" />
+                              <Label style="-fx-font-size: 16px; -fx-text-fill: #888; -fx-padding: 0 0 0 10px; -fx-opacity: 0.7;" text="👤" StackPane.alignment="CENTER_LEFT" />
+                           </children>
+                        </StackPane>
+                     </children>
+                  </VBox>
+                  <VBox spacing="8.0">
+                     <children>
+                        <Label style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #555;" text="Senha" />
+                        <StackPane>
+                           <children>
+                              <PasswordField fx:id="senhaField" promptText="Insira sua senha" style="-fx-padding: 8px 8px 8px 35px; -fx-background-radius: 5px; -fx-border-color: #ccc; -fx-border-radius: 5px; -fx-prompt-text-fill: #aaa;" />
+                              <Label style="-fx-font-size: 16px; -fx-text-fill: #888; -fx-padding: 0 0 0 10px; -fx-opacity: 0.7;" text="🔑" StackPane.alignment="CENTER_LEFT" />
+                           </children>
+                        </StackPane>
+                     </children>
+                  </VBox>
+                  <Button fx:id="loginButton" maxWidth="Infinity" onAction="#autenticar" style="-fx-background-color: #489ec1; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10px 0px; -fx-background-radius: 5px; -fx-cursor: hand;" text="Entrar" />
+               </children>
             </VBox>
-        </VBox>
-    </center>
-</BorderPane>
+            
+            <Label fx:id="mensagemLabel" alignment="CENTER" prefWidth="380.0" text="Mensagem de Erro/Sucesso" textFill="RED" visible="false">
+               <font><Font name="System Italic" size="12.0" /></font>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </Label>
+         </children>
+      </VBox>
+   </children>
+</HBox>
