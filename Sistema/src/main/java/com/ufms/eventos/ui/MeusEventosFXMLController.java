@@ -44,6 +44,8 @@ public class MeusEventosFXMLController implements Initializable {
 
     private EventoController eventoController;
 
+    @FXML private HomebarFXMLController homebarController;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.eventoController = new EventoController();
@@ -53,6 +55,11 @@ public class MeusEventosFXMLController implements Initializable {
             carregarMeusEventos(usuarioLogado);
         } else {
             disponiveisContainer.getChildren().add(new Label("Erro: Sessão de usuário inválida."));
+        }
+
+        if (homebarController != null) {
+            // AVISA A BARRA QUE ESTA NÃO É A PÁGINA "HOME"
+            homebarController.configurarParaPagina("MEUSEVENTOS"); 
         }
     }
 

@@ -10,7 +10,6 @@ import com.ufms.eventos.model.Usuario;
 import com.ufms.eventos.util.SessaoUsuario;
 import com.ufms.eventos.controller.PresencaConfirmadaController;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -25,10 +24,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.Node;
 
@@ -64,6 +63,7 @@ public class DetalhesEventoFXMLController implements Initializable {
     private EventoController eventoController;
     private AcaoController acaoController;
     private AdminController adminController;
+    @FXML private HomebarFXMLController homebarController;
     private PresencaConfirmadaController presencaController = new PresencaConfirmadaController();
     
     private Long eventoIdAtual;
@@ -73,41 +73,24 @@ public class DetalhesEventoFXMLController implements Initializable {
         this.eventoController = new EventoController();
         this.acaoController = new AcaoController();
         this.adminController = new AdminController();
-        // Configura tamanho e posicionamento ideal para a imagem
-        // Configuração responsiva para a imagem
-        Platform.runLater(() -> {
-            // Garante que o container tenha altura fixa
-            double headerHeight = 250.0;
-            imagemContainer.setPrefHeight(headerHeight);
-            imagemContainer.setMinHeight(headerHeight);
-            
-            // Configura o ImageView para ocupar o StackPane adequadamente
-            bannerImageView.fitWidthProperty().bind(imagemContainer.widthProperty());
-            bannerImageView.setFitHeight(headerHeight);
-            
-            // Adiciona listener para ajustar em tela cheia
-            configureFullscreenHandling();
-        });
-    }
+        this.presencaController = new PresencaConfirmadaController();
+        
+        // --- NOVO CÓDIGO PARA O CLIPPING DA IMAGEM ---
+        // Cria um retângulo com cantos arredondados que servirá de "molde"
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(15.0); // Ajuste para o arredondamento que desejar
+        clip.setArcHeight(15.0);
+        
+        // Vincula o tamanho do retângulo ao tamanho do seu container de imagem
+        clip.widthProperty().bind(imagemContainer.widthProperty());
+        clip.heightProperty().bind(imagemContainer.heightProperty());
+        
+        // Aplica o retângulo como um "clipe" (molde de corte) para o container
+        imagemContainer.setClip(clip);
 
-    private void configureFullscreenHandling() {
-        Scene scene = imagemContainer.getScene();
-        if (scene != null) {
-            Stage stage = (Stage) scene.getWindow();
-            
-            // Listener para tela cheia
-            stage.fullScreenProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal) { // Está em tela cheia
-                    // Ajusta a altura para melhor proporção em tela cheia
-                    double screenHeight = Screen.getPrimary().getBounds().getHeight() * 0.3;
-                    imagemContainer.setPrefHeight(screenHeight);
-                    bannerImageView.setFitHeight(screenHeight);
-                } else {
-                    // Volta ao tamanho normal quando sair da tela cheia
-                    imagemContainer.setPrefHeight(250);
-                    bannerImageView.setFitHeight(250);
-                }
-            });
+        if (homebarController != null) {
+            // AVISA A BARRA QUE ESTA NÃO É A PÁGINA "HOME"
+            homebarController.configurarParaPagina("DETALHES"); 
         }
     }
 
@@ -171,47 +154,55 @@ public class DetalhesEventoFXMLController implements Initializable {
             infoHyperlink.setDisable(true);
         }
 
-        // Carrega a imagem do banner
+        // --- LÓGICA DE CARREGAMENTO DE IMAGEM MELHORADA ---
         try {
-            String imagePath = evento.getImagem();
-            if (imagePath != null && !imagePath.isEmpty()) {
-                File arquivoImagem = new File(imagePath);
-                
-                if (arquivoImagem.exists()) {
-                    // Carrega a imagem
-                    Image image = new Image(new FileInputStream(arquivoImagem));
-                    
-                    // Aplica a imagem e configura para display apropriado
-                    bannerImageView.setImage(image);
-                    
-                    // Ajusta o modo de visualização para melhor posicionamento
-                    if (image.getWidth() / image.getHeight() > 1.5) {
-                        // Para imagens muito largas, foca no centro
-                        bannerImageView.setViewport(new Rectangle2D(
-                            (image.getWidth() - image.getHeight() * 1.5) / 2, 
-                            0, 
-                            image.getHeight() * 1.5, 
-                            image.getHeight()
-                        ));
-                    } else {
-                        // Para imagens normais ou verticais, mostra tudo preservando proporção
-                        bannerImageView.setViewport(null);
-                    }
-                    
-                    // Garante que a imagem preencha o espaço disponível
-                    bannerImageView.setPreserveRatio(true);
-                } else {
-                    System.err.println("Imagem não encontrada no caminho: " + imagePath);
-                    carregarImagemPlaceholder();
-                }
+            String imagePath = evento.getImagem(); // Corrigido para getImagemPath
+            Image image = null;
+
+            if (imagePath != null && !imagePath.isEmpty() && new File(imagePath).exists()) {
+                image = new Image(new FileInputStream(imagePath));
             } else {
-                carregarImagemPlaceholder();
+                // Carrega a imagem placeholder a partir dos recursos
+                InputStream is = getClass().getResourceAsStream("/img/placeholder.png");
+                if (is != null) {
+                    image = new Image(is);
+                } else {
+                    System.err.println("ERRO CRÍTICO: Imagem placeholder não encontrada!");
+                }
+            }
+
+            if (image != null) {
+                bannerImageView.setImage(image);
+                
+                // MUDANÇA PRINCIPAL: A imagem não preserva mais a proporção.
+                // Ela vai preencher o espaço, e o 'setViewport' fará o corte inteligente.
+                bannerImageView.setPreserveRatio(false);
+
+                // Centraliza a imagem dentro do ImageView para um efeito de "cover"
+                double viewWidth = bannerImageView.getFitWidth();
+                double viewHeight = bannerImageView.getFitHeight();
+                double imgWidth = image.getWidth();
+                double imgHeight = image.getHeight();
+                
+                double widthRatio = viewWidth / imgWidth;
+                double heightRatio = viewHeight / imgHeight;
+
+                double finalRatio = Math.max(widthRatio, heightRatio);
+
+                double newWidth = imgWidth * finalRatio;
+                double newHeight = imgHeight * finalRatio;
+
+                // Calcula o deslocamento para centralizar a imagem
+                double offsetX = (newWidth - viewWidth) / 2;
+                double offsetY = (newHeight - viewHeight) / 2;
+
+                bannerImageView.setViewport(new Rectangle2D(offsetX, offsetY, viewWidth, viewHeight));
             }
         } catch (Exception e) {
-            System.err.println("Erro ao carregar imagem: " + e.getMessage());
-            carregarImagemPlaceholder();
+            e.printStackTrace();
         }
     }
+    
     /**
      * Configura a visibilidade dos botões de ação baseado no status do evento e tipo de usuário
      */
@@ -245,22 +236,6 @@ public class DetalhesEventoFXMLController implements Initializable {
                     }
                 }
             }
-        }
-    }
-    /**
-     * Carrega uma imagem placeholder quando a imagem principal não está disponível
-     */
-    private void carregarImagemPlaceholder() {
-        try {
-            // Tenta carregar o placeholder de recursos
-            InputStream is = getClass().getResourceAsStream("/img/placeholder.png");
-            if (is != null) {
-                bannerImageView.setImage(new Image(is));
-            } else {
-                System.err.println("Arquivo placeholder.png não encontrado nos recursos");
-            }
-        } catch (Exception e) {
-            System.err.println("Erro ao carregar imagem placeholder: " + e.getMessage());
         }
     }
     

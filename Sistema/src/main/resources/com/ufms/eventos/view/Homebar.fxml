@@ -8,30 +8,40 @@
 <?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.StackPane?>
 
-<HBox alignment="CENTER_LEFT" maxHeight="40.0" prefHeight="40.0" prefWidth="800.0" spacing="15.0" style="-fx-background-color: #489ec1;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ufms.eventos.ui.HomebarFXMLController">
+<HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: #489ec1;" 
+      maxHeight="50.0" minHeight="50.0" prefHeight="50.0" 
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.ufms.eventos.ui.HomebarFXMLController">
    <children>
-      
+   
       <Label fx:id="homeLabel" onMouseClicked="#handleNavigateHome" style="-fx-cursor: hand;" text="Home" textFill="#2f4a51">
          <font><Font name="System Bold" size="12.0" /></font>
       </Label>
-
       <Label fx:id="analiseLabel" onMouseClicked="#handleNavigateAnalise" style="-fx-cursor: hand;" text="Análise de Eventos" textFill="#2f4a51" visible="false" managed="false">
          <font><Font name="System Bold" size="12.0" /></font>
       </Label>
-      
       <Label fx:id="presencasLabel" onMouseClicked="#handleNavigatePresencas" style="-fx-cursor: hand;" text="Minhas Presenças" textFill="#2f4a51">
          <font><Font name="System Bold" size="12.0" /></font>
       </Label>
-      
       <Label fx:id="meusEventosLabel" onMouseClicked="#handleNavigateMeusEventos" style="-fx-cursor: hand;" text="Meus Eventos" textFill="#2f4a51" visible="false" managed="false">
          <font><Font name="System Bold" size="12.0" /></font>
       </Label>
 
       <Region HBox.hgrow="ALWAYS" />
 
-      <TextField fx:id="searchTextField" onMouseClicked="#handleSearchFieldClick" prefHeight="25.0" prefWidth="180.0" promptText="Pesquisar Evento" />
-      <Button fx:id="searchButton" mnemonicParsing="false" onAction="#handleSearch" prefHeight="25.0" style="-fx-background-color: #2f4a51;" text="Buscar" textFill="WHITE" />
+      <StackPane fx:id="containerDireita">
+         <children>
+            <HBox fx:id="buscaBox" alignment="CENTER_LEFT" spacing="5.0">
+               <children>
+                  <TextField fx:id="searchTextField" onMouseClicked="#handleSearchFieldClick" prefHeight="30.0" prefWidth="200.0" promptText="Pesquisar Evento" />
+                  <Button fx:id="searchButton" onAction="#handleSearch" prefHeight="30.0" style="-fx-background-color: #2f4a51;" text="Buscar" textFill="WHITE" />
+               </children>
+            </HBox>
+            <Button fx:id="logoutButton" onAction="#handleLogout" prefHeight="30.0" style="-fx-background-color: #c94c4c; -fx-text-fill: white; -fx-font-weight: bold;" text="Desconectar" visible="false" managed="false" />
+         </children>
+      </StackPane>
       
    </children>
    <padding>

@@ -40,6 +40,9 @@ public class HomebarFXMLController implements Initializable {
     @FXML private Label meusEventosLabel;
     @FXML private TextField searchTextField;
     @FXML private Button searchButton;
+    @FXML private HBox buscaBox;
+    @FXML private Button logoutButton;
+
 
     // --- LÓGICA DE FILTRO E COMUNICAÇÃO ---
     private Popup filterTriggerPopup;
@@ -163,6 +166,31 @@ public class HomebarFXMLController implements Initializable {
     @FXML
     private void handleSearch() {
         executeSearchLogic(null, null, null);
+    }
+
+    public void configurarParaPagina(String nomePagina) {
+        boolean isHomePage = "HOME".equalsIgnoreCase(nomePagina);
+
+        // Mostra a busca somente se estiver na página Home
+        if (buscaBox != null) {
+            buscaBox.setVisible(isHomePage);
+            buscaBox.setManaged(isHomePage);
+        }
+
+        // Mostra o botão de logout em TODAS as outras páginas
+        if (logoutButton != null) {
+            logoutButton.setVisible(!isHomePage);
+            logoutButton.setManaged(!isHomePage);
+        }
+    }
+
+    /**
+     * NOVO MÉTODO: Faz o logout do usuário e o redireciona para a tela de login.
+     */
+    @FXML
+    private void handleLogout(ActionEvent event) {
+        SessaoUsuario.getInstancia().logout(); // Limpa a sessão
+        navegarPara(event, "/com/ufms/eventos/view/Login.fxml", "Login");
     }
     
     private void executeSearchLogic(Categoria categoria, Departamento departamento, String modalidade) {

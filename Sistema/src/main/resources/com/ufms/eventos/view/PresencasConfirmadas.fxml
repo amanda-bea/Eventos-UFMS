@@ -10,7 +10,7 @@
 
 <VBox prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ufms.eventos.ui.PresencasConfirmadasFXMLController">
    <children>
-      <fx:include source="Homebar.fxml" />
+      <fx:include fx:id="homebar" source="Homebar.fxml" />
       
       <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
          <content>

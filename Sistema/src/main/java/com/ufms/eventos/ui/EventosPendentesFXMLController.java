@@ -34,6 +34,7 @@ public class EventosPendentesFXMLController implements Initializable {
     @FXML private Label tituloPrincipalLabel;
 
     private AdminController adminController;
+    @FXML private HomebarFXMLController homebarController;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -46,6 +47,11 @@ public class EventosPendentesFXMLController implements Initializable {
             eventoContainer.getChildren().add(new Label("Você não tem permissão para acessar esta página."));
         } else {
             carregarEventosParaAnalise();
+        }
+
+        if (homebarController != null) {
+            // AVISA A BARRA QUE ESTA NÃO É A PÁGINA "HOME"
+            homebarController.configurarParaPagina("EVENTOSPENDENTES"); 
         }
     }
 

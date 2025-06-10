@@ -4,6 +4,7 @@ import com.ufms.eventos.controller.EventoController;
 import com.ufms.eventos.dto.EventoMinDTO;
 import com.ufms.eventos.model.Categoria;
 import com.ufms.eventos.model.Departamento;
+import com.ufms.eventos.ui.HomebarFXMLController.FilterData;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -37,7 +38,6 @@ public class HomeFXMLController implements Initializable {
     @FXML private TilePane eventoContainer;
     
     // --- REFERÊNCIA PARA O CONTROLLER DA BARRA INCLUÍDA ---
-    // O nome 'homebarController' é gerado a partir do fx:id="homebar" no FXML
     @FXML private HomebarFXMLController homebarController; 
 
     // --- CONTROLADORES E ESTADO DOS FILTROS ---
@@ -53,39 +53,35 @@ public class HomeFXMLController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.eventoController = new EventoController();
         
-        // A "PONTE" entre a barra e a tela principal é configurada aqui
         if (homebarController != null) {
-            // Diz ao controller da barra qual função executar quando o usuário buscar/filtrar
-            homebarController.setOnSearch(filterData -> {
-                System.out.println("Filtro recebido da Homebar: " + filterData);
-                
-                // Atualiza o estado dos filtros nesta tela principal
-                this.termoAtual = filterData.termoBusca();
-                this.categoriaAtual = filterData.categoria();
-                this.departamentoAtual = filterData.departamento();
-                this.modalidadeAtual = filterData.modalidade();
-                
-                // Manda recarregar o conteúdo do TilePane com os novos filtros
-                carregarEventosFiltrados();
-            });
+            // AVISA A BARRA QUE ESTA É A PÁGINA "HOME"
+            homebarController.configurarParaPagina("HOME");
+            
+            // Configura a função de callback para a busca
+            homebarController.setOnSearch(this::aplicarFiltroEBuscar);
         }
         
-        // Carga inicial (sem filtros) quando a tela abre
+        // Carga inicial sem filtros quando a tela abre
         carregarEventosFiltrados();
     }
 
-    /**
-     * Usa os campos de filtro da classe para buscar no serviço e exibir os eventos.
-     */
+    private void aplicarFiltroEBuscar(FilterData filterData) {
+        System.out.println("TELA PRINCIPAL: Filtro recebido! " + filterData);
+        
+        this.termoAtual = filterData.termoBusca();
+        this.categoriaAtual = filterData.categoria();
+        this.departamentoAtual = filterData.departamento();
+        this.modalidadeAtual = filterData.modalidade();
+        
+        carregarEventosFiltrados();
+    }
+
     private void carregarEventosFiltrados() {
         if (eventoContainer == null) return;
         eventoContainer.getChildren().clear();
 
         List<EventoMinDTO> eventosFiltrados = eventoController.buscarEventosComFiltro(
-            this.termoAtual, 
-            this.categoriaAtual, 
-            this.departamentoAtual, 
-            this.modalidadeAtual
+            this.termoAtual, this.categoriaAtual, this.departamentoAtual, this.modalidadeAtual
         );
 
         if (eventosFiltrados.isEmpty()) {

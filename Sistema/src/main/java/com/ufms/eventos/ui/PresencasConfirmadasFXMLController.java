@@ -12,7 +12,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
@@ -41,6 +40,7 @@ public class PresencasConfirmadasFXMLController implements Initializable {
     @FXML private Label tituloPrincipalLabel;
 
     private PresencaConfirmadaController presencaController;
+    @FXML private HomebarFXMLController homebarController;
 
     @FXML private FlowPane disponiveisContainer;
     @FXML private FlowPane indisponiveisContainer;
@@ -56,6 +56,11 @@ public class PresencasConfirmadasFXMLController implements Initializable {
             if (disponiveisContainer != null) {
                 disponiveisContainer.getChildren().add(new Label("Erro: Faça o login para ver suas presenças."));
             }
+        }
+
+        if (homebarController != null) {
+            // AVISA A BARRA QUE ESTA NÃO É A PÁGINA "HOME"
+            homebarController.configurarParaPagina("DETALHES"); 
         }
     }
 
@@ -161,15 +166,6 @@ public class PresencasConfirmadasFXMLController implements Initializable {
         cardPane.setOnMouseClicked(mouseEvent -> navegarParaDetalhes(mouseEvent, evento.getId()));
 
         return cardPane;
-    }
-
-    private Label criarLabelSeparador(String texto) {
-        Label separador = new Label(texto);
-        separador.setFont(Font.font("System", FontWeight.BOLD, 16));
-        separador.setPadding(new Insets(10, 0, 5, 0));
-        separador.setPrefWidth(740);
-        separador.setTextFill(Color.web("#2f4a51"));
-        return separador;
     }
     
     private void navegarParaDetalhes(MouseEvent event, Long eventoId) {
