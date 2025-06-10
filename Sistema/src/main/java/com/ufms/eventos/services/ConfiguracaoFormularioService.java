@@ -5,7 +5,6 @@ import com.ufms.eventos.model.ConfiguracaoFormulario;
 import com.ufms.eventos.model.Acao;
 import com.ufms.eventos.repository.ConfiguracaoFormularioRepositoryJDBC;
 import com.ufms.eventos.repository.AcaoRepositoryJDBC;
-import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -24,94 +23,36 @@ public class ConfiguracaoFormularioService {
         this.acaoRepository = new AcaoRepositoryJDBC();
     }
 
-    /**
-     * Cria uma nova configuração de formulário.
-     * @param dto O DTO contendo os dados da configuração.
-     * @return O DTO da configuração criada, ou null se ocorreu algum erro.
-     */
-    public ConfiguracaoFormularioDTO criarConfiguracaoFormulario(ConfiguracaoFormularioDTO dto) {
-        if (dto == null || dto.getNomeAcao() == null || dto.getNomeAcao().trim().isEmpty()) {
-            System.err.println("ConfiguracaoFormularioService: Dados inválidos para criar configuração.");
-            return null;
-        }
+    public ConfiguracaoFormularioDTO criarConfiguracao(ConfiguracaoFormularioDTO dto) {
+        if (dto == null || dto.getAcaoId() == null) return null;
 
-        // Busca a ação pelo nome
-        Acao acao = acaoRepository.getAcao(dto.getNomeAcao());
+        Acao acao = acaoRepository.findById(dto.getAcaoId());
         if (acao == null) {
-            System.err.println("Ação não encontrada: " + dto.getNomeAcao());
-            return null;
+            return null; // Ação não existe, não pode criar configuração
         }
 
-        // Converte DTO para Model
         ConfiguracaoFormulario model = new ConfiguracaoFormulario();
         model.setAcao(acao);
         model.setUsarNome(dto.isUsarNome());
         model.setUsarEmail(dto.isUsarEmail());
         model.setUsarCpf(dto.isUsarCpf());
         model.setUsarCurso(dto.isUsarCurso());
-        model.setCamposPersonalizados(new ArrayList<>(dto.getCamposPersonalizados())); // Usando o nome correto
+        model.setCamposPersonalizados(dto.getCamposPersonalizados());
 
         ConfiguracaoFormulario salvo = repository.salvar(model);
-        if (salvo != null) {
-            // Converte Model de volta para DTO para o retorno
-            return new ConfiguracaoFormularioDTO(
-                salvo.getAcao().getNome(),
-                salvo.isUsarNome(),
-                salvo.isUsarEmail(),
-                salvo.isUsarCpf(),
-                salvo.isUsarCurso(),
-                new ArrayList<>(salvo.getCamposPersonalizados())
-            );
-        }
-        return null;
+        return salvo != null ? new ConfiguracaoFormularioDTO(salvo) : null;
     }
 
-    /**
-     * Busca uma configuração de formulário pelo nome da ação.
-     * @param nomeAcao O nome da ação.
-     * @return Um Optional contendo o DTO da configuração, se encontrada.
-     */
-    public Optional<ConfiguracaoFormularioDTO> buscarConfiguracaoFormularioPorNomeAcao(String nomeAcao) {
-        Optional<ConfiguracaoFormulario> modelOptional = repository.buscarPorNomeAcao(nomeAcao);
-        if (modelOptional.isPresent()) {
-            ConfiguracaoFormulario model = modelOptional.get();
-            // Converte Model para DTO
-            ConfiguracaoFormularioDTO dto = new ConfiguracaoFormularioDTO(
-                model.getAcao().getNome(),
-                model.isUsarNome(),
-                model.isUsarEmail(),
-                model.isUsarCpf(),
-                model.isUsarCurso(),
-                new ArrayList<>(model.getCamposPersonalizados())
-            );
-            return Optional.of(dto);
+    public Optional<ConfiguracaoFormularioDTO> buscarConfiguracaoPorAcaoId(Long acaoId) {
+        if (acaoId == null) {
+            return Optional.empty();
         }
-        return Optional.empty();
-    }
-
-    /**
-     * Busca uma configuração de formulário pelo ID da ação.
-     * @param acaoId O ID da ação.
-     * @return Um Optional contendo o DTO da configuração, se encontrada.
-     */
-    public Optional<ConfiguracaoFormularioDTO> buscarConfiguracaoFormularioPorAcaoId(Long acaoId) {
+        // O repositório retorna Optional<Model>
         Optional<ConfiguracaoFormulario> modelOptional = repository.buscarPorAcaoId(acaoId);
-        if (modelOptional.isPresent()) {
-            ConfiguracaoFormulario model = modelOptional.get();
-            // Converte Model para DTO
-            ConfiguracaoFormularioDTO dto = new ConfiguracaoFormularioDTO(
-                model.getAcao().getNome(),
-                model.isUsarNome(),
-                model.isUsarEmail(),
-                model.isUsarCpf(),
-                model.isUsarCurso(),
-                new ArrayList<>(model.getCamposPersonalizados())
-            );
-            return Optional.of(dto);
-        }
-        return Optional.empty();
+        
+        // Se o modelo existir, mapeia para um DTO e retorna dentro de um Optional
+        return modelOptional.map(ConfiguracaoFormularioDTO::new);
     }
-
     /**
      * Deleta uma configuração de formulário pelo nome da ação.
      * @param nomeAcao O nome da ação.
@@ -128,6 +69,37 @@ public class ConfiguracaoFormularioService {
      */
     public boolean deletarConfiguracaoFormularioPorAcaoId(Long acaoId) {
         return repository.deletarPorAcaoId(acaoId);
+    }
+
+    /**
+     * Busca uma configuração de formulário pelo nome da ação associada
+     * 
+     * @param nomeAcao Nome da ação associada à configuração de formulário
+     * @return Um Optional contendo o DTO da configuração de formulário, ou Optional vazio se não encontrado
+     */
+    public Optional<ConfiguracaoFormularioDTO> buscarConfiguracaoFormularioPorNomeAcao(String nomeAcao) {
+        try {
+            // Obter a entidade de configuração do repositório
+            Optional<ConfiguracaoFormulario> configuracaoOpt = repository.buscarPorNomeAcao(nomeAcao);
+            
+            // Se a configuração não foi encontrada, retorne um Optional vazio
+            if (!configuracaoOpt.isPresent()) {
+                return Optional.empty();
+            }
+            
+            ConfiguracaoFormulario configuracao = configuracaoOpt.get();
+            
+            // Usar o construtor de conveniência do DTO que já faz o mapeamento correto
+            ConfiguracaoFormularioDTO dto = new ConfiguracaoFormularioDTO(configuracao);
+            
+            // Retornar o DTO dentro de um Optional
+            return Optional.of(dto);
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao buscar configuração de formulário: " + e.getMessage());
+            e.printStackTrace();
+            return Optional.empty();
+        }
     }
 
     /**

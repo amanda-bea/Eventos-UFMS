@@ -4,6 +4,7 @@ import com.ufms.eventos.dto.AcaoDTO;
 import com.ufms.eventos.dto.EditarEventoDTO;
 import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.dto.EventoMinDTO;
+import com.ufms.eventos.model.Acao;
 import com.ufms.eventos.model.Categoria;
 import com.ufms.eventos.model.Departamento;
 import com.ufms.eventos.model.Evento;
@@ -42,11 +43,12 @@ public class EventoController {
      * @param criadorDoEvento Usuário que está criando o evento.
      * @return true se a solicitação foi realizada com sucesso, false caso contrário.
      */
-    public boolean solicitarEventoComAcoes(EventoDTO eventoDTO, List<AcaoDTO> listaAcoesDTO, Usuario criadorDoEvento) {
-        if (eventoDTO == null || criadorDoEvento == null) {
-            return false;
-        }
+    public List<Acao> solicitarEventoComAcoes(EventoDTO eventoDTO, List<AcaoDTO> listaAcoesDTO, Usuario criadorDoEvento) {
         return eventoService.solicitarEventoComAcoes(eventoDTO, listaAcoesDTO, criadorDoEvento);
+    }
+
+    public boolean deletarEventoCompleto(String nomeEvento) {
+        return eventoService.deletarEventoCompleto(nomeEvento);
     }
 
     /**

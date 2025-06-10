@@ -8,6 +8,8 @@ import com.ufms.eventos.model.Departamento;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -15,13 +17,15 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.TilePane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -88,59 +92,86 @@ public class HomeFXMLController implements Initializable {
             eventoContainer.getChildren().add(new Label("Nenhum evento encontrado com os filtros atuais."));
         } else {
             for (EventoMinDTO evento : eventosFiltrados) {
-                eventoContainer.getChildren().add(criarCardEventoAtivo(evento));
+                eventoContainer.getChildren().add(criarCardEvento(evento));
             }
         }
     }
 
     /**
-     * Cria o "card" visual para um único evento.
+     * Cria o card visual padrão para um único evento.
+     * Usa um layout VBox estável e não mostra a etiqueta de status,
+     * ideal para a visualização de usuários comuns.
+     *
+     * @param evento O DTO com as informações do evento.
+     * @return Um VBox que representa o card completo e clicável.
      */
-    private AnchorPane criarCardEventoAtivo(EventoMinDTO evento) {
-        AnchorPane cardPane = new AnchorPane();
-        cardPane.setPrefSize(190, 210);
-        cardPane.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-background-radius: 5;");
+    private VBox criarCardEvento(EventoMinDTO evento) {
+        // 1. O card é um VBox para empilhar a imagem e os textos
+        VBox cardPane = new VBox(5); // 5px de espaçamento vertical
+        cardPane.setPrefSize(210, 240);
+        cardPane.setMinSize(210, 240);
+        cardPane.setMaxSize(210, 240);
+        cardPane.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);");
         cardPane.setCursor(Cursor.HAND);
+        cardPane.setPadding(new Insets(10));
+        cardPane.setAlignment(Pos.TOP_CENTER); // Centraliza a imagem e o VBox de textos
 
-        cardPane.setOnMouseClicked(mouseEvent -> navegarParaDetalhes(mouseEvent, evento.getId()));
-
+        // 2. Imagem do Evento (sem o status)
         ImageView imageView = new ImageView();
         imageView.setFitHeight(130.0);
-        imageView.setFitWidth(170.0);
-        imageView.setLayoutX(10.0);
-        imageView.setLayoutY(10.0);
+        imageView.setFitWidth(190.0);
+        imageView.setPreserveRatio(true); // Garante que a imagem não seja distorcida
+
         try {
-            imageView.setImage(new Image(evento.getImagem(), true));
+            String imagePath = evento.getImagem(); // Usando o campo de caminho do arquivo
+            if (imagePath != null && !imagePath.isEmpty() && new File(imagePath).exists()) {
+                imageView.setImage(new Image(new FileInputStream(imagePath)));
+            } else {
+                imageView.setImage(new Image(new FileInputStream("Sistema/imagem_eventos/placeholder.png")));
+            }
         } catch (Exception e) {
-            imageView.setImage(new Image(getClass().getResourceAsStream("/img/placeholder.png")));
+            System.err.println("Falha ao carregar imagem para '" + evento.getNome() + "'. Usando placeholder.");
+            try {
+                imageView.setImage(new Image(new FileInputStream("Sistema/imagem_eventos/placeholder.png")));
+            } catch (Exception ex) {
+                System.err.println("ERRO CRÍTICO: Imagem placeholder não encontrada!");
+            }
         }
 
+        // 3. Informações de Texto
+        VBox infoBox = new VBox(4);
+        infoBox.setPadding(new Insets(8, 5, 0, 5));
+        infoBox.setAlignment(Pos.CENTER_LEFT);
+
         Label nomeLabel = new Label(evento.getNome());
-        nomeLabel.setLayoutX(10.0);
-        nomeLabel.setLayoutY(145.0);
-        nomeLabel.setFont(Font.font("System", FontWeight.BOLD, 13));
+        nomeLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
 
         Label categoriaLabel = new Label(evento.getCategoria());
-        categoriaLabel.setLayoutX(10.0);
-        categoriaLabel.setLayoutY(165.0);
         categoriaLabel.setFont(Font.font("System", FontWeight.NORMAL, 12));
         categoriaLabel.setTextFill(Color.web("#489ec1"));
-
+        
         Label dataLabel = new Label(evento.getDataInicio());
-        dataLabel.setLayoutX(10.0);
-        dataLabel.setLayoutY(185.0);
         dataLabel.setFont(Font.font("System", FontWeight.NORMAL, 11));
+        
+        infoBox.getChildren().addAll(nomeLabel, categoriaLabel, dataLabel);
+        
+        // 4. Montagem Final do Card
+        // Adiciona a imagem e o VBox de textos ao card principal.
+        // A etiqueta de STATUS foi removida.
+        cardPane.getChildren().addAll(imageView, infoBox);
 
-        cardPane.getChildren().addAll(imageView, nomeLabel, categoriaLabel, dataLabel);
+        // Ação de clique para navegar para os detalhes
+        cardPane.setOnMouseClicked(mouseEvent -> navegarParaDetalhes(mouseEvent, evento.getId()));
+
         return cardPane;
     }
-    
+
     /**
      * Lógica para navegar para a tela de detalhes do evento.
      */
     private void navegarParaDetalhes(MouseEvent mouseEvent, Long eventoId) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/DetalhesEvento.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/EventoDetalhado.fxml"));
             Parent root = loader.load();
             DetalhesEventoFXMLController detalhesController = loader.getController();
             detalhesController.carregarDadosDoEvento(eventoId);

@@ -20,6 +20,6 @@
             <VBox fx:id="formContainer" spacing="10.0" />
          </content>
       </ScrollPane>
-      <Button fx:id="btnSubmeter" onAction="#handleSubmeter" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;" text="Confirmar Inscrição" />
+      <Button fx:id="btnSubmeter" onAction="#handleSubmeter" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;" text="Confirmar Presença" />
    </children>
 </VBox>

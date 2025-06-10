@@ -136,7 +136,34 @@ public class AcaoRepositoryJDBC implements AcaoRepository {
             return false;
         }
     }
-
+    /**
+     * Busca uma ação pelo seu ID
+     * 
+     * @param id ID da ação a ser encontrada
+     * @return A ação encontrada ou null se não existir
+     */
+    public Acao getAcao(Long id) {
+        String sql = "SELECT * FROM acoes WHERE id = ?";
+        
+        try (Connection conn = ConnectionFactory.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, id);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToAcao(rs);
+                }
+            }
+            
+            return null;
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar ação por ID: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     @Override
     public Acao getAcao(String nome) {
         String sql = "SELECT * FROM acoes WHERE nome = ?";
@@ -186,6 +213,29 @@ public class AcaoRepositoryJDBC implements AcaoRepository {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * Deleta uma ação do banco de dados.
+     * 
+     * @param acao A ação a ser deletada
+     * @return true se a operação foi bem-sucedida, false caso contrário
+     */
+    public boolean delete(Acao acao) {
+        String sql = "DELETE FROM acoes WHERE id = ?";
+        
+        try (Connection conn = ConnectionFactory.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, acao.getId());
+            int rowsAffected = stmt.executeUpdate();
+            
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.err.println("Erro ao deletar ação: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override

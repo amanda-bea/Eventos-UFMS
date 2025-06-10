@@ -8,6 +8,7 @@ import com.ufms.eventos.dto.EventoDTO;
 import com.ufms.eventos.model.Admin;
 import com.ufms.eventos.model.Usuario;
 import com.ufms.eventos.util.SessaoUsuario;
+import com.ufms.eventos.controller.PresencaConfirmadaController;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -20,7 +21,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -30,13 +30,11 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import javafx.scene.Node;
 
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -66,6 +64,7 @@ public class DetalhesEventoFXMLController implements Initializable {
     private EventoController eventoController;
     private AcaoController acaoController;
     private AdminController adminController;
+    private PresencaConfirmadaController presencaController = new PresencaConfirmadaController();
     
     private Long eventoIdAtual;
 
@@ -344,27 +343,59 @@ public class DetalhesEventoFXMLController implements Initializable {
         // Define o grid como o conteúdo do painel expansível
         titledPane.setContent(gridConteudo);
 
-        // Verifica o status do evento antes de adicionar o botão de inscrição
-        EventoDTO evento = eventoController.buscarDtoPorId(this.eventoIdAtual);
-        boolean eventoPendente = evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus());
-        
-        // Só adiciona o botão se o evento não estiver pendente
-        if (!eventoPendente) {
-            // Adiciona o botão "Inscrever-se" ao final do conteúdo
-            Button btnInscrever = new Button("Inscrever-se nesta Ação");
-            btnInscrever.setStyle("-fx-background-color: #489ec1; -fx-text-fill: white; -fx-font-weight: bold;");
-            btnInscrever.setOnAction(e -> handleInscrever(acao));
-            
-            // Adiciona o botão ao grid de conteúdo
-            gridConteudo.add(btnInscrever, 0, 7, 2, 1); // Ocupa 2 colunas e 1 linha
+        // --- LÓGICA DO BOTÃO DINÂMICO ---
+        Button actionButton;
+        Usuario usuarioLogado = SessaoUsuario.getInstancia().getUsuarioLogado();
+
+        // Verifica se o usuário está inscrito nesta ação específica
+        boolean inscrito = presencaController.isUsuarioInscrito(usuarioLogado, acao.getId());
+
+        if (inscrito) {
+            // Se já está inscrito, cria o botão de cancelar
+            actionButton = new Button("Cancelar Inscrição");
+            actionButton.setStyle("-fx-background-color: #d9534f; -fx-text-fill: white; -fx-font-weight: bold;");
+            actionButton.setOnAction(e -> handleCancelarInscricao(acao));
         } else {
-            // Adiciona uma mensagem informativa para eventos pendentes
-            Label pendingLabel = new Label("Inscrições disponíveis após aprovação do evento");
-            pendingLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-style: italic;");
-            gridConteudo.add(pendingLabel, 0, 7, 2, 1);
+            // Se não está inscrito, cria o botão de inscrever
+            actionButton = new Button("Inscrever-se nesta Ação");
+            actionButton.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;");
+            actionButton.setOnAction(e -> handleInscrever(acao));
+        }
+
+        // Desabilita o botão se a ação estiver lotada ou o evento pendente
+        if ("Lotado".equalsIgnoreCase(acao.getStatus()) && !inscrito) {
+            actionButton.setDisable(true);
+            actionButton.setText("Esgotado");
+            actionButton.setStyle("-fx-background-color: #777777; -fx-text-fill: white; -fx-font-weight: bold;");
         }
         
+        // Adiciona o botão dinâmico ao grid de conteúdo
+        gridConteudo.add(actionButton, 0, 7, 2, 1);
+        
+        titledPane.setContent(gridConteudo);
         return titledPane;
+    }
+    
+    private void handleCancelarInscricao(AcaoDTO acao) {
+        Usuario usuarioLogado = SessaoUsuario.getInstancia().getUsuarioLogado();
+
+        Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION, 
+            "Tem certeza que deseja cancelar sua inscrição na ação '" + acao.getNome() + "'?", 
+            ButtonType.YES, ButtonType.NO);
+        confirmacao.setTitle("Confirmar Cancelamento");
+        confirmacao.setHeaderText(null);
+
+        Optional<ButtonType> resultado = confirmacao.showAndWait();
+        if (resultado.isPresent() && resultado.get() == ButtonType.YES) {
+            boolean sucesso = presencaController.cancelarInscricao(usuarioLogado, acao.getId());
+            if (sucesso) {
+                mostrarAlerta(Alert.AlertType.INFORMATION, "Sucesso", "Sua inscrição foi cancelada.");
+                // Atualiza a tela para mostrar o botão "Inscrever-se" novamente e as vagas
+                carregarDadosDoEvento(this.eventoIdAtual);
+            } else {
+                mostrarAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível cancelar sua inscrição.");
+            }
+        }
     }
 
     private void handleInscrever(AcaoDTO acao) {
@@ -445,12 +476,6 @@ public class DetalhesEventoFXMLController implements Initializable {
         }
     }
 
-    private void fecharJanela() {
-        if (btnAprovar != null && btnAprovar.getScene() != null) {
-            ((Stage) btnAprovar.getScene().getWindow()).close();
-        }
-    }
-    
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String conteudo) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);

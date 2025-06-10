@@ -24,7 +24,7 @@ public class ConfiguracaoFormularioController {
     }
 
     public ConfiguracaoFormularioDTO criarConfiguracaoFormulario(ConfiguracaoFormularioDTO dto) {
-        return configuracaoFormularioService.criarConfiguracaoFormulario(dto);
+        return configuracaoFormularioService.criarConfiguracao(dto);
     }
 
     public boolean deletarConfiguracaoFormulario(String nomeAcao) {
@@ -33,5 +33,10 @@ public class ConfiguracaoFormularioController {
 
     public boolean verificarExistenciaConfiguracao(String nomeAcao) {
         return configuracaoFormularioService.existeConfiguracaoFormulario(nomeAcao);
+    }
+
+ 
+     public Optional<ConfiguracaoFormularioDTO> buscarConfiguracaoPorAcaoId(Long acaoId) {
+        return configuracaoFormularioService.buscarConfiguracaoPorAcaoId(acaoId);
     }
 }

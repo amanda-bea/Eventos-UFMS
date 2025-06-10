@@ -5,7 +5,6 @@ import com.ufms.eventos.model.PresencaConfirmada;
 import com.ufms.eventos.model.Usuario;
 
 import com.ufms.eventos.repository.AcaoRepositoryJDBC;
-import com.ufms.eventos.repository.PresencaConfirmadaRepository;
 import com.ufms.eventos.repository.PresencaConfirmadaRepositoryJDBC;
 import com.ufms.eventos.dto.EventoMinDTO;
 import com.ufms.eventos.dto.PresencaConfirmadaDTO;
@@ -16,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class PresencaConfirmadaService {
-    private PresencaConfirmadaRepository pr;
+    private PresencaConfirmadaRepositoryJDBC pr;
     private AcaoRepositoryJDBC ar;
 
     public PresencaConfirmadaService() {
@@ -116,43 +115,84 @@ public class PresencaConfirmadaService {
     }
     
     /**
-     * Cancela a presença de um usuário em uma ação.
-     * 
-     * @param usuario O usuário
-     * @param acao A ação
-     * @return true se a operação foi bem-sucedida
+     * Verifica se um usuário específico já confirmou presença em uma ação.
+     * @param usuario O usuário da sessão.
+     * @param acaoId O ID da ação a ser verificada.
+     * @return true se a presença já existe, false caso contrário.
      */
-    public boolean cancelarPresenca(Usuario usuario, Acao acao) {
-        if (usuario == null || acao == null) {
+    public boolean isUsuarioInscrito(Usuario usuario, Long acaoId) {
+        if (usuario == null || acaoId == null) {
             return false;
         }
-        
-        PresencaConfirmada presenca = new PresencaConfirmada(usuario, acao);
-        return pr.removePresencaConfirmada(presenca);
+        // Supondo que seu PresencaConfirmadaRepository tenha um método 'exists'
+        return pr.verificarPresenca(usuario.getNome(), acaoId);
+    }
+
+    /**
+ * Remove a presença confirmada de um usuário em uma ação.
+ * @param usuario O usuário da sessão.
+ * @param acaoId O ID da ação da qual o usuário quer se desinscrever.
+ * @return true se a inscrição foi cancelada com sucesso.
+ */
+public boolean cancelarInscricao(Usuario usuario, Long acaoId) {
+    if (usuario == null || acaoId == null) {
+        return false;
     }
     
-    /**
-     * Cancela a presença de um usuário em uma ação usando os nomes.
-     * 
-     * @param nomeUsuario Nome do usuário
-     * @param nomeAcao Nome da ação
-     * @return true se a operação foi bem-sucedida
-     */
-    public boolean cancelarPresenca(String nomeUsuario, String nomeAcao) {
-        if (nomeUsuario == null || nomeAcao == null) {
-            return false;
-        }
-        
-        // Cria usuário
-        Usuario usuario = new Usuario();
-        usuario.setNome(nomeUsuario);
-        
-        // Busca a ação pelo nome
-        Acao acao = ar.getAcao(nomeAcao);
-        if (acao == null) {
-            return false;
-        }
-        
-        return cancelarPresenca(usuario, acao);
+    // Supondo que seu PresencaConfirmadaRepository tenha um método 'delete'
+    boolean sucesso = pr.delete(usuario.getNome(), acaoId);
+    
+    if (sucesso) {
+        // Em vez de chamar acaoService.verificarStatusVagas(acaoId),
+        // atualizamos diretamente o status da ação
+        atualizarStatusVagas(acaoId);
     }
+    return sucesso;
+}
+
+/**
+ * Atualiza o status de vagas da ação com base nas inscrições atuais.
+ * Se capacidade - inscrições <= 10, status = "Últimas vagas"
+ * Se inscrições >= capacidade, status = "Lotado"
+ * Caso contrário, status = "Ativo"
+ * 
+ * @param acaoId ID da ação para atualizar o status
+ */
+private void atualizarStatusVagas(Long acaoId) {
+    Acao acao = ar.findById(acaoId);
+    if (acao == null) return;
+    
+    int inscricoes = contarPresencasConfirmadas(acaoId);
+    int capacidade = acao.getCapacidade();
+    
+    // Se a ação não tem limite de capacidade, mantenha como ativa
+    if (capacidade <= 0) {
+        if (!"Ativo".equals(acao.getStatus())) {
+            acao.setStatus("Ativo");
+            ar.updateAcao(acao);
+        }
+        return;
+    }
+    
+    // Vagas disponíveis
+    int vagasDisponiveis = capacidade - inscricoes;
+    
+    // Definir o status baseado nas vagas disponíveis
+    String novoStatus;
+    
+    if (vagasDisponiveis <= 0) {
+        novoStatus = "Lotado";
+    } else if (vagasDisponiveis <= 10) {
+        novoStatus = "Últimas vagas";
+    } else {
+        novoStatus = "Ativo";
+    }
+    
+    // Atualizar apenas se o status mudou
+    if (!novoStatus.equals(acao.getStatus())) {
+        acao.setStatus(novoStatus);
+        ar.updateAcao(acao);
+        System.out.println("Status da ação ID " + acaoId + " atualizado para: " + novoStatus);
+    }
+}
 }

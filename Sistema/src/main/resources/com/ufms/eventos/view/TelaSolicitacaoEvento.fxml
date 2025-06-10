@@ -10,29 +10,23 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="550.0" prefWidth="750.0" style="-fx-background-color: #489ec1;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ufms.eventos.ui.SolicitarEventoFXMLController">
-
+<BorderPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #489ec1;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ufms.eventos.ui.SolicitarEventoFXMLController">
     <left>
         <VBox alignment="TOP_CENTER" prefWidth="220.0" spacing="20.0" style="-fx-background-color: #489ec1;">
             <padding>
                 <Insets bottom="20.0" left="10.0" right="10.0" top="20.0" />
             </padding>
-         <AnchorPane prefHeight="66.0" prefWidth="153.0">
-            <children>
-                  <ImageView fitHeight="37.0" fitWidth="120.0" layoutY="8.0" onMouseClicked="#voltar" pickOnBounds="true" preserveRatio="true">
-                      <image>
-                          <Image url="@/img/seta.png" />
-                      </image>
-                  </ImageView>
-            </children>
-         </AnchorPane>
+            <ImageView fx:id="btnVoltar" fitHeight="37.0" fitWidth="120.0" onMouseClicked="#voltar" pickOnBounds="true" preserveRatio="true" style="-fx-cursor: hand;">
+                <image>
+                    <Image url="@/img/seta.png" />
+                </image>
+            </ImageView>
             <ImageView fitHeight="165.0" fitWidth="176.0" pickOnBounds="true" preserveRatio="true">
                 <image>
                     <Image url="@/img/logo.png" />
@@ -40,19 +34,17 @@
             </ImageView>
         </VBox>
     </left>
-
     <center>
-        <ScrollPane fitToWidth="true" style="-fx-background-color: #ffffff; -fx-background: #ffffff;" BorderPane.alignment="CENTER">
+        <ScrollPane fitToWidth="true" style="-fx-background-color: #ffffff;" BorderPane.alignment="CENTER">
             <content>
                 <StackPane alignment="TOP_CENTER" style="-fx-background-color: #ffffff;">
                     <padding>
                         <Insets bottom="20.0" top="20.0" />
                     </padding>
-                    <VBox fx:id="formVBox" alignment="TOP_LEFT" maxWidth="450.0" spacing="12.0" style="-fx-background-color: #ffffff;">
+                    <VBox fx:id="formVBox" alignment="TOP_LEFT" maxWidth="450.0" spacing="12.0">
                         <padding>
                             <Insets bottom="20.0" left="30.0" right="30.0" top="10.0" />
                         </padding>
-
                         <Label style="-fx-alignment: center;" text="Solicitação de Novo Evento" textFill="#489ec1d1" VBox.vgrow="NEVER">
                             <font>
                                 <Font name="System Bold" size="18.0" />
@@ -61,51 +53,62 @@
                                 <Insets bottom="15.0" />
                             </VBox.margin>
                         </Label>
-
                         <Label text="Nome do Evento" textFill="#2f4a51">
-                            <font><Font name="Nirmala UI Bold" size="12.0" /></font>
+                            <font>
+                                <Font name="Nirmala UI Bold" size="12.0" />
+                            </font>
                         </Label>
                         <TextField fx:id="nomeField" prefHeight="30.0" promptText="Nome do Evento">
-                            <font><Font name="Nirmala UI Semilight" size="12.0" /></font>
+                            <font>
+                                <Font name="Nirmala UI Semilight" size="12.0" />
+                            </font>
                         </TextField>
-
                         <Label text="Descrição" textFill="#2f4a51">
-                            <font><Font name="Nirmala UI Bold" size="12.0" /></font>
+                            <font>
+                                <Font name="Nirmala UI Bold" size="12.0" />
+                            </font>
                         </Label>
                         <TextArea fx:id="descricaoArea" prefHeight="60.0" promptText="Descrição do Evento" wrapText="true">
-                            <font><Font name="Nirmala UI Semilight" size="12.0" /></font>
+                            <font>
+                                <Font name="Nirmala UI Semilight" size="12.0" />
+                            </font>
                         </TextArea>
-
                         <HBox spacing="20.0">
                             <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                                 <Label text="Data de Início" textFill="#2f4a51">
-                                    <font><Font name="Nirmala UI Bold" size="12.0" /></font>
+                                    <font>
+                                        <Font name="Nirmala UI Bold" size="12.0" />
+                                    </font>
                                 </Label>
                                 <DatePicker fx:id="dataInicioField" prefHeight="30.0" prefWidth="1000.0" promptText="dd/MM/yyyy" />
                             </VBox>
                             <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                                 <Label text="Data de Fim" textFill="#2f4a51">
-                                    <font><Font name="Nirmala UI Bold" size="12.0" /></font>
+                                    <font>
+                                        <Font name="Nirmala UI Bold" size="12.0" />
+                                    </font>
                                 </Label>
                                 <DatePicker fx:id="dataFimField" prefHeight="30.0" prefWidth="1000.0" promptText="dd/MM/yyyy" />
                             </VBox>
                         </HBox>
-
                         <HBox spacing="20.0">
                             <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                                 <Label text="Departamento (Evento)" textFill="#2f4a51">
-                                     <font><Font name="Nirmala UI Bold" size="12.0" /></font>
+                                    <font>
+                                        <Font name="Nirmala UI Bold" size="12.0" />
+                                    </font>
                                 </Label>
                                 <ComboBox fx:id="departamentoComboBox" prefHeight="30.0" prefWidth="1000.0" promptText="Selecione o Departamento" />
                             </VBox>
                             <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                                 <Label text="Categoria (Evento)" textFill="#2f4a51">
-                                    <font><Font name="Nirmala UI Bold" size="12.0" /></font>
+                                    <font>
+                                        <Font name="Nirmala UI Bold" size="12.0" />
+                                    </font>
                                 </Label>
                                 <ComboBox fx:id="categoriaComboBox" prefHeight="30.0" prefWidth="1000.0" promptText="Selecione a Categoria" />
                             </VBox>
                         </HBox>
-
                         <VBox spacing="5.0">
                             <children>
                                 <Label text="Imagem do Evento" />
@@ -117,30 +120,32 @@
                                 </HBox>
                             </children>
                         </VBox>
-
                         <Label text="Link para mais informações (Evento)" textFill="#2f4a51">
-                            <font><Font name="Nirmala UI Bold" size="12.0" /></font>
+                            <font>
+                                <Font name="Nirmala UI Bold" size="12.0" />
+                            </font>
                         </Label>
                         <TextField fx:id="linkField" prefHeight="30.0" promptText="Link para mais informações" />
-                        
                         <Label text="Ações do Evento" textFill="#489ec1d1">
-                            <font><Font name="System Bold" size="16.0" /></font>
-                            <VBox.margin><Insets bottom="5.0" top="15.0" /></VBox.margin>
+                            <font>
+                                <Font name="System Bold" size="16.0" />
+                            </font>
+                            <VBox.margin>
+                                <Insets bottom="5.0" top="15.0" />
+                            </VBox.margin>
                         </Label>
-
                         <VBox fx:id="acoesContainerVBox" spacing="20.0" style="-fx-border-color: #DDDDDD; -fx-border-width: 0 0 1 0; -fx-padding: 0 0 15 0;">
-                             <VBox.margin>
+                            <VBox.margin>
                                 <Insets bottom="10.0" />
                             </VBox.margin>
-                            </VBox>
-
+                        </VBox>
                         <Button fx:id="btnAdicionarAcao" maxWidth="Infinity" onAction="#handleAdicionarAcao" style="-fx-background-color: #5cb85c; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10px 0px; -fx-background-radius: 5px; -fx-cursor: hand;" text="Adicionar Ação">
                             <VBox.margin>
                                 <Insets top="5.0" />
                             </VBox.margin>
                         </Button>
-
-                        <Button fx:id="btnSolicitarEventoFinal" managed="false" maxWidth="Infinity" onAction="#handleSolicitarEventoFinal" style="-fx-background-color: #489ec1; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10px 0px; -fx-background-radius: 5px; -fx-cursor: hand;" text="Concluir e Solicitar Evento" visible="false"> <VBox.margin>
+                        <Button fx:id="btnSolicitarEventoFinal" managed="false" maxWidth="Infinity" onAction="#handleSolicitarEventoFinal" style="-fx-background-color: #489ec1; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10px 0px; -fx-background-radius: 5px; -fx-cursor: hand;" text="Concluir e Solicitar Evento" visible="false">
+                            <VBox.margin>
                                 <Insets top="15.0" />
                             </VBox.margin>
                         </Button>

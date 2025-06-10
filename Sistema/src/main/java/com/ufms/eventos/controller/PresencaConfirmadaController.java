@@ -27,13 +27,13 @@ public class PresencaConfirmadaController {
         return service.confirmarPresenca(dto);
     }
     
-    /**
-     * Cancela a presença de um usuário em uma ação.
-     */
-    public boolean cancelarPresenca(String nomeUsuario, String nomeAcao) {
-        return service.cancelarPresenca(nomeUsuario, nomeAcao);
+    public boolean isUsuarioInscrito(Usuario usuario, Long acaoId) {
+        return service.isUsuarioInscrito(usuario, acaoId);
     }
-    
+
+    public boolean cancelarInscricao(Usuario usuario, Long acaoId) {
+        return service.cancelarInscricao(usuario, acaoId);
+    }
     /**
      * Conta o número de presenças confirmadas para uma ação.
      */

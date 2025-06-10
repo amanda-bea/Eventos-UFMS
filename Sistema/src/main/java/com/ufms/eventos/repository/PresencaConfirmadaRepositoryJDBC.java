@@ -67,6 +67,37 @@ public class PresencaConfirmadaRepositoryJDBC implements PresencaConfirmadaRepos
         }
     }
 
+    public boolean delete(String usuarioNome, Long acaoId) {
+        if (usuarioNome == null || usuarioNome.trim().isEmpty() || acaoId == null) {
+            return false;
+        }
+        
+        // Utilizando a tabela presencas_confirmadas conforme criada no ConnectionFactory
+        String sql = "DELETE FROM presencas_confirmadas WHERE usuario_nome = ? AND acao_id = ?";
+        
+        try (Connection conn = ConnectionFactory.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, usuarioNome);
+            stmt.setLong(2, acaoId);
+            
+            int rowsAffected = stmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                System.out.println("Presença cancelada com sucesso para usuário: " + usuarioNome + " na ação ID: " + acaoId);
+                return true;
+            } else {
+                System.out.println("Nenhum registro encontrado para cancelar a presença do usuário: " + usuarioNome + " na ação ID: " + acaoId);
+                return false;
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Erro ao cancelar presença: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     @Override
     public HashSet<PresencaConfirmada> getPresencasConfirmadas() {
         HashSet<PresencaConfirmada> presencas = new HashSet<>();

@@ -17,10 +17,7 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 
 import java.io.File;

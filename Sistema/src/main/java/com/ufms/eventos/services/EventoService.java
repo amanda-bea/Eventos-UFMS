@@ -12,7 +12,7 @@ import com.ufms.eventos.model.Organizador;
 import com.ufms.eventos.model.Usuario;
 import com.ufms.eventos.repository.AcaoRepositoryJDBC;
 import com.ufms.eventos.repository.EventoRepositoryJDBC;
-import com.ufms.eventos.util.SessaoUsuario;
+import com.ufms.eventos.repository.OrganizadorRepositoryJDBC;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,14 +24,16 @@ import java.util.stream.Collectors;
  * É utilizada tanto pelo EventoController quanto pelo AdminController.
  */
 public class EventoService {
-    private EventoRepositoryJDBC eventoRepositoryJDBC;
+    private EventoRepositoryJDBC er;
     private AcaoRepositoryJDBC ar;
     private AcaoService acaoService;
+    private OrganizadorRepositoryJDBC organizadorRepository;
 
     public EventoService() {
-        this.eventoRepositoryJDBC = new EventoRepositoryJDBC();
+        this.er = new EventoRepositoryJDBC();
         this.ar = new AcaoRepositoryJDBC();
         this.acaoService = new AcaoService();
+        this.organizadorRepository = new OrganizadorRepositoryJDBC();
     }
 
     // ===================================================================
@@ -39,75 +41,87 @@ public class EventoService {
     // ===================================================================
 
     /**
-     * Método principal para criar um evento. Recebe qualquer usuário e o trata
-     * como o organizador do evento.
+     * CORRIGIDO: Salva um evento e suas ações, e RETORNA as ações recém-criadas com seus IDs do banco.
+     * @return Uma lista de objetos Acao persistidos, ou uma lista vazia se falhar.
      */
-    public boolean solicitarEventoComAcoes(EventoDTO eventoDTO, List<AcaoDTO> listaAcoesDTO, Usuario criadorDoEvento) {
-        if (eventoDTO == null || listaAcoesDTO == null || listaAcoesDTO.isEmpty() || criadorDoEvento == null) {
-            System.err.println("Erro: dados inválidos para criação de evento");
-            return false;
-        }
-        
-        // Verifica se o usuário já é organizador ou precisa se tornar um
-        Organizador organizador;
-        
-        if (criadorDoEvento instanceof Organizador) {
-            // Já é um organizador
-            organizador = (Organizador) criadorDoEvento;
-        } else {
-            try {
-                // Transformar o usuário em organizador
-                OrganizadorService organizadorService = new OrganizadorService();
-                
-                // Cria um organizador com os mesmos dados do usuário
-                organizador = new Organizador(
-                    criadorDoEvento.getNome(), 
-                    criadorDoEvento.getEmail(), 
-                    criadorDoEvento.getSenha(), 
-                    criadorDoEvento.getTelefone()
-                );
-                
-                // Cadastra o organizador no sistema
-                boolean sucesso = organizadorService.salvarOrganizador(organizador);
-                
-                if (!sucesso) {
-                    System.err.println("Erro ao converter usuário em organizador: " + criadorDoEvento.getNome());
-                    return false;
-                }
-                
-                // Atualiza a sessão
-                SessaoUsuario.getInstancia().login(organizador);
-                System.out.println("Usuário " + criadorDoEvento.getNome() + " promovido para organizador");
-                
-            } catch (Exception e) {
-                System.err.println("Erro ao transformar usuário em organizador: " + e.getMessage());
-                e.printStackTrace();
-                return false;
+    public List<Acao> solicitarEventoComAcoes(EventoDTO eventoDTO, List<AcaoDTO> listaAcoesDTO, Usuario criadorDoEvento) {
+        // Lógica para obter ou criar o Organizador
+        Organizador organizador = organizadorRepository.getOrganizador(criadorDoEvento.getNome());
+        if (organizador == null) {
+            // Criar um novo organizador usando o construtor padrão e setters
+            Organizador novoOrganizador = new Organizador();
+            novoOrganizador.setNome(criadorDoEvento.getNome());
+            novoOrganizador.setEmail(criadorDoEvento.getEmail());
+            
+            // Definir outros campos disponíveis do usuário que devem ser copiados para o organizador
+            if (criadorDoEvento.getTelefone() != null) {
+                novoOrganizador.setTelefone(criadorDoEvento.getTelefone());
             }
+            
+            // Salvar no repositório
+            organizador = organizadorRepository.salvar(novoOrganizador);
         }
 
+        Evento evento = new Evento(eventoDTO);
+        evento.setOrganizador(organizador);
+        evento.setStatus("Aguardando aprovação");
+        
+        // Salva o evento principal. O método 'salvar' deve popular o ID no objeto 'evento'.
         try {
-            Evento evento = new Evento(eventoDTO);
-            evento.setStatus("Aguardando aprovação");
-            evento.setOrganizador(organizador);
-                
-            // Verifica se já existe um evento com este nome
-            if (buscarPorNome(evento.getNome()) == null) {
-                // Salva o evento usando o repositório JDBC
-                eventoRepositoryJDBC.salvar(evento);
+            er.salvar(evento);
+        } catch (Exception e) {
+            System.err.println("Erro ao salvar o evento principal: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>(); // Retorna lista vazia em caso de falha
+        }
+        if (evento.getId() == null) {
+            System.err.println("Falha ao salvar o evento principal no banco de dados.");
+            return new ArrayList<>(); // Retorna lista vazia em caso de falha
+        }
+
+        List<Acao> acoesSalvas = new ArrayList<>();
+        for (AcaoDTO acaoDTO : listaAcoesDTO) {
+            Acao acao = new Acao(acaoDTO);
+            acao.setEvento(evento); // Vincula ao evento recém-criado, que já tem ID
+            acao.setStatus("Aguardando aprovação");
+            
+            // O método 'add' do AcaoRepository também deve popular o ID no objeto 'acao'.
+            if (ar.addAcao(acao)) {
+                acoesSalvas.add(acao);
+            }
+        }
+        
+        if (acoesSalvas.size() != listaAcoesDTO.size()){
+            System.err.println("Falha ao salvar uma ou mais ações. Iniciando rollback...");
+            deletarEventoCompleto(evento.getNome());
+            return new ArrayList<>();
+        }
+        
+        return acoesSalvas;
+    }
+
+
+    /**
+     * Deleta um evento e todas as suas ações e configurações associadas (rollback).
+     */
+    public boolean deletarEventoCompleto(String nomeEvento) {
+        try {
+            Evento evento = buscarPorNome(nomeEvento);
+            if (evento != null) {
+                // Usar o método existente para buscar ações por evento ID
+                List<Acao> acoes = ar.findByEventoId(evento.getId());
+                for (Acao acao : acoes) {
                     
-                // Cria as ações associadas ao evento
-                for (AcaoDTO acaoDTO : listaAcoesDTO) {
-                    Acao acao = new Acao(acaoDTO);
-                    acao.setEvento(evento);
-                    acao.setStatus("Aguardando aprovação");
-                    ar.addAcao(acao);
+                    ar.delete(acao);
                 }
+                
+                // Usar o método deletar em vez de delete
+                er.deletar(evento.getId());
                 return true;
             }
             return false;
         } catch (Exception e) {
-            System.err.println("Erro ao salvar evento ou ações: " + e.getMessage());
+            System.err.println("Erro ao deletar evento completo: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -118,7 +132,7 @@ public class EventoService {
      */
     private Evento buscarPorNome(String nome) {
         try {
-            List<Evento> eventos = eventoRepositoryJDBC.listarTodos();
+            List<Evento> eventos = er.listarTodos();
             return eventos.stream()
                 .filter(e -> e.getNome().equals(nome))
                 .findFirst().orElse(null);
@@ -140,7 +154,7 @@ public class EventoService {
                 evento.setDataInicio(LocalDate.parse(dto.getNovaDataInicio()));
                 evento.setDataFim(LocalDate.parse(dto.getNovaDataFim()));
                 evento.setLink(dto.getNovoLink());
-                eventoRepositoryJDBC.atualizar(evento);
+                er.atualizar(evento);
                 return true;
             }
             return false;
@@ -175,7 +189,7 @@ public class EventoService {
             
             if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())
                 && evento.getOrganizador().getNome().equals(usuarioLogado.getNome())) {
-                eventoRepositoryJDBC.deletar(evento.getId());
+                er.deletar(evento.getId());
                 return true;
             }
             return false;
@@ -188,7 +202,7 @@ public class EventoService {
     public List<EventoMinDTO> buscarEventosPorUsuario(Usuario usuario) {
         List<EventoMinDTO> eventosMiniDTO = new ArrayList<>();
         try {
-            List<Evento> eventos = eventoRepositoryJDBC.buscarPorOrganizador(usuario.getNome());
+            List<Evento> eventos = er.buscarPorOrganizador(usuario.getNome());
             
             for (Evento evento : eventos) {
                 EventoMinDTO dto = new EventoMinDTO();
@@ -224,7 +238,7 @@ public class EventoService {
      */
     public List<EventoMinDTO> buscarEventosPorStatus(String status) {
         try {
-            List<Evento> eventos = eventoRepositoryJDBC.findByStatus(status);
+            List<Evento> eventos = er.findByStatus(status);
             return eventos.stream()
                     .map(EventoMinDTO::new)
                     .collect(Collectors.toList());
@@ -242,7 +256,7 @@ public class EventoService {
             Evento evento = buscarPorNome(nomeEvento);
             if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
                 evento.setStatus("Ativo");
-                eventoRepositoryJDBC.atualizar(evento);
+                er.atualizar(evento);
                 
                 // Aprovar ações filhas
                 List<Acao> acoesDoEvento = ar.findByEventoId(evento.getId());
@@ -269,7 +283,7 @@ public class EventoService {
             if (evento != null && "Aguardando aprovação".equalsIgnoreCase(evento.getStatus())) {
                 evento.setStatus("Rejeitado");
                 evento.setMensagemRejeicao(motivo);
-                eventoRepositoryJDBC.atualizar(evento);
+                er.atualizar(evento);
                 
                 // Rejeitar ações filhas
                 List<Acao> acoesDoEvento = ar.findByEventoId(evento.getId());
@@ -297,7 +311,7 @@ public class EventoService {
      */
     public List<EventoMinDTO> listarEventosAtivosMin() {
         try {
-            List<Evento> eventos = eventoRepositoryJDBC.findByStatus("Ativo");
+            List<Evento> eventos = er.findByStatus("Ativo");
             return eventos.stream()
                     .map(EventoMinDTO::new)
                     .collect(Collectors.toList());
@@ -312,7 +326,7 @@ public class EventoService {
      */
     public EventoDTO buscarDtoPorId(Long id) {
         try {
-            Evento evento = eventoRepositoryJDBC.buscarPorId(id);
+            Evento evento = er.buscarPorId(id);
             if (evento == null) {
                 throw new IllegalArgumentException("Evento com ID " + id + " não encontrado.");
             }
@@ -330,7 +344,7 @@ public class EventoService {
                                                      Departamento departamento, String modalidade) {
         try {
             // Base: eventos ativos 
-            List<Evento> eventosAtivos = eventoRepositoryJDBC.findByStatus("Ativo");
+            List<Evento> eventosAtivos = er.findByStatus("Ativo");
             List<Evento> eventosFiltrados = new ArrayList<>(eventosAtivos);
             
             // Filtra por termo de busca
@@ -388,7 +402,7 @@ public class EventoService {
      */
     public Evento buscarEventoPorId(Long id) {
         try {
-            return eventoRepositoryJDBC.buscarPorId(id);
+            return er.buscarPorId(id);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -404,7 +418,7 @@ public class EventoService {
             acaoService.atualizarAcoesExpiradas();
     
             // 2. Pega todos os eventos que ainda estão "Ativos"
-            List<Evento> eventosAtivos = eventoRepositoryJDBC.findByStatus("Ativo");
+            List<Evento> eventosAtivos = er.findByStatus("Ativo");
     
             // 3. Para cada evento ativo, verifica o status de suas ações
             for (Evento evento : eventosAtivos) {
@@ -423,7 +437,7 @@ public class EventoService {
                 if (todasAcoesInativas) {
                     System.out.println("Inativando evento '" + evento.getNome() + "' pois todas as suas ações expiraram.");
                     evento.setStatus("Inativo");
-                    eventoRepositoryJDBC.atualizar(evento);
+                    er.atualizar(evento);
                 }
             }
         } catch (Exception e) {

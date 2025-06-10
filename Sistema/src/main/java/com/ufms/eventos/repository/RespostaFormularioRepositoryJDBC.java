@@ -20,10 +20,9 @@ public class RespostaFormularioRepositoryJDBC implements RespostaFormularioRepos
             return; // Não é possível salvar com dados inválidos
         }
         
-        // Primeiro, inserimos os dados principais
-        String sqlMain = "INSERT INTO resposta_formulario (id_acao, nome, email, cpf, curso) VALUES (?, ?, ?, ?, ?)";
+        // Primeiro, inserimos os dados principais - CORRIGIDO nome da tabela para respostas_formulario
+        String sqlMain = "INSERT INTO respostas_formulario (acao_id, nome, email, cpf, curso) VALUES (?, ?, ?, ?, ?)";
         
-        // Alterado para declarar explicitamente que o método getConnection() lança SQLException
         try (Connection conn = ConnectionFactory.getConnection()) {
             conn.setAutoCommit(false); // Inicia transação
             
@@ -48,9 +47,10 @@ public class RespostaFormularioRepositoryJDBC implements RespostaFormularioRepos
                     }
                 }
                 
-                // Agora insere as respostas extras se existirem
+                // Agora insere as respostas extras se existirem - CORRIGIDO nome da tabela para respostas_extras
                 if (resposta.getRespostasExtras() != null && !resposta.getRespostasExtras().isEmpty()) {
-                    String sqlExtras = "INSERT INTO resposta_extras (id_resposta, nome_campo, valor_campo) VALUES (?, ?, ?)";
+                    // CORRIGIDO nome da tabela e nomes de colunas
+                    String sqlExtras = "INSERT INTO respostas_extras (resposta_id, nome_campo, valor_campo) VALUES (?, ?, ?)";
                     try (PreparedStatement extrasStmt = conn.prepareStatement(sqlExtras)) {
                         for (Map.Entry<String, String> entry : resposta.getRespostasExtras().entrySet()) {
                             extrasStmt.setInt(1, resposta.getId());
@@ -82,10 +82,11 @@ public class RespostaFormularioRepositoryJDBC implements RespostaFormularioRepos
         
         List<RespostaFormulario> respostas = new ArrayList<>();
 
+        // CORRIGIDO nome da tabela para respostas_formulario
         String sql = """
-                SELECT rf.id, rf.nome, rf.email, rf.cpf, rf.curso, a.id AS id_acao, a.nome AS nome_acao
-                FROM resposta_formulario rf
-                JOIN acao a ON rf.id_acao = a.id
+                SELECT rf.id, rf.nome, rf.email, rf.cpf, rf.curso, a.id AS acao_id, a.nome AS nome_acao
+                FROM respostas_formulario rf
+                JOIN acoes a ON rf.acao_id = a.id
                 WHERE LOWER(a.nome) = LOWER(?)
                 """;
 
@@ -120,10 +121,11 @@ public class RespostaFormularioRepositoryJDBC implements RespostaFormularioRepos
         
         List<RespostaFormulario> respostas = new ArrayList<>();
 
+        // CORRIGIDO nome da tabela e nomes de colunas
         String sql = """
-                SELECT rf.id, rf.nome, rf.email, rf.cpf, rf.curso, a.id AS id_acao, a.nome AS nome_acao
-                FROM resposta_formulario rf
-                JOIN acao a ON rf.id_acao = a.id
+                SELECT rf.id, rf.nome, rf.email, rf.cpf, rf.curso, a.id AS acao_id, a.nome AS nome_acao
+                FROM respostas_formulario rf
+                JOIN acoes a ON rf.acao_id = a.id
                 WHERE a.id = ?
                 """;
 
@@ -157,10 +159,11 @@ public class RespostaFormularioRepositoryJDBC implements RespostaFormularioRepos
         
         List<RespostaFormulario> respostas = new ArrayList<>();
         
+        // CORRIGIDO nome da tabela e nomes de colunas
         String sql = """
-                SELECT rf.id, rf.nome, rf.email, rf.cpf, rf.curso, a.id AS id_acao, a.nome AS nome_acao
-                FROM resposta_formulario rf
-                JOIN acao a ON rf.id_acao = a.id
+                SELECT rf.id, rf.nome, rf.email, rf.cpf, rf.curso, a.id AS acao_id, a.nome AS nome_acao
+                FROM respostas_formulario rf
+                JOIN acoes a ON rf.acao_id = a.id
                 WHERE a.id = ? AND rf.nome = ?
                 """;
         
@@ -200,7 +203,8 @@ public class RespostaFormularioRepositoryJDBC implements RespostaFormularioRepos
             try {
                 // Primeiro precisamos encontrar os IDs de todas as respostas para essa ação
                 List<Integer> respostaIds = new ArrayList<>();
-                String sqlFindIds = "SELECT id FROM resposta_formulario WHERE id_acao = ?";
+                // CORRIGIDO nome da tabela e nomes de colunas
+                String sqlFindIds = "SELECT id FROM respostas_formulario WHERE acao_id = ?";
                 
                 try (PreparedStatement findStmt = conn.prepareStatement(sqlFindIds)) {
                     findStmt.setLong(1, acaoId);
@@ -214,7 +218,8 @@ public class RespostaFormularioRepositoryJDBC implements RespostaFormularioRepos
                 
                 // Excluir as respostas extras primeiro
                 if (!respostaIds.isEmpty()) {
-                    String sqlDeleteExtras = "DELETE FROM resposta_extras WHERE id_resposta = ?";
+                    // CORRIGIDO nome da tabela e nomes de colunas
+                    String sqlDeleteExtras = "DELETE FROM respostas_extras WHERE resposta_id = ?";
                     try (PreparedStatement deleteExtrasStmt = conn.prepareStatement(sqlDeleteExtras)) {
                         for (Integer respostaId : respostaIds) {
                             deleteExtrasStmt.setInt(1, respostaId);
@@ -225,7 +230,8 @@ public class RespostaFormularioRepositoryJDBC implements RespostaFormularioRepos
                 }
                 
                 // Agora exclui as respostas principais
-                String sqlDeleteMain = "DELETE FROM resposta_formulario WHERE id_acao = ?";
+                // CORRIGIDO nome da tabela e nomes de colunas
+                String sqlDeleteMain = "DELETE FROM respostas_formulario WHERE acao_id = ?";
                 try (PreparedStatement deleteMainStmt = conn.prepareStatement(sqlDeleteMain)) {
                     deleteMainStmt.setLong(1, acaoId);
                     deleteMainStmt.executeUpdate();
@@ -250,7 +256,8 @@ public class RespostaFormularioRepositoryJDBC implements RespostaFormularioRepos
      * Carrega as respostas extras para um formulário específico.
      */
     private void carregarRespostasExtras(Connection conn, Integer respostaId, RespostaFormulario resposta) throws SQLException {
-        String sql = "SELECT nome_campo, valor_campo FROM resposta_extras WHERE id_resposta = ?";
+        // CORRIGIDO nome da tabela e nomes de colunas
+        String sql = "SELECT nome_campo, valor_campo FROM respostas_extras WHERE resposta_id = ?";
         
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, respostaId);
@@ -270,7 +277,8 @@ public class RespostaFormularioRepositoryJDBC implements RespostaFormularioRepos
      */
     private RespostaFormulario mapResultSetToRespostaFormulario(ResultSet rs) throws SQLException {
         Acao acao = new Acao();
-        acao.setId(rs.getLong("id_acao"));
+        // CORRIGIDO nome da coluna de acao_id
+        acao.setId(rs.getLong("acao_id"));
         acao.setNome(rs.getString("nome_acao"));
 
         RespostaFormulario resposta = new RespostaFormulario();
