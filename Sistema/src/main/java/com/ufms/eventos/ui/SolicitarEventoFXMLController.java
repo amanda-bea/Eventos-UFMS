@@ -166,23 +166,89 @@ public class SolicitarEventoFXMLController implements Initializable {
      * Coleta os dados dos campos do evento e cria o DTO.
      */
     private EventoDTO criarEventoDTO() throws ValidationException {
-        if (nomeField.getText().trim().isEmpty() || dataInicioField.getValue() == null || categoriaComboBox.getValue() == null || departamentoComboBox.getValue() == null) {
-            throw new ValidationException("Preencha todos os campos obrigatórios (*) do Evento.");
+        // Validação de campos obrigatórios
+        String nomeEvento = nomeField.getText().trim();
+        if (nomeEvento.isEmpty()) {
+            throw new ValidationException("O nome do evento é obrigatório.");
         }
+        
+        // Validação de tamanho do nome
+        if (nomeEvento.length() < 5) {
+            throw new ValidationException("O nome do evento deve ter pelo menos 5 caracteres.");
+        }
+        
+        if (nomeEvento.length() > 150) {
+            throw new ValidationException("O nome do evento não pode exceder 150 caracteres.");
+        }
+        
+        // Validação de data de início
         LocalDate dataInicioEv = dataInicioField.getValue();
+        if (dataInicioEv == null) {
+            throw new ValidationException("A data de início do evento é obrigatória.");
+        }
+        
+        // Não permitir datas no passado
+        LocalDate hoje = LocalDate.now();
+        if (dataInicioEv.isBefore(hoje)) {
+            throw new ValidationException("A data de início do evento não pode ser no passado.");
+        }
+        
+        // MODIFICAÇÃO: Tornar data fim obrigatória
         LocalDate dataFimEv = dataFimField.getValue();
-        if (dataFimEv != null && dataFimEv.isBefore(dataInicioEv)) {
+        if (dataFimEv == null) {
+            throw new ValidationException("A data de fim do evento é obrigatória.");
+        }
+        
+        // Validar que a data fim não é anterior à data início
+        if (dataFimEv.isBefore(dataInicioEv)) {
             throw new ValidationException("A data de fim do evento não pode ser anterior à data de início.");
         }
-
+        
+        // Validação para evento não muito longo
+        long diasDuracao = java.time.temporal.ChronoUnit.DAYS.between(dataInicioEv, dataFimEv);
+        if (diasDuracao > 60) {
+            throw new ValidationException("A duração do evento não pode exceder 60 dias.");
+        }
+        
+        // Validação de categoria
+        Categoria categoria = categoriaComboBox.getValue();
+        if (categoria == null) {
+            throw new ValidationException("A categoria do evento é obrigatória.");
+        }
+        
+        // Validação de departamento
+        Departamento departamento = departamentoComboBox.getValue();
+        if (departamento == null) {
+            throw new ValidationException("O departamento do evento é obrigatório.");
+        }
+        
+        // Validação para descrição (opcional mas com limite)
+        String descricao = descricaoArea.getText();
+        if (descricao != null && descricao.length() > 2000) {
+            throw new ValidationException("A descrição do evento não pode exceder 2000 caracteres.");
+        }
+        
+        // Validação de link (se informado)
+        String link = linkField.getText();
+        if (link != null && !link.trim().isEmpty()) {
+            if (!link.toLowerCase().startsWith("http://") && !link.toLowerCase().startsWith("https://")) {
+                throw new ValidationException("O link do evento deve começar com http:// ou https://");
+            }
+            
+            if (link.length() > 500) {
+                throw new ValidationException("O URL do evento não pode exceder 500 caracteres.");
+            }
+        }
+        
+        // Tudo validado, criar o DTO
         EventoDTO dto = new EventoDTO();
-        dto.setNome(nomeField.getText().trim());
+        dto.setNome(nomeEvento);
         dto.setDataInicio(dataInicioEv.toString());
-        dto.setDataFim(dataFimEv != null ? dataFimEv.toString() : dataInicioEv.toString());
-        dto.setCategoria(categoriaComboBox.getValue().name());
-        dto.setDepartamento(departamentoComboBox.getValue().name());
-        dto.setDescricao(descricaoArea.getText());
-        dto.setLink(linkField.getText());
+        dto.setDataFim(dataFimEv.toString()); // Agora dataFimEv é garantidamente não nula
+        dto.setCategoria(categoria.name());
+        dto.setDepartamento(departamento.name());
+        dto.setDescricao(descricao);
+        dto.setLink(link);
         dto.setImagem(this.caminhoImagemSalva);
         return dto;
     }
@@ -389,7 +455,7 @@ private void handleEscolherImagem(ActionEvent event) {
     /**
      * Classe interna simples para agrupar todos os controles de um formulário de ação.
      */
-    private static class AcaoFormControls {
+    private class AcaoFormControls {
         private final VBox container;
         final TextField nomeAcaoField = new TextField();
         final DatePicker dataAcaoPicker = new DatePicker();
@@ -410,12 +476,36 @@ private void handleEscolherImagem(ActionEvent event) {
          * Valida os dados dos campos e os converte para um AcaoDTO.
          * @throws ValidationException se algum campo obrigatório for inválido.
          */
+        // Modificando o método toDTO na classe interna AcaoFormControls
+
         public AcaoDTO toDTO(String nomeEventoPai) throws ValidationException {
             String nomeAcao = nomeAcaoField.getText();
             if (nomeAcao == null || nomeAcao.trim().isEmpty()) throw new ValidationException("O nome da ação é obrigatório.");
             
+            // Validação do tamanho do nome
+            if (nomeAcao.trim().length() < 3) throw new ValidationException("O nome da ação deve ter pelo menos 3 caracteres.");
+            
             LocalDate dataAcao = dataAcaoPicker.getValue();
             if (dataAcao == null) throw new ValidationException("A data da ação '" + nomeAcao + "' é obrigatória.");
+
+            // Não permitir datas no passado
+            LocalDate hoje = LocalDate.now();
+            if (dataAcao.isBefore(hoje)) throw new ValidationException("A data da ação '" + nomeAcao + "' não pode ser no passado.");
+
+            // Obter as datas do evento pai do formulário principal
+            LocalDate dataInicio = SolicitarEventoFXMLController.this.dataInicioField.getValue();
+            LocalDate dataFim = SolicitarEventoFXMLController.this.dataFimField.getValue();
+            
+            // Se não tiver data fim, usar a data início como referência
+            if (dataFim == null) {
+                dataFim = dataInicio;
+            }
+            
+            // Verificar se a data da ação está dentro do período do evento
+            if (dataAcao.isBefore(dataInicio) || dataAcao.isAfter(dataFim)) {
+                throw new ValidationException("A data da ação '" + nomeAcao + "' (" + dataAcao + 
+                    ") está fora do período do evento (" + dataInicio + " a " + dataFim + ").");
+            }
             
             String localAcao = localAcaoField.getText();
             if (localAcao == null || localAcao.trim().isEmpty()) throw new ValidationException("O local da ação '" + nomeAcao + "' é obrigatório.");
@@ -435,6 +525,14 @@ private void handleEscolherImagem(ActionEvent event) {
             String modalidadeAcao = modalidadeAcaoComboBox.getValue();
             if (modalidadeAcao == null) throw new ValidationException("A modalidade da ação '" + nomeAcao + "' é obrigatória.");
 
+            // Verificar se a modalidade é Online e se tem link
+            if ("Online".equals(modalidadeAcao)) {
+                String link = linkAcaoField.getText();
+                if (link == null || link.trim().isEmpty()) {
+                    throw new ValidationException("Para ações online, o link da ação '" + nomeAcao + "' é obrigatório.");
+                }
+            }
+
             AcaoDTO dto = new AcaoDTO();
             try {
                 LocalTime inicio = LocalTime.parse(horarioInicioStr);
@@ -442,10 +540,35 @@ private void handleEscolherImagem(ActionEvent event) {
                 if (fim.isBefore(inicio)) {
                     throw new ValidationException("O horário de fim não pode ser anterior ao de início na ação '" + nomeAcao + "'.");
                 }
+                
+                // Verificar duração mínima (15 minutos)
+                long duracaoMinutos = java.time.Duration.between(inicio, fim).toMinutes();
+                if (duracaoMinutos < 15) {
+                    throw new ValidationException("A ação '" + nomeAcao + "' deve ter duração mínima de 15 minutos.");
+                }
+                
                 dto.setHorarioInicio(inicio.toString());
                 dto.setHorarioFim(fim.toString());
             } catch (DateTimeParseException e) {
                 throw new ValidationException("Formato de horário inválido (use HH:mm) na ação '" + nomeAcao + "'.");
+            }
+            
+            // Validação de capacidade: garantir que seja um número inteiro válido
+            String capacidadeStr = capacidadeAcaoField.getText().trim();
+            if (!capacidadeStr.isEmpty()) {
+                try {
+                    int capacidade = Integer.parseInt(capacidadeStr);
+                    if (capacidade < 0) {
+                        throw new ValidationException("A capacidade da ação '" + nomeAcao + "' não pode ser negativa.");
+                    }
+                    // Usa o valor validado
+                    dto.setCapacidade(Integer.toString(capacidade));
+                } catch (NumberFormatException e) {
+                    throw new ValidationException("A capacidade da ação '" + nomeAcao + "' deve ser um número inteiro válido.");
+                }
+            } else {
+                // Se estiver vazio, usa zero
+                dto.setCapacidade("0");
             }
             
             dto.setEvento(nomeEventoPai);
@@ -457,8 +580,7 @@ private void handleEscolherImagem(ActionEvent event) {
             dto.setContato(contatoAcao.trim());
             dto.setModalidade(modalidadeAcao);
             dto.setLink(linkAcaoField.getText());
-            String capacidade = capacidadeAcaoField.getText().trim();
-            dto.setCapacidade(capacidade.isEmpty() ? "0" : capacidade);
+            
             return dto;
         }
     }

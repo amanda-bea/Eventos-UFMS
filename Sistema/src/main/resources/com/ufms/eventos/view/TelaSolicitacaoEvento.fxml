@@ -27,11 +27,16 @@
                     <Image url="@/img/seta.png" />
                 </image>
             </ImageView>
+            <VBox VBox.vgrow="ALWAYS" />
             <ImageView fitHeight="165.0" fitWidth="176.0" pickOnBounds="true" preserveRatio="true">
                 <image>
                     <Image url="@/img/logo.png" />
                 </image>
+                <VBox.margin>
+                    <Insets bottom="50.0" />
+                </VBox.margin>
             </ImageView>
+            <VBox VBox.vgrow="ALWAYS" />
         </VBox>
     </left>
     <center>
@@ -53,7 +58,7 @@
                                 <Insets bottom="15.0" />
                             </VBox.margin>
                         </Label>
-                        <Label text="Nome do Evento" textFill="#2f4a51">
+                        <Label text="Nome do Evento*" textFill="#2f4a51">
                             <font>
                                 <Font name="Nirmala UI Bold" size="12.0" />
                             </font>
@@ -75,7 +80,7 @@
                         </TextArea>
                         <HBox spacing="20.0">
                             <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                <Label text="Data de Início" textFill="#2f4a51">
+                                <Label text="Data de Início*" textFill="#2f4a51">
                                     <font>
                                         <Font name="Nirmala UI Bold" size="12.0" />
                                     </font>
@@ -83,7 +88,7 @@
                                 <DatePicker fx:id="dataInicioField" prefHeight="30.0" prefWidth="1000.0" promptText="dd/MM/yyyy" />
                             </VBox>
                             <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                <Label text="Data de Fim" textFill="#2f4a51">
+                                <Label text="Data de Fim*" textFill="#2f4a51">
                                     <font>
                                         <Font name="Nirmala UI Bold" size="12.0" />
                                     </font>
@@ -93,7 +98,7 @@
                         </HBox>
                         <HBox spacing="20.0">
                             <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                <Label text="Departamento (Evento)" textFill="#2f4a51">
+                                <Label text="Departamento (Evento)*" textFill="#2f4a51">
                                     <font>
                                         <Font name="Nirmala UI Bold" size="12.0" />
                                     </font>
@@ -101,7 +106,7 @@
                                 <ComboBox fx:id="departamentoComboBox" prefHeight="30.0" prefWidth="1000.0" promptText="Selecione o Departamento" />
                             </VBox>
                             <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                <Label text="Categoria (Evento)" textFill="#2f4a51">
+                                <Label text="Categoria (Evento)*" textFill="#2f4a51">
                                     <font>
                                         <Font name="Nirmala UI Bold" size="12.0" />
                                     </font>
