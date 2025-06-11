@@ -9,13 +9,16 @@ import com.ufms.eventos.util.SessaoUsuario;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.TilePane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.scene.layout.StackPane;
@@ -170,34 +173,42 @@ public class EventosPendentesFXMLController implements Initializable {
         }
     }
 
-    private void navegarParaDetalhes(javafx.scene.input.MouseEvent event, Long eventoId) {
+    private void navegarParaDetalhes(MouseEvent event, Long eventoId) {
+        if (eventoId == null) {
+            mostrarAlerta(AlertType.ERROR, "Erro de Dados", "Não foi possível obter o ID deste evento.");
+            return;
+        }
+
         try {
-            System.out.println("Navegando para detalhes do evento ID: " + eventoId);
-            
-            if (eventoId == null) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível abrir o evento: ID inválido.");
+            // Pega a janela (Stage) a partir do componente que foi clicado
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // 1. SALVA O ESTADO DE TELA CHEIA ATUAL
+            boolean estavaEmTelaCheia = stage.isFullScreen();
+
+            // 2. Carrega a nova tela de detalhes
+            URL fxmlUrl = getClass().getResource("/com/ufms/eventos/view/EventoDetalhado.fxml");
+            if (fxmlUrl == null) {
+                mostrarAlerta(AlertType.ERROR, "Erro de Arquivo", "Não foi possível encontrar o arquivo 'EventoDetalhado.fxml'.");
                 return;
             }
-            
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/EventoDetalhado.fxml"));
+            FXMLLoader loader = new FXMLLoader(fxmlUrl);
             Parent root = loader.load();
             
-            DetalhesEventoFXMLController controller = loader.getController();
-            if (controller == null) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível inicializar a tela de detalhes.");
-                return;
-            }
+            // Passa o ID para o controller da tela de detalhes
+            DetalhesEventoFXMLController detalhesController = loader.getController();
+            detalhesController.carregarDadosDoEvento(eventoId);
             
-            controller.carregarDadosDoEvento(eventoId);
-            
-            Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-            
+            // 3. Substitui o conteúdo da cena atual
+            stage.getScene().setRoot(root);
+            stage.setTitle("Análise de Evento");
+
+            // 4. RESTAURA O ESTADO DE TELA CHEIA
+            stage.setFullScreen(estavaEmTelaCheia);
+
         } catch (IOException e) {
             e.printStackTrace();
-            mostrarAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível abrir a tela de detalhes: " + e.getMessage());
+            mostrarAlerta(AlertType.ERROR, "Erro de Navegação", "Não foi possível carregar a tela de detalhes.");
         }
     }
 
