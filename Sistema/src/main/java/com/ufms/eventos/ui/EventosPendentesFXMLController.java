@@ -11,7 +11,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
@@ -212,11 +211,17 @@ public class EventosPendentesFXMLController implements Initializable {
         }
     }
 
-    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensagem) {
-        Alert alerta = new Alert(tipo);
-        alerta.setTitle(titulo);
-        alerta.setHeaderText(null);
-        alerta.setContentText(mensagem);
-        alerta.showAndWait();
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String conteudo) {
+    Alert alert = new Alert(tipo);
+    alert.setTitle(titulo);
+    alert.setHeaderText(null);
+    alert.setContentText(conteudo);
+
+    // Usa o container de eventos para encontrar a janela "dona" do alerta.
+    if (eventoContainer != null && eventoContainer.getScene() != null) {
+        alert.initOwner(eventoContainer.getScene().getWindow());
     }
+
+    alert.showAndWait();
+}
 }

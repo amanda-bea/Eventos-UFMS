@@ -91,60 +91,90 @@ public class HomeFXMLController implements Initializable {
     }
 
     private VBox criarCardEvento(EventoMinDTO evento) {
-        // 1. O card é um VBox para empilhar a imagem e os textos
-        VBox cardPane = new VBox(8);
-        cardPane.setPrefSize(260, 300); // Aumentado de 210x240
-        cardPane.setMinSize(260, 300); // Aumentado de 210x240
-        cardPane.setMaxSize(260, 300); // Aumentado de 210x240
-        
-        cardPane.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, 2);");
-        cardPane.setCursor(Cursor.HAND);
-        cardPane.setPadding(new Insets(15)); // Aumento do padding interno para 15px
-        cardPane.setAlignment(Pos.TOP_CENTER);
+    // 1. O card é um VBox para empilhar a imagem e os textos
+    VBox cardPane = new VBox(6); // Reduzir o espaçamento vertical entre elementos de 8 para 6
+    cardPane.setPrefSize(260, 270); // Reduzir a altura de 300 para 270
+    cardPane.setMinSize(260, 270);
+    cardPane.setMaxSize(260, 270);
+    
+    cardPane.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, 2);");
+    cardPane.setCursor(Cursor.HAND);
+    cardPane.setPadding(new Insets(12, 15, 10, 15)); // Ajustar padding: menos no topo e base
+    cardPane.setAlignment(Pos.TOP_CENTER);
 
-        ImageView imageView = new ImageView();
-        imageView.setFitHeight(160.0); 
-        imageView.setFitWidth(230.0); 
-        imageView.setPreserveRatio(true);
+    // 2. Container para imagem com altura fixa
+    VBox imageContainer = new VBox();
+    imageContainer.setMinHeight(160);
+    imageContainer.setMaxHeight(160);
+    imageContainer.setAlignment(Pos.CENTER);
+    
+    ImageView imageView = new ImageView();
+    imageView.setFitHeight(160.0); 
+    imageView.setFitWidth(230.0); 
+    imageView.setPreserveRatio(true);
+    
+    imageContainer.getChildren().add(imageView);
 
+    try {
+        String imagePath = evento.getImagem();
+        if (imagePath != null && !imagePath.isEmpty()) {
+            // PRIORIDADE 1: Arquivo local em imagens_eventos/
+            File imagemLocal = new File(imagePath);
+            if (imagemLocal.exists()) {
+                imageView.setImage(new Image(new FileInputStream(imagemLocal)));
+            } 
+            // PRIORIDADE 2: Se o caminho direto falhar, tente extrair nome do arquivo
+            else {
+                String nomeArquivo = new File(imagePath).getName();
+                File imagemPastaImagens = new File("imagens_eventos", nomeArquivo);
+                if (imagemPastaImagens.exists()) {
+                    imageView.setImage(new Image(new FileInputStream(imagemPastaImagens)));
+                } else {
+                    // Placeholder
+                    File placeholder = new File("imagens_eventos/placeholder.png");
+                    if (placeholder.exists()) {
+                        imageView.setImage(new Image(new FileInputStream(placeholder)));
+                    }
+                }
+            }
+        } 
+    } catch (Exception e) {
+        System.err.println("Falha ao carregar imagem para '" + evento.getNome() + "': " + e.getMessage());
         try {
-            String imagePath = evento.getImagem();
-            if (imagePath != null && !imagePath.isEmpty() && new File(imagePath).exists()) {
-                imageView.setImage(new Image(new FileInputStream(imagePath)));
-            } else {
-                imageView.setImage(new Image(new FileInputStream("Sistema/imagem_eventos/placeholder.png")));
+            File placeholder = new File("imagens_eventos/placeholder.png");
+            if (placeholder.exists()) {
+                imageView.setImage(new Image(new FileInputStream(placeholder)));
             }
-        } catch (Exception e) {
-            System.err.println("Falha ao carregar imagem para '" + evento.getNome() + "'. Usando placeholder.");
-            try {
-                imageView.setImage(new Image(new FileInputStream("Sistema/imagem_eventos/placeholder.png")));
-            } catch (Exception ex) {
-                System.err.println("ERRO CRÍTICO: Imagem placeholder não encontrada!");
-            }
+        } catch (Exception ex) {
+            System.err.println("ERRO CRÍTICO: Imagem placeholder não encontrada!");
         }
-
-        VBox infoBox = new VBox(6); 
-        infoBox.setPadding(new Insets(12, 8, 0, 8)); 
-        infoBox.setAlignment(Pos.CENTER_LEFT);
-
-        Label nomeLabel = new Label(evento.getNome());
-        nomeLabel.setFont(Font.font("System", FontWeight.BOLD, 16)); 
-        nomeLabel.setWrapText(true); 
-
-        Label categoriaLabel = new Label(evento.getCategoria());
-        categoriaLabel.setFont(Font.font("System", FontWeight.NORMAL, 14));
-        categoriaLabel.setTextFill(Color.web("#489ec1"));
-        
-        Label dataLabel = new Label(evento.getDataInicio());
-        dataLabel.setFont(Font.font("System", FontWeight.NORMAL, 13)); 
-        
-        infoBox.getChildren().addAll(nomeLabel, categoriaLabel, dataLabel);
-
-        cardPane.getChildren().addAll(imageView, infoBox);
-        cardPane.setOnMouseClicked(mouseEvent -> navegarParaDetalhes(mouseEvent, evento.getId()));
-
-        return cardPane;
     }
+
+    // 3. Box de informações com altura dinâmica
+    VBox infoBox = new VBox(4); // Reduzir espaçamento de 6 para 4
+    infoBox.setPadding(new Insets(8, 4, 0, 4)); // Reduzir padding lateral e superior
+    infoBox.setAlignment(Pos.TOP_LEFT); // Alinhar ao topo e à esquerda
+    VBox.setVgrow(infoBox, javafx.scene.layout.Priority.ALWAYS); // Permitir crescimento
+
+    Label nomeLabel = new Label(evento.getNome());
+    nomeLabel.setFont(Font.font("System", FontWeight.BOLD, 16)); 
+    nomeLabel.setWrapText(true);
+    nomeLabel.setMaxHeight(40); // Limitar altura para evitar crescimento excessivo
+
+    Label categoriaLabel = new Label(evento.getCategoria());
+    categoriaLabel.setFont(Font.font("System", FontWeight.NORMAL, 14));
+    categoriaLabel.setTextFill(Color.web("#489ec1"));
+    
+    Label dataLabel = new Label(evento.getDataInicio());
+    dataLabel.setFont(Font.font("System", FontWeight.NORMAL, 13)); 
+    
+    infoBox.getChildren().addAll(nomeLabel, categoriaLabel, dataLabel);
+
+    cardPane.getChildren().addAll(imageContainer, infoBox);
+    cardPane.setOnMouseClicked(mouseEvent -> navegarParaDetalhes(mouseEvent, evento.getId()));
+
+    return cardPane;
+}
 
 
     private void navegarParaDetalhes(MouseEvent mouseEvent, Long eventoId) {

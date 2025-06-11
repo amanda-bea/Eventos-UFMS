@@ -2,6 +2,8 @@ package com.ufms.eventos.view;
 import java.io.File;
 
 import com.ufms.eventos.services.EventoService;
+import com.ufms.eventos.util.AppDataManager;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,6 +14,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        AppDataManager.inicializarPastas();
         System.out.println("Sistema iniciando... Verificando status de eventos e ações.");
 
         EventoService eventoService = new EventoService();

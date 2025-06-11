@@ -189,11 +189,18 @@ public class PresencasConfirmadasFXMLController implements Initializable {
         }
     }
 
-    private void mostrarAlerta(AlertType tipo, String titulo, String conteudo) {
-        Alert alert = new Alert(tipo);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(conteudo);
-        alert.showAndWait();
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String conteudo) {
+    Alert alert = new Alert(tipo);
+    alert.setTitle(titulo);
+    alert.setHeaderText(null);
+    alert.setContentText(conteudo);
+
+    // Usa um dos containers de cards para encontrar a janela "dona" do alerta.
+    // Lembre-se de usar o nome correto da sua variável (@FXML private FlowPane disponiveisContainer;)
+    if (disponiveisContainer != null && disponiveisContainer.getScene() != null) {
+        alert.initOwner(disponiveisContainer.getScene().getWindow());
     }
+
+    alert.showAndWait();
+}
 }

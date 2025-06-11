@@ -376,13 +376,19 @@ public class SolicitarEventoFXMLController implements Initializable {
     }
 
 
-    private void mostrarAlerta(String titulo, String conteudo, AlertType tipo) {
-        Alert alert = new Alert(tipo);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(conteudo);
-        alert.showAndWait();
+    private void mostrarAlerta(String titulo, String cabecalho, Alert.AlertType tipo) {
+    Alert alert = new Alert(tipo);
+    alert.setTitle(titulo);
+    alert.setHeaderText(cabecalho);
+    alert.setContentText(null); // Ajustado para corresponder à sua chamada
+
+    // Usa o botão de solicitação para encontrar a janela "dona" do alerta.
+    if (btnSolicitarEventoFinal != null && btnSolicitarEventoFinal.getScene() != null) {
+        alert.initOwner(btnSolicitarEventoFinal.getScene().getWindow());
     }
+
+    alert.showAndWait();
+}
 
 
     @FXML

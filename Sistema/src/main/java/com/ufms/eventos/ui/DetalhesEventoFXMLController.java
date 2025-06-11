@@ -40,7 +40,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import javafx.scene.control.Hyperlink;
 import java.awt.Desktop;
 
 public class DetalhesEventoFXMLController implements Initializable {
@@ -387,11 +386,17 @@ public class DetalhesEventoFXMLController implements Initializable {
         }
     }
 
-    private void mostrarAlerta(AlertType tipo, String titulo, String conteudo) {
-        Alert alert = new Alert(tipo);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(conteudo);
-        alert.showAndWait();
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String conteudo) {
+    Alert alert = new Alert(tipo);
+    alert.setTitle(titulo);
+    alert.setHeaderText(null);
+    alert.setContentText(conteudo);
+
+    // Usa o label do nome do evento para encontrar a janela "dona" do alerta.
+    if (nomeEventoLabel != null && nomeEventoLabel.getScene() != null) {
+        alert.initOwner(nomeEventoLabel.getScene().getWindow());
     }
+
+    alert.showAndWait();
+}
 }

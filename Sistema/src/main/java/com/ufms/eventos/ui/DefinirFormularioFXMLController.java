@@ -156,11 +156,17 @@ public class DefinirFormularioFXMLController implements Initializable {
         }
     }
     
-    private void mostrarAlerta(String titulo, String conteudo, AlertType tipo) {
-        Alert alert = new Alert(tipo);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(conteudo);
-        alert.showAndWait();
+    private void mostrarAlerta(String titulo, String conteudo, Alert.AlertType tipo) {
+    Alert alert = new Alert(tipo);
+    alert.setTitle(titulo);
+    alert.setHeaderText(null);
+    alert.setContentText(conteudo);
+
+    // Usa o label do título para encontrar a janela "dona" do alerta.
+    if (lblTituloAcao != null && lblTituloAcao.getScene() != null) {
+        alert.initOwner(lblTituloAcao.getScene().getWindow());
     }
+
+    alert.showAndWait();
+}
 }

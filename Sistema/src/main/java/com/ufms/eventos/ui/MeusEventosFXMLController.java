@@ -84,80 +84,164 @@ public class MeusEventosFXMLController implements Initializable {
         if (eventosAtivos.isEmpty()) {
             disponiveisContainer.getChildren().add(new Label("Nenhum evento ativo no momento."));
         } else {
-            eventosAtivos.forEach(evento -> disponiveisContainer.getChildren().add(criarCardMeuEvento(evento)));
+            eventosAtivos.forEach(evento -> disponiveisContainer.getChildren().add(criarCardEvento(evento)));
         }
         
         if (eventosInativos.isEmpty()) {
             indisponiveisContainer.getChildren().add(new Label("Nenhum evento inativo ou pendente."));
         } else {
-            eventosInativos.forEach(evento -> indisponiveisContainer.getChildren().add(criarCardMeuEvento(evento)));
+            eventosInativos.forEach(evento -> indisponiveisContainer.getChildren().add(criarCardEvento(evento)));
         }
     }
 
-    private VBox criarCardMeuEvento(EventoMinDTO evento) {
-        VBox cardPane = new VBox(5);
-        cardPane.setPrefSize(210, 240);
-        cardPane.setMinSize(210, 240);
-        cardPane.setMaxSize(210, 240);
-        cardPane.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);");
-        cardPane.setCursor(Cursor.HAND);
-        cardPane.setPadding(new Insets(10));
+/**
+ * Cria o card visual padrão para um único evento, combinando um bom design
+ * com um layout VBox estável e responsivo.
+ * @param evento O DTO com as informações do evento.
+ * @return Um VBox que representa o card completo e clicável.
+ */
+private VBox criarCardEvento(EventoMinDTO evento) {
+    // 1. O card principal é um VBox para estabilidade.
+    VBox cardPane = new VBox(5); // 5px de espaçamento vertical
+    cardPane.setPrefSize(210, 240);
+    cardPane.setMinSize(210, 240);
+    cardPane.setMaxSize(210, 240);
+    cardPane.setStyle("-fx-background-color: white; -fx-background-radius: 8px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);");
+    cardPane.setCursor(Cursor.HAND);
+    cardPane.setAlignment(Pos.TOP_CENTER);
+    cardPane.setPadding(new Insets(10, 10, 8, 10)); // Reduzir padding inferior
 
-        ImageView imageView = new ImageView();
-        imageView.setFitHeight(130.0);
-        imageView.setFitWidth(190.0);
-        imageView.setPreserveRatio(true);
+    // 2. A imagem com a etiqueta de status sobreposta
+    StackPane imagemComStatusPane = criarImagemComStatus(evento);
+    
+    // Ajustar tamanho específico do container de imagem para evitar redimensionamento
+    imagemComStatusPane.setMinHeight(130);
+    imagemComStatusPane.setPrefHeight(130);
+    imagemComStatusPane.setMaxHeight(130);
 
-        try {
-            String imagePath = evento.getImagem(); // Usando getImagemPath
-            if (imagePath != null && !imagePath.isEmpty() && new File(imagePath).exists()) {
-                imageView.setImage(new Image(new FileInputStream(imagePath)));
+    // 3. O container para as informações de texto
+    VBox infoBox = new VBox(3); // Reduzir espaçamento para 3px
+    infoBox.setPadding(new Insets(6, 4, 0, 4)); // Reduzir padding
+    infoBox.setMinHeight(80); // Altura mínima para o texto
+    infoBox.setAlignment(Pos.TOP_LEFT); // Alinhar ao topo!
+
+    Label nomeLabel = new Label(evento.getNome());
+    nomeLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
+    nomeLabel.setTextFill(Color.web("#2f4a51"));
+    nomeLabel.setWrapText(true);
+    nomeLabel.setMaxHeight(40); // Limitar altura para nomes muito longos
+
+    Label categoriaLabel = new Label(evento.getCategoria());
+    categoriaLabel.setFont(Font.font("System", FontWeight.NORMAL, 12));
+    categoriaLabel.setTextFill(Color.web("#489ec1"));
+
+    Label dataLabel = new Label("Início: " + evento.getDataInicio());
+    dataLabel.setFont(Font.font("System", FontWeight.NORMAL, 11));
+    dataLabel.setTextFill(Color.web("#666"));
+
+    infoBox.getChildren().addAll(nomeLabel, categoriaLabel, dataLabel);
+    
+    // 4. Montagem final e ação de clique
+    cardPane.getChildren().addAll(imagemComStatusPane, infoBox);
+    cardPane.setOnMouseClicked(mouseEvent -> navegarParaDetalhes(mouseEvent, evento.getId()));
+
+    return cardPane;
+}
+/**
+ * Método auxiliar para criar o grupo de Imagem + Status.
+ * @return Um StackPane contendo a imagem e a etiqueta de status.
+ */
+private StackPane criarImagemComStatus(EventoMinDTO evento) {
+    ImageView imageView = new ImageView();
+    imageView.setFitHeight(130.0);
+    imageView.setFitWidth(190.0);
+    imageView.setPreserveRatio(true);
+
+    try {
+        String imagePath = evento.getImagem();
+        Image imagem = null;
+        
+        // PRIORIDADE 1: Verificar na pasta externa imagens_eventos
+        if (imagePath != null && !imagePath.isEmpty()) {
+            // Extrair nome do arquivo do caminho completo
+            String nomeArquivo = new File(imagePath).getName();
+            
+            File imagemDiretorioLocal = new File("imagens_eventos", nomeArquivo);
+            if (imagemDiretorioLocal.exists()) {
+                imagem = new Image(new FileInputStream(imagemDiretorioLocal));
+                System.out.println("DEBUG: Imagem carregada de imagens_eventos: " + imagemDiretorioLocal.getAbsolutePath());
+            } 
+            // PRIORIDADE 2: Tentar o caminho direto
+            else if (new File(imagePath).exists()) {
+                imagem = new Image(new FileInputStream(imagePath));
+                System.out.println("DEBUG: Imagem carregada do caminho direto: " + imagePath);
+            }
+            // PRIORIDADE 3: Verificar nos recursos internos
+            else {
+                String resourcePath = "/img/" + nomeArquivo;
+                java.io.InputStream resourceStream = getClass().getResourceAsStream(resourcePath);
+                if (resourceStream != null) {
+                    imagem = new Image(resourceStream);
+                    System.out.println("DEBUG: Imagem carregada de recursos: " + resourcePath);
+                }
+            }
+        }
+        
+        // Se não conseguiu carregar, usar placeholder
+        if (imagem == null) {
+            File placeholderFile = new File("imagens_eventos/placeholder.png");
+            if (placeholderFile.exists()) {
+                imagem = new Image(new FileInputStream(placeholderFile));
             } else {
-                imageView.setImage(new Image(new FileInputStream("Sistema/imagem_eventos/placeholder.png")));
-            }
-        } catch (Exception e) {
-            System.err.println("Falha ao carregar imagem para '" + evento.getNome() + "'. Usando placeholder.");
-            try {
-                imageView.setImage(new Image(new FileInputStream("Sistema/imagem_eventos/placeholder.png")));
-            } catch (Exception ex) {
-                System.err.println("Placeholder não encontrado!");
+                java.io.InputStream placeholderStream = getClass().getResourceAsStream("/img/placeholder.png");
+                if (placeholderStream != null) {
+                    imagem = new Image(placeholderStream);
+                }
             }
         }
-
-        Label statusLabel = new Label(evento.getStatus());
-        statusLabel.setFont(Font.font("System", FontWeight.BOLD, 10));
-        statusLabel.setTextFill(Color.WHITE);
-        statusLabel.setPadding(new Insets(2, 6, 2, 6));
-        String statusStyle = "-fx-background-radius: 5; -fx-background-color: ";
-        switch (evento.getStatus().toLowerCase()) {
-            case "ativo" -> statusStyle += "#5cb85c;";
-            case "aguardando aprovação" -> statusStyle += "#f0ad4e;";
-            case "rejeitado", "cancelado" -> statusStyle += "#d9534f;";
-            default -> statusStyle += "#777777;";
+        
+        imageView.setImage(imagem);
+        
+    } catch (Exception e) {
+        System.err.println("Erro ao carregar imagem para evento " + evento.getNome() + ": " + e.getMessage());
+        e.printStackTrace();
+        
+        // Tentar placeholder em caso de erro
+        try {
+            java.io.InputStream placeholderStream = getClass().getResourceAsStream("/img/placeholder.png");
+            if (placeholderStream != null) {
+                imageView.setImage(new Image(placeholderStream));
+            }
+        } catch (Exception ex) {
+            // Silenciar erro de placeholder
         }
-        statusLabel.setStyle(statusStyle);
-
-        StackPane imagemComStatusPane = new StackPane(imageView, statusLabel);
-        StackPane.setAlignment(statusLabel, Pos.TOP_RIGHT);
-        StackPane.setMargin(statusLabel, new Insets(5, 5, 0, 0));
-
-        VBox infoBox = new VBox(4);
-        infoBox.setPadding(new Insets(8, 0, 0, 0));
-        
-        Label nomeLabel = new Label(evento.getNome());
-        nomeLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
-        Label categoriaLabel = new Label(evento.getCategoria());
-        categoriaLabel.setFont(Font.font("System", FontWeight.NORMAL, 12));
-        Label dataLabel = new Label(evento.getDataInicio());
-        dataLabel.setFont(Font.font("System", FontWeight.NORMAL, 11));
-        
-        infoBox.getChildren().addAll(nomeLabel, categoriaLabel, dataLabel);
-        
-        cardPane.getChildren().addAll(imagemComStatusPane, infoBox);
-        cardPane.setOnMouseClicked(mouseEvent -> navegarParaDetalhes(mouseEvent, evento.getId()));
-
-        return cardPane;
     }
+
+    Label statusLabel = new Label(evento.getStatus());
+    statusLabel.setFont(Font.font("System", FontWeight.BOLD, 10));
+    statusLabel.setTextFill(Color.WHITE);
+    statusLabel.setPadding(new Insets(3, 7, 3, 7));
+    String statusStyle = "-fx-background-radius: 10; -fx-background-color: ";
+    
+    switch (evento.getStatus().toLowerCase()) {
+        case "ativo" -> statusStyle += "#28a745;";
+        case "aguardando aprovação" -> statusStyle += "#ffc107;";
+        case "rejeitado", "cancelado" -> statusStyle += "#dc3545;";
+        default -> statusStyle += "#6c757d;";
+    }
+    statusLabel.setStyle(statusStyle);
+
+    // Criar container para imagem com centralização
+    StackPane imagemContainer = new StackPane(imageView);
+    imagemContainer.setAlignment(Pos.CENTER);
+    
+    // Criar container completo com imagem e status
+    StackPane imagemComStatusPane = new StackPane(imagemContainer, statusLabel);
+    StackPane.setAlignment(statusLabel, Pos.TOP_RIGHT);
+    StackPane.setMargin(statusLabel, new Insets(8, 8, 0, 0));
+
+    return imagemComStatusPane;
+}
 
     @FXML
     private void handleSolicitarNovoEvento() {
@@ -190,10 +274,17 @@ public class MeusEventosFXMLController implements Initializable {
     }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String conteudo) {
-        Alert alert = new Alert(tipo);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(conteudo);
-        alert.showAndWait();
+    Alert alert = new Alert(tipo);
+    alert.setTitle(titulo);
+    alert.setHeaderText(null);
+    alert.setContentText(conteudo);
+
+    // Usa um dos containers de cards para encontrar a janela "dona" do alerta.
+    // Lembre-se de usar o nome correto da sua variável (@FXML private FlowPane disponiveisContainer;)
+    if (disponiveisContainer != null && disponiveisContainer.getScene() != null) {
+        alert.initOwner(disponiveisContainer.getScene().getWindow());
     }
+
+    alert.showAndWait();
+}
 }

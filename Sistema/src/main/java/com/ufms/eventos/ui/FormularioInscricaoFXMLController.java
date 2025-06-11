@@ -80,11 +80,11 @@ public class FormularioInscricaoFXMLController implements Initializable {
     @FXML
     private void handleSubmeter() {
         if (camposDoFormulario.containsKey("nome") && camposDoFormulario.get("nome").getText().trim().isEmpty()) {
-            mostrarAlerta("Campo Obrigatório", "Por favor, preencha seu nome completo.", AlertType.WARNING);
+            mostrarAlerta(AlertType.WARNING, "Campo Obrigatório", "Por favor, preencha seu nome completo.");
             return;
         }
         if (camposDoFormulario.containsKey("email") && camposDoFormulario.get("email").getText().trim().isEmpty()) {
-            mostrarAlerta("Campo Obrigatório", "Por favor, preencha seu e-mail.", AlertType.WARNING);
+            mostrarAlerta(AlertType.WARNING, "Campo Obrigatório", "Por favor, preencha seu e-mail.");
             return;
         }
         
@@ -107,7 +107,7 @@ public class FormularioInscricaoFXMLController implements Initializable {
 
         resposta.setRespostasExtras(extras);
         respostaController.enviarResposta(resposta);
-        mostrarAlerta("Inscrição Realizada", "Sua inscrição na ação '" + acaoAtual.getNome() + "' foi confirmada com sucesso!", AlertType.INFORMATION);
+        mostrarAlerta(AlertType.INFORMATION, "Inscrição Realizada", "Sua inscrição na ação '" + acaoAtual.getNome() + "' foi confirmada com sucesso!");
         fecharJanela();
     }
 
@@ -115,11 +115,17 @@ public class FormularioInscricaoFXMLController implements Initializable {
         ((Stage) formContainer.getScene().getWindow()).close();
     }
     
-    private void mostrarAlerta(String titulo, String conteudo, AlertType tipo) {
-        Alert alert = new Alert(tipo);
-        alert.setTitle(titulo);
-        alert.setHeaderText(null);
-        alert.setContentText(conteudo);
-        alert.showAndWait();
+    private void mostrarAlerta(Alert.AlertType tipo, String titulo, String conteudo) {
+    Alert alert = new Alert(tipo);
+    alert.setTitle(titulo);
+    alert.setHeaderText(null);
+    alert.setContentText(conteudo);
+
+    // Usa o label do título para encontrar a janela "dona" do alerta.
+    if (tituloAcaoLabel != null && tituloAcaoLabel.getScene() != null) {
+        alert.initOwner(tituloAcaoLabel.getScene().getWindow());
     }
+
+    alert.showAndWait();
+}
 }
