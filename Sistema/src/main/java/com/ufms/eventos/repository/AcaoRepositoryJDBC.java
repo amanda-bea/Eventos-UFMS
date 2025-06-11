@@ -136,12 +136,7 @@ public class AcaoRepositoryJDBC implements AcaoRepository {
             return false;
         }
     }
-    /**
-     * Busca uma ação pelo seu ID
-     * 
-     * @param id ID da ação a ser encontrada
-     * @return A ação encontrada ou null se não existir
-     */
+
     public Acao getAcao(Long id) {
         String sql = "SELECT * FROM acoes WHERE id = ?";
         

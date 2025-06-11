@@ -222,5 +222,6 @@ public class ConnectionFactory {
     }
 }
 // compilar: 
-// cd Sistema && javac -cp "lib/postgresql-42.7.javac -cp "lib/postgresql-42.7.3.jar" -d bin src/main/java/com/ufms/eventos/util/ConnectionFactory.java3.jar" -d bin src/main/java/com/ufms/eventos/util/ConnectionFactory.java
-// java -cp "bin;lib/postgresql-42.7.3.jar" com.ufms.eventos.util.ConnectionFactory
+//cd Sistema
+//javac -cp "lib/postgresql-42.7.3.jar" -d bin src/main/java/com/ufms/eventos/util/ConnectionFactory.java
+//java -cp "bin;lib/postgresql-42.7.3.jar" com.ufms.eventos.util/ConnectionFactory

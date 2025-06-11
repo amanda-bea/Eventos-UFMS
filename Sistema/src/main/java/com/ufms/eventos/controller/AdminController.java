@@ -14,21 +14,10 @@ public class AdminController {
 
     private AdminService adminService;
 
-    /**
-     * Construtor padrão que inicializa o serviço de administração.
-     */
     public AdminController() {
         this.adminService = new AdminService();
     }
     
-    /**
-     * Construtor para injeção de dependência (facilita testes).
-     * @param adminService O serviço de administração a ser utilizado.
-     */
-    public AdminController(AdminService adminService) {
-        this.adminService = adminService;
-    }
-
     /**
      * Busca todos os eventos com status "Aguardando aprovação".
      * @return Lista de DTOs com informações básicas dos eventos aguardando aprovação.

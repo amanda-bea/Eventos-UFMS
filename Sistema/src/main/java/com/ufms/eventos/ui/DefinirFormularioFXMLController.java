@@ -3,6 +3,7 @@ package com.ufms.eventos.ui;
 import com.ufms.eventos.controller.ConfiguracaoFormularioController;
 import com.ufms.eventos.dto.AcaoDTO;
 import com.ufms.eventos.dto.ConfiguracaoFormularioDTO;
+
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -38,13 +39,13 @@ public class DefinirFormularioFXMLController implements Initializable {
     private ConfiguracaoFormularioController configController;
     private List<TextField> camposPersonalizadosFields = new ArrayList<>();
     
-    // "Bandeira" para avisar a tela anterior se a operação foi um sucesso
+    //avisar a tela anterior se a operação foi um sucesso
     private boolean foiSalvo = false;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.configController = new ConfiguracaoFormularioController();
-        // Valores padrão para a tela
+        //valores padrão para os checkboxes
         chkUsarNome.setSelected(true);
         chkUsarEmail.setSelected(true);
     }
@@ -61,9 +62,7 @@ public class DefinirFormularioFXMLController implements Initializable {
         configOpt.ifPresent(this::popularFormularioExistente);
     }
     
-    /**
-     * Preenche a UI se uma configuração para esta ação já existir no banco.
-     */
+
     private void popularFormularioExistente(ConfiguracaoFormularioDTO config) {
         chkUsarNome.setSelected(config.isUsarNome());
         chkUsarEmail.setSelected(config.isUsarEmail());
@@ -108,9 +107,6 @@ public class DefinirFormularioFXMLController implements Initializable {
         camposPersonalizadosContainer.getChildren().add(linhaCampo);
     }
     
-    /**
-     * Chamado ao clicar em "Salvar Configuração". Valida, cria o DTO e chama o serviço.
-     */
     @FXML
     private void handleFinalizarFormulario() {
         List<String> nomesCamposPersonalizados = new ArrayList<>();
@@ -144,18 +140,12 @@ public class DefinirFormularioFXMLController implements Initializable {
         }
     }
 
-    /**
-     * Chamado pelo botão "Cancelar". Fecha a janela sem salvar.
-     */
     @FXML
     private void handleCancelar() {
         this.foiSalvo = false; // SINALIZA O CANCELAMENTO
         fecharJanela();
     }
 
-    /**
-     * Método público para a tela anterior (SolicitarEvento) poder verificar o resultado.
-     */
     public boolean foiSalvoComSucesso() {
         return this.foiSalvo;
     }

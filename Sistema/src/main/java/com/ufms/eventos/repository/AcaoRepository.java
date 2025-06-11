@@ -4,9 +4,6 @@ import com.ufms.eventos.model.Acao;
 import java.util.HashSet;
 import java.util.List;
 
-/**
- * Interface que define as operações de um repositório de ações no banco de dados.
- */
 public interface AcaoRepository {
     
     /**

@@ -13,7 +13,6 @@ public class RespostaFormularioService {
     private final AcaoService acaoService;
 
     public RespostaFormularioService() {
-        // Inicialize seus repositórios JDBC aqui
         this.respostaRepository = new RespostaFormularioRepositoryJDBC();
         this.presencaRepository = new PresencaConfirmadaRepositoryJDBC();
         this.acaoRepository = new AcaoRepositoryJDBC();
@@ -31,7 +30,6 @@ public class RespostaFormularioService {
             throw new IllegalArgumentException("Ação com ID " + dto.getAcaoId() + " não encontrada.");
         }
 
-        // Cria resposta manualmente em vez de usar o construtor inexistente
         RespostaFormulario resposta = new RespostaFormulario();
         resposta.setAcao(acaoAssociada);
         resposta.setNome(dto.getNome());

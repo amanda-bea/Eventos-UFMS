@@ -19,5 +19,4 @@ public class Organizador extends Usuario {
         super(nome, null, senha, null); // Telefone e email podem ser nulos
     }
 
-
 }

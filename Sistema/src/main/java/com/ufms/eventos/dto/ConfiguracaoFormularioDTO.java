@@ -9,14 +9,13 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class ConfiguracaoFormularioDTO {
-    private Long acaoId; // ID da Ação à qual este formulário pertence
+    private Long acaoId;
     private boolean usarNome;
     private boolean usarEmail;
     private boolean usarCpf;
     private boolean usarCurso;
     private List<String> camposPersonalizados;
 
-    // Construtor de conveniência para converter do modelo
     public ConfiguracaoFormularioDTO(ConfiguracaoFormulario model) {
         this.acaoId = model.getAcao().getId();
         this.usarNome = model.isUsarNome();

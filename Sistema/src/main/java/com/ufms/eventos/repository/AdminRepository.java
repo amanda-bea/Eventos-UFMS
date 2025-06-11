@@ -3,9 +3,6 @@ package com.ufms.eventos.repository;
 import com.ufms.eventos.model.Admin;
 import java.util.HashSet;
 
-/**
- * Interface que define operações de um repositório de administradores.
- */
 public interface AdminRepository {
     
     /**

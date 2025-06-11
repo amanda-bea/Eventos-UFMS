@@ -15,38 +15,10 @@ public class Evento {
     private Organizador organizador;
     private Departamento departamento;
     private Categoria categoria; // Ex: Cultura, Educação, Saúde, etc.
-    private String imagem; // URL da imagem do evento
+    private String imagem; // Path da imagem do evento
     private String link; // Link para mais informações (opcional)
     private String status; // Ativo, Inativo, Cancelado, etc.
     private String mensagemRejeicao;
-
-    public Evento(String nome, LocalDate dataInicio, LocalDate dataFim, String descricao, Organizador organizador, Departamento departamento, 
-                  Categoria categoria, String imagem, String link, String status, String mensagemRejeicao) {
-        this.nome = nome;
-        this.dataInicio = dataInicio;
-        this.dataFim = dataFim;
-        this.descricao = descricao;
-        this.organizador = organizador; // Presumindo que o organizador é um objeto do tipo Organizador, reeb nome do organzador como string
-        this.departamento = departamento;
-        this.categoria = categoria;
-        this.imagem = imagem;
-        this.link = link;
-        this.status = status;
-        this.mensagemRejeicao = mensagemRejeicao;
-    }
-
-    public Evento(String nome, LocalDate dataInicio, LocalDate dataFim, String descricao, Organizador organizador, 
-                  Departamento departamento, Categoria categoria, String imagem, String link) {
-        this.nome = nome;
-        this.dataInicio = dataInicio;
-        this.dataFim = dataFim;
-        this.descricao = descricao;
-        this.organizador = organizador;
-        this.departamento = departamento;
-        this.categoria = categoria;
-        this.imagem = imagem;
-        this.link = link;
-    }
 
     public Evento(EventoDTO evento) {
         this.nome = evento.getNome();
@@ -61,9 +33,8 @@ public class Evento {
     }
 
     public Evento() {
-        // Construtor padrão necessário para algumas operações de serialização/deserialização
     }
-
+        
     @Override
     public int hashCode() {
         final int prime = 31;

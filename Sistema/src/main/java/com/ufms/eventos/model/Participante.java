@@ -15,17 +15,8 @@ public class Participante extends Usuario {
     }
 
     public Participante() {
-        // Construtor padrão
+        
     }
 
-    @Override
-    public String toString() {
-        return "Participante{" +
-                "nome='" + nome + '\'' +
-                "telefone='" + telefone + '\'' +
-                ", email='" + email + '\'' +
-                ", senha='" + senha + '\'' +
-                '}';
-    }
 
 }

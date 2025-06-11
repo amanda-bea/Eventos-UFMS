@@ -25,12 +25,6 @@ public class AcaoMinDTO {
         this.departamento = departamento;
     }
 
-    public AcaoMinDTO(AcaoDTO acao) {
-        this.nome = acao.getNome();
-        this.data = acao.getData();
-        this.departamento = acao.getDepartamento();
-    }
-
     public AcaoMinDTO(Acao acao) {
         this.nome = acao.getNome();
         this.data = acao.getData().toString();
@@ -38,7 +32,6 @@ public class AcaoMinDTO {
     }
 
     public AcaoMinDTO() {
-        // Construtor padrão
     }
 
 }

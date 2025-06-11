@@ -13,29 +13,15 @@ public class ConfiguracaoFormularioController {
         this.configuracaoFormularioService = new ConfiguracaoFormularioService();
     }
 
-    // Construtor para injeção de dependências (melhor prática)
-    public ConfiguracaoFormularioController(ConfiguracaoFormularioService configuracaoFormularioService) {
-        this.configuracaoFormularioService = configuracaoFormularioService;
-    }
-
     public ConfiguracaoFormularioDTO buscarConfiguracao(String nomeAcao) {
         Optional<ConfiguracaoFormularioDTO> dtoOptional = configuracaoFormularioService.buscarConfiguracaoFormularioPorNomeAcao(nomeAcao);
-        return dtoOptional.orElse(null); // Retorna o DTO ou null
+        return dtoOptional.orElse(null);
     }
 
     public ConfiguracaoFormularioDTO criarConfiguracaoFormulario(ConfiguracaoFormularioDTO dto) {
         return configuracaoFormularioService.criarConfiguracao(dto);
     }
 
-    public boolean deletarConfiguracaoFormulario(String nomeAcao) {
-        return configuracaoFormularioService.deletarConfiguracaoFormulario(nomeAcao);
-    }
-
-    public boolean verificarExistenciaConfiguracao(String nomeAcao) {
-        return configuracaoFormularioService.existeConfiguracaoFormulario(nomeAcao);
-    }
-
- 
      public Optional<ConfiguracaoFormularioDTO> buscarConfiguracaoPorAcaoId(Long acaoId) {
         return configuracaoFormularioService.buscarConfiguracaoPorAcaoId(acaoId);
     }

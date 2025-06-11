@@ -23,7 +23,6 @@ import javafx.scene.layout.StackPane;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -92,16 +91,12 @@ public class EventosPendentesFXMLController implements Initializable {
         imageContainer.setLayoutY(10);
         imageContainer.setStyle("-fx-background-color: #f5f5f5; -fx-background-radius: 3;");
         
-        // Configuração da imagem
         ImageView imageView = new ImageView();
         imageView.setFitWidth(155);
         imageView.setFitHeight(90);
         imageView.setPreserveRatio(true);
-        
-        // Adiciona a imagem ao container
         imageContainer.getChildren().add(imageView);
         
-        // Carrega a imagem
         try {
             if (evento.getImagem() != null && !evento.getImagem().isEmpty()) {
                 File imageFile = new File(evento.getImagem());
@@ -143,12 +138,9 @@ public class EventosPendentesFXMLController implements Initializable {
         statusLabel.setPrefWidth(155);
         statusLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #e74c3c; -fx-font-style: italic;");
         
-        // Adiciona todos os elementos ao card
         card.getChildren().addAll(imageContainer, nomeLabel, dataLabel, statusLabel);
         
-        // Adiciona a funcionalidade de clique para visualizar os detalhes
         card.setOnMouseClicked(e -> {
-            // Verifica se o ID é válido antes de navegar
             if (evento.getId() != null) {
                 System.out.println("Clicou para ver detalhes do evento ID: " + evento.getId());
                 navegarParaDetalhes(e, evento.getId());
@@ -165,15 +157,6 @@ public class EventosPendentesFXMLController implements Initializable {
      */
     private void setPlaceholderImage(ImageView imageView) {
         try {
-            // Primeiro, tenta carregar do recurso (dentro do JAR)
-            InputStream is = getClass().getResourceAsStream("/img/placeholder.png");
-            if (is != null) {
-                imageView.setImage(new Image(is));
-                is.close();
-                return;
-            }
-            
-            // Se não encontrou no classpath, tenta carregar como arquivo
             File placeholderFile = new File("imagem_eventos/placeholder.png");
             if (placeholderFile.exists()) {
                 FileInputStream fis = new FileInputStream(placeholderFile);
@@ -187,9 +170,6 @@ public class EventosPendentesFXMLController implements Initializable {
         }
     }
 
-    /**
-     * Navega para a tela de detalhes do evento
-     */
     private void navegarParaDetalhes(javafx.scene.input.MouseEvent event, Long eventoId) {
         try {
             System.out.println("Navegando para detalhes do evento ID: " + eventoId);

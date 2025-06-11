@@ -129,70 +129,80 @@ public class PresencaConfirmadaService {
     }
 
     /**
- * Remove a presença confirmada de um usuário em uma ação.
- * @param usuario O usuário da sessão.
- * @param acaoId O ID da ação da qual o usuário quer se desinscrever.
- * @return true se a inscrição foi cancelada com sucesso.
- */
-public boolean cancelarInscricao(Usuario usuario, Long acaoId) {
-    if (usuario == null || acaoId == null) {
-        return false;
-    }
-    
-    // Supondo que seu PresencaConfirmadaRepository tenha um método 'delete'
-    boolean sucesso = pr.delete(usuario.getNome(), acaoId);
-    
-    if (sucesso) {
-        // Em vez de chamar acaoService.verificarStatusVagas(acaoId),
-        // atualizamos diretamente o status da ação
-        atualizarStatusVagas(acaoId);
-    }
-    return sucesso;
-}
-
-/**
- * Atualiza o status de vagas da ação com base nas inscrições atuais.
- * Se capacidade - inscrições <= 10, status = "Últimas vagas"
- * Se inscrições >= capacidade, status = "Lotado"
- * Caso contrário, status = "Ativo"
- * 
- * @param acaoId ID da ação para atualizar o status
- */
-private void atualizarStatusVagas(Long acaoId) {
-    Acao acao = ar.findById(acaoId);
-    if (acao == null) return;
-    
-    int inscricoes = contarPresencasConfirmadas(acaoId);
-    int capacidade = acao.getCapacidade();
-    
-    // Se a ação não tem limite de capacidade, mantenha como ativa
-    if (capacidade <= 0) {
-        if (!"Ativo".equals(acao.getStatus())) {
-            acao.setStatus("Ativo");
-            ar.updateAcao(acao);
+     * Remove a presença confirmada de um usuário em uma ação.
+     * @param usuario O usuário da sessão.
+     * @param acaoId O ID da ação da qual o usuário quer se desinscrever.
+     * @return true se a inscrição foi cancelada com sucesso.
+     */
+    public boolean cancelarInscricao(Usuario usuario, Long acaoId) {
+        if (usuario == null || acaoId == null) {
+            return false;
         }
-        return;
+        
+        // Supondo que seu PresencaConfirmadaRepository tenha um método 'delete'
+        boolean sucesso = pr.delete(usuario.getNome(), acaoId);
+        
+        if (sucesso) {
+            // Em vez de chamar acaoService.verificarStatusVagas(acaoId),
+            // atualizamos diretamente o status da ação
+            atualizarStatusVagas(acaoId);
+        }
+        return sucesso;
     }
-    
-    // Vagas disponíveis
-    int vagasDisponiveis = capacidade - inscricoes;
-    
-    // Definir o status baseado nas vagas disponíveis
-    String novoStatus;
-    
-    if (vagasDisponiveis <= 0) {
-        novoStatus = "Lotado";
-    } else if (vagasDisponiveis <= 10) {
-        novoStatus = "Últimas vagas";
-    } else {
-        novoStatus = "Ativo";
+
+    /**
+     * Atualiza o status de vagas da ação com base nas inscrições atuais.
+     * Se capacidade - inscrições <= 10, status = "Últimas vagas"
+     * Se inscrições >= capacidade, status = "Lotado"
+     * Caso contrário, status = "Ativo"
+     * 
+     * @param acaoId ID da ação para atualizar o status
+     */
+    private void atualizarStatusVagas(Long acaoId) {
+        Acao acao = ar.findById(acaoId);
+        if (acao == null) return;
+        
+        int inscricoes = contarPresencasConfirmadas(acaoId);
+        int capacidade = acao.getCapacidade();
+        
+        // Se a ação não tem limite de capacidade, mantenha como ativa
+        if (capacidade <= 0) {
+            if (!"Ativo".equals(acao.getStatus())) {
+                acao.setStatus("Ativo");
+                ar.updateAcao(acao);
+            }
+            return;
+        }
+        
+        // Vagas disponíveis
+        int vagasDisponiveis = capacidade - inscricoes;
+        
+        // Definir o status baseado nas vagas disponíveis
+        String novoStatus;
+        
+        if (vagasDisponiveis <= 0) {
+            novoStatus = "Lotado";
+        } else if (vagasDisponiveis <= 10) {
+            novoStatus = "Últimas vagas";
+        } else {
+            novoStatus = "Ativo";
+        }
+        
+        // Atualizar apenas se o status mudou
+        if (!novoStatus.equals(acao.getStatus())) {
+            acao.setStatus(novoStatus);
+            ar.updateAcao(acao);
+            System.out.println("Status da ação ID " + acaoId + " atualizado para: " + novoStatus);
+        }
     }
-    
-    // Atualizar apenas se o status mudou
-    if (!novoStatus.equals(acao.getStatus())) {
-        acao.setStatus(novoStatus);
-        ar.updateAcao(acao);
-        System.out.println("Status da ação ID " + acaoId + " atualizado para: " + novoStatus);
+
+    public List<Usuario> listarInscritosPorAcao(Long acaoId) {
+        if (acaoId == null) {
+            return new ArrayList<>();
+        }
+        // Supondo que presencaRepository.findByAcaoId(acaoId) retorne List<PresencaConfirmada>
+        return pr.getPresencasPorAcao(acaoId).stream()
+                .map(PresencaConfirmada::getUsuario) // Pega o objeto Usuario de cada presença
+                .collect(Collectors.toList());
     }
-}
 }

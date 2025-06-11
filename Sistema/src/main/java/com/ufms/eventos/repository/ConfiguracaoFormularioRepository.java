@@ -3,9 +3,7 @@ package com.ufms.eventos.repository;
 import com.ufms.eventos.model.ConfiguracaoFormulario;
 import java.util.Optional;
 
-/**
- * Interface para repositório de configurações de formulário.
- */
+
 public interface ConfiguracaoFormularioRepository {
 
     /**

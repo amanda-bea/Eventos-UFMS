@@ -74,44 +74,6 @@ public class RespostaFormularioRepositoryJDBC implements RespostaFormularioRepos
         }
     }
 
-    @Override
-    public List<RespostaFormulario> listarPorAcao(String acaoNome) {
-        if (acaoNome == null || acaoNome.trim().isEmpty()) {
-            return new ArrayList<>();
-        }
-        
-        List<RespostaFormulario> respostas = new ArrayList<>();
-
-        // CORRIGIDO nome da tabela para respostas_formulario
-        String sql = """
-                SELECT rf.id, rf.nome, rf.email, rf.cpf, rf.curso, a.id AS acao_id, a.nome AS nome_acao
-                FROM respostas_formulario rf
-                JOIN acoes a ON rf.acao_id = a.id
-                WHERE LOWER(a.nome) = LOWER(?)
-                """;
-
-        try (Connection conn = ConnectionFactory.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, acaoNome);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    RespostaFormulario resposta = mapResultSetToRespostaFormulario(rs);
-                    
-                    // Carrega as respostas extras
-                    carregarRespostasExtras(conn, resposta.getId(), resposta);
-                    
-                    respostas.add(resposta);
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return respostas;
-    }
     
     @Override
     public List<RespostaFormulario> listarPorAcaoId(Long acaoId) {
@@ -189,67 +151,6 @@ public class RespostaFormularioRepositoryJDBC implements RespostaFormularioRepos
         }
         
         return respostas;
-    }
-    
-    @Override
-    public boolean excluirPorAcao(Long acaoId) {
-        if (acaoId == null) {
-            return false;
-        }
-        
-        try (Connection conn = ConnectionFactory.getConnection()) {
-            conn.setAutoCommit(false);
-            
-            try {
-                // Primeiro precisamos encontrar os IDs de todas as respostas para essa ação
-                List<Integer> respostaIds = new ArrayList<>();
-                // CORRIGIDO nome da tabela e nomes de colunas
-                String sqlFindIds = "SELECT id FROM respostas_formulario WHERE acao_id = ?";
-                
-                try (PreparedStatement findStmt = conn.prepareStatement(sqlFindIds)) {
-                    findStmt.setLong(1, acaoId);
-                    
-                    try (ResultSet rs = findStmt.executeQuery()) {
-                        while (rs.next()) {
-                            respostaIds.add(rs.getInt("id"));
-                        }
-                    }
-                }
-                
-                // Excluir as respostas extras primeiro
-                if (!respostaIds.isEmpty()) {
-                    // CORRIGIDO nome da tabela e nomes de colunas
-                    String sqlDeleteExtras = "DELETE FROM respostas_extras WHERE resposta_id = ?";
-                    try (PreparedStatement deleteExtrasStmt = conn.prepareStatement(sqlDeleteExtras)) {
-                        for (Integer respostaId : respostaIds) {
-                            deleteExtrasStmt.setInt(1, respostaId);
-                            deleteExtrasStmt.addBatch();
-                        }
-                        deleteExtrasStmt.executeBatch();
-                    }
-                }
-                
-                // Agora exclui as respostas principais
-                // CORRIGIDO nome da tabela e nomes de colunas
-                String sqlDeleteMain = "DELETE FROM respostas_formulario WHERE acao_id = ?";
-                try (PreparedStatement deleteMainStmt = conn.prepareStatement(sqlDeleteMain)) {
-                    deleteMainStmt.setLong(1, acaoId);
-                    deleteMainStmt.executeUpdate();
-                }
-                
-                conn.commit();
-                return true;
-            } catch (SQLException e) {
-                conn.rollback();
-                e.printStackTrace();
-                return false;
-            } finally {
-                conn.setAutoCommit(true);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
     
     /**

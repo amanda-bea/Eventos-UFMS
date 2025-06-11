@@ -43,7 +43,6 @@ public class HomeFXMLController implements Initializable {
     // --- CONTROLADORES E ESTADO DOS FILTROS ---
     private EventoController eventoController;
 
-    // O estado dos filtros agora é gerenciado pela tela principal
     private String termoAtual = "";
     private Categoria categoriaAtual = null;
     private Departamento departamentoAtual = null;
@@ -56,12 +55,10 @@ public class HomeFXMLController implements Initializable {
         if (homebarController != null) {
             // AVISA A BARRA QUE ESTA É A PÁGINA "HOME"
             homebarController.configurarParaPagina("HOME");
-            
-            // Configura a função de callback para a busca
             homebarController.setOnSearch(this::aplicarFiltroEBuscar);
         }
         
-        // Carga inicial sem filtros quando a tela abre
+        //sem filtros quando a tela abre
         carregarEventosFiltrados();
     }
 
@@ -93,33 +90,25 @@ public class HomeFXMLController implements Initializable {
         }
     }
 
-    /**
-     * Cria o card visual padrão para um único evento.
-     * Usa um layout VBox estável e não mostra a etiqueta de status,
-     * ideal para a visualização de usuários comuns.
-     *
-     * @param evento O DTO com as informações do evento.
-     * @return Um VBox que representa o card completo e clicável.
-     */
     private VBox criarCardEvento(EventoMinDTO evento) {
         // 1. O card é um VBox para empilhar a imagem e os textos
-        VBox cardPane = new VBox(5); // 5px de espaçamento vertical
-        cardPane.setPrefSize(210, 240);
-        cardPane.setMinSize(210, 240);
-        cardPane.setMaxSize(210, 240);
-        cardPane.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);");
+        VBox cardPane = new VBox(8);
+        cardPane.setPrefSize(260, 300); // Aumentado de 210x240
+        cardPane.setMinSize(260, 300); // Aumentado de 210x240
+        cardPane.setMaxSize(260, 300); // Aumentado de 210x240
+        
+        cardPane.setStyle("-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, 2);");
         cardPane.setCursor(Cursor.HAND);
-        cardPane.setPadding(new Insets(10));
-        cardPane.setAlignment(Pos.TOP_CENTER); // Centraliza a imagem e o VBox de textos
+        cardPane.setPadding(new Insets(15)); // Aumento do padding interno para 15px
+        cardPane.setAlignment(Pos.TOP_CENTER);
 
-        // 2. Imagem do Evento (sem o status)
         ImageView imageView = new ImageView();
-        imageView.setFitHeight(130.0);
-        imageView.setFitWidth(190.0);
-        imageView.setPreserveRatio(true); // Garante que a imagem não seja distorcida
+        imageView.setFitHeight(160.0); 
+        imageView.setFitWidth(230.0); 
+        imageView.setPreserveRatio(true);
 
         try {
-            String imagePath = evento.getImagem(); // Usando o campo de caminho do arquivo
+            String imagePath = evento.getImagem();
             if (imagePath != null && !imagePath.isEmpty() && new File(imagePath).exists()) {
                 imageView.setImage(new Image(new FileInputStream(imagePath)));
             } else {
@@ -134,37 +123,30 @@ public class HomeFXMLController implements Initializable {
             }
         }
 
-        // 3. Informações de Texto
-        VBox infoBox = new VBox(4);
-        infoBox.setPadding(new Insets(8, 5, 0, 5));
+        VBox infoBox = new VBox(6); 
+        infoBox.setPadding(new Insets(12, 8, 0, 8)); 
         infoBox.setAlignment(Pos.CENTER_LEFT);
 
         Label nomeLabel = new Label(evento.getNome());
-        nomeLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
+        nomeLabel.setFont(Font.font("System", FontWeight.BOLD, 16)); 
+        nomeLabel.setWrapText(true); 
 
         Label categoriaLabel = new Label(evento.getCategoria());
-        categoriaLabel.setFont(Font.font("System", FontWeight.NORMAL, 12));
+        categoriaLabel.setFont(Font.font("System", FontWeight.NORMAL, 14));
         categoriaLabel.setTextFill(Color.web("#489ec1"));
         
         Label dataLabel = new Label(evento.getDataInicio());
-        dataLabel.setFont(Font.font("System", FontWeight.NORMAL, 11));
+        dataLabel.setFont(Font.font("System", FontWeight.NORMAL, 13)); 
         
         infoBox.getChildren().addAll(nomeLabel, categoriaLabel, dataLabel);
-        
-        // 4. Montagem Final do Card
-        // Adiciona a imagem e o VBox de textos ao card principal.
-        // A etiqueta de STATUS foi removida.
-        cardPane.getChildren().addAll(imageView, infoBox);
 
-        // Ação de clique para navegar para os detalhes
+        cardPane.getChildren().addAll(imageView, infoBox);
         cardPane.setOnMouseClicked(mouseEvent -> navegarParaDetalhes(mouseEvent, evento.getId()));
 
         return cardPane;
     }
 
-    /**
-     * Lógica para navegar para a tela de detalhes do evento.
-     */
+
     private void navegarParaDetalhes(MouseEvent mouseEvent, Long eventoId) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/EventoDetalhado.fxml"));
@@ -177,7 +159,6 @@ public class HomeFXMLController implements Initializable {
             stage.setTitle("Detalhes do Evento");
         } catch (IOException e) {
             e.printStackTrace();
-            // Mostrar um alerta de erro para o usuário
         }
     }
 }

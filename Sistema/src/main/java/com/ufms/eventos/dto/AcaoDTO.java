@@ -1,12 +1,6 @@
 package com.ufms.eventos.dto;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-
 import com.ufms.eventos.model.Acao;
-import com.ufms.eventos.model.Evento;
-import com.ufms.eventos.model.Organizador;
-
 import lombok.Data;
 
 @Data
@@ -45,40 +39,6 @@ public class AcaoDTO {
         this.id = id;
     }
 
-    public AcaoDTO(Long id, Evento evento, String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio,
-                   LocalTime horarioFim, Organizador organizador, String departamento, String contato, String modalidade, 
-                   String imagem, String link, int capacidade) {
-        this.evento = evento.getNome();
-        this.nome = nome;
-        this.data = data.toString();
-        this.descricao = descricao;
-        this.local = local;
-        this.horarioInicio = horarioInicio.toString();
-        this.horarioFim = horarioFim.toString();
-        this.departamento = departamento;
-        this.contato = contato;
-        this.modalidade = modalidade;
-        this.link = link;
-        this.capacidade = Integer.toString(capacidade);
-        this.id = id;
-    }
-
-    public AcaoDTO(AcaoDTO acao) {
-        this.evento = acao.getEvento();
-        this.nome = acao.getNome();
-        this.data = acao.getData();
-        this.descricao = acao.getDescricao();
-        this.local = acao.getLocal();
-        this.horarioInicio = acao.getHorarioInicio();
-        this.horarioFim = acao.getHorarioFim();
-        this.departamento = acao.getDepartamento();
-        this.contato = acao.getContato();
-        this.modalidade = acao.getModalidade();
-        this.link = acao.getLink();
-        this.capacidade = acao.getCapacidade();
-        this.id = acao.getId();
-    }
-
     public AcaoDTO(Acao acao) {
         this.evento = acao.getEvento().getNome();
         this.nome = acao.getNome();
@@ -97,6 +57,5 @@ public class AcaoDTO {
     }
 
     public AcaoDTO() {
-        // Construtor padrão
     }
 }

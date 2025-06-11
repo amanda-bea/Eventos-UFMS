@@ -4,6 +4,8 @@ import com.ufms.eventos.dto.EventoMinDTO;
 import com.ufms.eventos.dto.PresencaConfirmadaDTO;
 import com.ufms.eventos.model.Usuario;
 import com.ufms.eventos.services.PresencaConfirmadaService;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class PresencaConfirmadaController {
@@ -20,9 +22,6 @@ public class PresencaConfirmadaController {
         return service.listarEventosComPresencaConfirmada(usuario);
     }
     
-    /**
-     * Confirma a presença de um usuário em uma ação.
-     */
     public boolean confirmarPresenca(PresencaConfirmadaDTO dto) {
         return service.confirmarPresenca(dto);
     }
@@ -34,10 +33,18 @@ public class PresencaConfirmadaController {
     public boolean cancelarInscricao(Usuario usuario, Long acaoId) {
         return service.cancelarInscricao(usuario, acaoId);
     }
+    
     /**
      * Conta o número de presenças confirmadas para uma ação.
      */
     public int contarPresencasConfirmadas(Long idAcao) {
         return service.contarPresencasConfirmadas(idAcao);
+    }
+
+    public List<Usuario> listarInscritosPorAcao(Long idAcao) {
+        if (idAcao == null) {
+            return new ArrayList<>();
+        }
+        return service.listarInscritosPorAcao(idAcao);
     }
 }

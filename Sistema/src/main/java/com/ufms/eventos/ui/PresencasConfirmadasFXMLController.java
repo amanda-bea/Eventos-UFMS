@@ -59,13 +59,11 @@ public class PresencasConfirmadasFXMLController implements Initializable {
         }
 
         if (homebarController != null) {
-            // AVISA A BARRA QUE ESTA NÃO É A PÁGINA "HOME"
             homebarController.configurarParaPagina("DETALHES"); 
         }
     }
 
     private void carregarPresencas(Usuario usuarioLogado) {
-        // Limpa ambos os containers
         disponiveisContainer.getChildren().clear();
         indisponiveisContainer.getChildren().clear();
         
@@ -99,9 +97,7 @@ public class PresencasConfirmadasFXMLController implements Initializable {
             eventosInativos.forEach(evento -> indisponiveisContainer.getChildren().add(criarCardEvento(evento)));
         }
     }
-    /**
-     * MÉTODO ATUALIZADO: A versão final, robusta e bonita para criar o card.
-     */
+
     private VBox criarCardEvento(EventoMinDTO evento) {
         VBox cardPane = new VBox(5);
         cardPane.setPrefSize(210, 240);
@@ -132,7 +128,6 @@ public class PresencasConfirmadasFXMLController implements Initializable {
             }
         }
         
-        // Etiqueta de status (opcional, mas útil para o usuário saber o estado)
         Label statusLabel = new Label(evento.getStatus());
         statusLabel.setFont(Font.font("System", FontWeight.BOLD, 10));
         statusLabel.setTextFill(Color.WHITE);
@@ -175,24 +170,17 @@ public class PresencasConfirmadasFXMLController implements Initializable {
         }
 
         try {
-            // Pega a janela (Stage) a partir do componente que foi clicado
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
-            // 1. SALVA O ESTADO ATUAL DA JANELA (se está maximizada ou não)
             boolean estavaMaximizado = stage.isMaximized();
 
-            // 2. Carrega a nova tela
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/ufms/eventos/view/EventoDetalhado.fxml"));
             Parent root = loader.load();
             
             DetalhesEventoFXMLController controller = loader.getController();
             controller.carregarDadosDoEvento(eventoId);
             
-            // 3. Substitui o conteúdo da cena atual
             stage.getScene().setRoot(root);
             stage.setTitle("Detalhes do Evento");
-
-            // 4. RESTAURA O ESTADO DA JANELA
             stage.setMaximized(estavaMaximizado);
 
         } catch (IOException e) {

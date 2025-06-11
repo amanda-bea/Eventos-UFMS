@@ -44,9 +44,8 @@ public class LoginFXMLController {
         // Simulação de autenticação
         Usuario usuarioAutenticado = null;
         
-        // Verifica se é admin - APENAS este caso é especial
+        // Verifica se é admin 
         if (nome.equalsIgnoreCase("admin") && senha.equals("admin")) {
-            // Cria um admin com dados completos
             usuarioAutenticado = new Admin(nome, "admin@sistema.com", senha, "");
             System.out.println("Login como administrador");
             
@@ -69,19 +68,16 @@ public class LoginFXMLController {
                 usuarioAutenticado = new Usuario();
                 usuarioAutenticado.setNome(nome);
                 usuarioAutenticado.setSenha(senha);
-                usuarioAutenticado.setEmail(nome + "@usuario.com");  // Email provisório
+                usuarioAutenticado.setEmail(nome + "@usuario.com");
                 
                 boolean sucesso = usuarioService.cadastrarUsuario(usuarioAutenticado);
                 if (sucesso) {
                     System.out.println("Novo usuário salvo no banco de dados: " + nome);
                 } else {
                     System.out.println("AVISO: Não foi possível salvar o usuário no banco de dados.");
-                    
-                    // Em caso de falha ao salvar, ainda cria o usuário em memória
                     usuarioAutenticado = new Usuario(nome, senha);
                 }
             } else if (!usuarioAutenticado.getSenha().equals(senha)) {
-                // Se o usuário existe mas a senha está errada, atualiza a senha no modo provisório
                 usuarioAutenticado.setSenha(senha);
                 usuarioService.atualizarUsuario(usuarioAutenticado);
                 System.out.println("Senha atualizada para o usuário: " + nome);
@@ -92,7 +88,7 @@ public class LoginFXMLController {
         
         // Inicia a sessão com o usuário autenticado
         SessaoUsuario.getInstancia().login(usuarioAutenticado);
-        System.out.println("DEBUG: Usuário salvo na sessão é do tipo: " + usuarioAutenticado.getClass().getName());
+
         
         showMessageText("Login realizado com sucesso! Redirecionando...");
         navegarParaTelaPrincipal();

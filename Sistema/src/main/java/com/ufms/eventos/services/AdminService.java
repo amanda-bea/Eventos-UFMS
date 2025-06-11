@@ -7,42 +7,21 @@ import com.ufms.eventos.repository.AcaoRepository;
 import com.ufms.eventos.repository.AcaoRepositoryJDBC;
 import com.ufms.eventos.repository.EventoRepository;
 import com.ufms.eventos.repository.EventoRepositoryJDBC;
-import com.ufms.eventos.repository.AdminRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Camada de Serviço que contém a lógica de negócio EXCLUSIVA do Administrador.
- */
 public class AdminService {
 
     private final EventoRepository eventoRepository;
     private final AcaoRepository acaoRepository;
 
-    /**
-     * Construtor padrão
-     */
     public AdminService() {
         this.eventoRepository = new EventoRepositoryJDBC();
         this.acaoRepository = new AcaoRepositoryJDBC();
     }
 
-    /**
-     * Construtor para injeção de dependência (facilita testes)
-     */
-    public AdminService(AdminRepository adminRepository, 
-                        EventoRepository eventoRepository, 
-                        AcaoRepository acaoRepository) {
-        this.eventoRepository = eventoRepository;
-        this.acaoRepository = acaoRepository;
-    }
-
-    /**
-     * Busca todos os eventos com status "Aguardando aprovação".
-     * @return Lista de DTOs com informações básicas dos eventos aguardando aprovação
-     */
     public List<EventoMinDTO> listarEventosAguardando() {
         List<Evento> eventos = null;
         try {
@@ -62,11 +41,6 @@ public class AdminService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Aprova um evento, atualizando seu status e o de suas ações para "Ativo".
-     * @param eventoId ID do evento a ser aprovado
-     * @return true se o evento foi aprovado com sucesso, false caso contrário
-     */
     public boolean aprovarEvento(Long eventoId) {
         if (eventoId == null) {
             System.err.println("ID do evento não pode ser nulo");
@@ -91,7 +65,6 @@ public class AdminService {
             return false;
         }
         
-        // Atualiza o status do evento
         evento.setStatus("Ativo");
         try {
             eventoRepository.atualizar(evento);
@@ -105,7 +78,7 @@ public class AdminService {
         // Aprova também todas as ações associadas
         List<Acao> acoes = acaoRepository.findByEventoId(eventoId);
         if (acoes == null || acoes.isEmpty()) {
-            return true; // Evento sem ações, mas aprovação foi bem-sucedida
+            return true;
         }
         
         boolean todasAcoesAtualizadas = true;
@@ -128,12 +101,6 @@ public class AdminService {
         return true;
     }
 
-    /**
-     * Rejeita um evento, atualizando seu status e salvando o motivo.
-     * @param eventoId ID do evento a ser rejeitado
-     * @param motivo Motivo da rejeição
-     * @return true se o evento foi rejeitado com sucesso, false caso contrário
-     */
     public boolean rejeitarEvento(Long eventoId, String motivo) {
         if (eventoId == null) {
             System.err.println("ID do evento não pode ser nulo");
@@ -178,7 +145,7 @@ public class AdminService {
         // Rejeita também as ações associadas
         List<Acao> acoes = acaoRepository.findByEventoId(eventoId);
         if (acoes == null || acoes.isEmpty()) {
-            return true; // Evento sem ações, mas rejeição foi bem-sucedida
+            return true;
         }
         
         for (Acao acao : acoes) {
@@ -198,9 +165,6 @@ public class AdminService {
 
     /**
      * Cancela um evento. Esta é uma ação exclusiva do administrador.
-     * @param eventoNome Nome do evento a ser cancelado
-     * @param motivo Motivo do cancelamento
-     * @return true se o evento foi cancelado com sucesso, false caso contrário
      */
     public boolean cancelarEvento(String eventoNome, String motivo) {
         if (eventoNome == null || eventoNome.trim().isEmpty()) {
@@ -213,7 +177,6 @@ public class AdminService {
             return false;
         }
         
-        // Como não há getEvento(String) na interface, precisamos encontrar o evento pelo nome
         List<Evento> eventos = null;
         try {
             eventos = eventoRepository.listarTodos();
@@ -258,7 +221,7 @@ public class AdminService {
         // Cancela também as ações associadas
         List<Acao> acoes = acaoRepository.findByEventoId(evento.getId());
         if (acoes == null || acoes.isEmpty()) {
-            return true; // Evento sem ações, mas cancelamento foi bem-sucedido
+            return true;
         }
         
         for (Acao acao : acoes) {
@@ -276,10 +239,6 @@ public class AdminService {
         return true;
     }
     
-    /**
-     * Lista todos os eventos no sistema, independente do status.
-     * @return Lista de DTOs com informações básicas de todos os eventos
-     */
     public List<EventoMinDTO> listarTodosEventos() {
         List<Evento> eventos = null;
         try {

@@ -445,4 +445,6 @@ public class EventoService {
             System.err.println("Erro ao atualizar status de eventos: " + e.getMessage());
         }
     }
+
+    
 }

@@ -16,22 +16,9 @@ public interface RespostaFormularioRepository {
     
     /**
      * Lista todas as respostas para uma ação específica.
-     * @param acaoNome O nome da ação.
-     * @return Lista de respostas de formulário.
-     */
-    List<RespostaFormulario> listarPorAcao(String acaoNome);
-    
-    /**
-     * Lista todas as respostas para uma ação específica.
      * @param acaoId O ID da ação.
      * @return Lista de respostas de formulário.
      */
     List<RespostaFormulario> listarPorAcaoId(Long acaoId);
     
-    /**
-     * Exclui todas as respostas de uma ação específica.
-     * @param acaoId O ID da ação.
-     * @return true se a operação foi bem-sucedida, false caso contrário.
-     */
-    boolean excluirPorAcao(Long acaoId);
 }

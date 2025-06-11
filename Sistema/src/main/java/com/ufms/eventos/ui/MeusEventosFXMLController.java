@@ -58,7 +58,6 @@ public class MeusEventosFXMLController implements Initializable {
         }
 
         if (homebarController != null) {
-            // AVISA A BARRA QUE ESTA NÃO É A PÁGINA "HOME"
             homebarController.configurarParaPagina("MEUSEVENTOS"); 
         }
     }

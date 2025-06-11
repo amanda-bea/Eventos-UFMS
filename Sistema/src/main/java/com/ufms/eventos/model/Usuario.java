@@ -19,7 +19,7 @@ public class Usuario {
     }
 
     public Usuario() {
-        // Construtor padrão
+        
     }
 
     public Usuario(String nome, String senha) {
@@ -28,16 +28,6 @@ public class Usuario {
         this.email = null; // Email não é obrigatório nesse construtor
         this.telefone = null; // Telefone não é obrigatório nesse construtor
 
-    }
-
-    @Override
-    public String toString() {
-        return "Usuário{" +
-                "nome='" + nome + '\'' +
-                "telefone='" + telefone + '\'' +
-                ", email='" + email + '\'' +
-                ", senha='" + senha + '\'' +
-                '}';
     }
 
     @Override
@@ -51,7 +41,6 @@ public class Usuario {
 
     @Override
     public int hashCode() {
-        // O hashCode também deve ser baseado no campo usado no equals.
         return Objects.hash(nome);
     }
 }

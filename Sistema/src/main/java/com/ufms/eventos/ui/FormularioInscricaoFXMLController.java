@@ -36,7 +36,6 @@ public class FormularioInscricaoFXMLController implements Initializable {
         this.respostaController = new RespostaFormularioController();
     }
 
-     // Recebe a ação e monta a tela
     public void initData(AcaoDTO acao) {
         this.acaoAtual = acao;
         tituloAcaoLabel.setText("Inscrição para: " + acao.getNome());
@@ -52,7 +51,7 @@ public class FormularioInscricaoFXMLController implements Initializable {
      * Cria e adiciona os campos (Label e TextField) na tela dinamicamente.
      */
     private void construirFormulario(ConfiguracaoFormularioDTO config) {
-        formContainer.getChildren().clear(); // Limpa qualquer campo existente
+        formContainer.getChildren().clear();
 
         if (config.isUsarNome()) adicionarCampo("Nome Completo", "nome", true);
         if (config.isUsarEmail()) adicionarCampo("E-mail", "email", true);
@@ -61,7 +60,7 @@ public class FormularioInscricaoFXMLController implements Initializable {
 
         if (config.getCamposPersonalizados() != null) {
             for (String nomeCampo : config.getCamposPersonalizados()) {
-                adicionarCampo(nomeCampo, nomeCampo, false); // Campos personalizados não são obrigatórios por padrão
+                adicionarCampo(nomeCampo, nomeCampo, false);
             }
         }
     }
@@ -80,7 +79,6 @@ public class FormularioInscricaoFXMLController implements Initializable {
      */
     @FXML
     private void handleSubmeter() {
-        // Validação básica: garante que os campos obrigatórios foram preenchidos
         if (camposDoFormulario.containsKey("nome") && camposDoFormulario.get("nome").getText().trim().isEmpty()) {
             mostrarAlerta("Campo Obrigatório", "Por favor, preencha seu nome completo.", AlertType.WARNING);
             return;
@@ -106,11 +104,9 @@ public class FormularioInscricaoFXMLController implements Initializable {
                 extras.put(chave, textField.getText());
             }
         });
+
         resposta.setRespostasExtras(extras);
-
-        // Envia para a camada de serviço
         respostaController.enviarResposta(resposta);
-
         mostrarAlerta("Inscrição Realizada", "Sua inscrição na ação '" + acaoAtual.getNome() + "' foi confirmada com sucesso!", AlertType.INFORMATION);
         fecharJanela();
     }

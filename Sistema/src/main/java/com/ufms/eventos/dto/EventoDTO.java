@@ -13,12 +13,13 @@ public class EventoDTO {
     private String dataFim;
     private String departamento;
     private String categoria; // Ex: Cultura, Educação, Saúde, etc.
-    private String imagem; // URL da imagem do evento
+    private String imagem; // path da imagem do evento
     private String link;
     private String status;
+    private String organizador;
 
     public EventoDTO(String nome, String dataInicio, String dataFim, String descricao,String departamento, String categoria, 
-                     String imagem, String link, String status) {
+                     String imagem, String link, String status, String organizador) {
         this.nome = nome;
         this.dataInicio = dataInicio;
         this.dataFim = dataFim;
@@ -28,18 +29,7 @@ public class EventoDTO {
         this.imagem = imagem;
         this.link = link;
         this.status = status;
-    }
-
-    public EventoDTO(EventoDTO evento){
-        this.nome = evento.getNome();
-        this.dataInicio = evento.getDataInicio();
-        this.dataFim = evento.getDataFim();
-        this.descricao = evento.getDescricao();
-        this.departamento = evento.getDepartamento();
-        this.categoria = evento.getCategoria();
-        this.imagem = evento.getImagem();
-        this.link = evento.getLink();
-        this.status = evento.getStatus();
+        this.organizador = organizador;
     }
 
     public EventoDTO(Evento evento) {
@@ -52,20 +42,9 @@ public class EventoDTO {
         this.categoria = evento.getCategoria().name();
         this.imagem = evento.getImagem();
         this.link = evento.getLink();
+        this.organizador = evento.getOrganizador().getNome();
+        this.id = evento.getId();
     }
+
     public EventoDTO(){}
-
-    public EventoDTO(SolicitacaoEventoDTO evento) {
-        this.nome = evento.getNome();
-        this.dataInicio = evento.getDataInicio();
-        this.dataFim = evento.getDataFim();
-        this.descricao = evento.getDescricao();
-        this.departamento = evento.getDepartamento();
-        this.categoria = evento.getCategoria();
-        this.imagem = evento.getImagem();
-        this.link = evento.getLink();
-
-    }
-
-
 }

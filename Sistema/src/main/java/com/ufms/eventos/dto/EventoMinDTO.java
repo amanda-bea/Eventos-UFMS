@@ -23,15 +23,6 @@ public class EventoMinDTO {
         this.status = status;
     }
 
-    public EventoMinDTO(EventoDTO evento){
-        this.id = evento.getId();
-        this.nome = evento.getNome();
-        this.dataInicio = evento.getDataInicio();
-        this.categoria = evento.getCategoria();
-        this.imagem = evento.getImagem();
-        
-    }
-
     public EventoMinDTO(Evento evento) {
         this.id = evento.getId();
         this.nome = evento.getNome();
@@ -40,6 +31,8 @@ public class EventoMinDTO {
         this.imagem = evento.getImagem();
         this.status = evento.getStatus();
     }
-    public EventoMinDTO(){}
+
+    public EventoMinDTO(){
+    }
 
 }

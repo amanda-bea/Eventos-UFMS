@@ -21,19 +21,8 @@ public class EventoController {
 
     private final EventoService eventoService;
 
-    /**
-     * Construtor padrão que inicializa o serviço de eventos.
-     */
     public EventoController() {
         this.eventoService = new EventoService();
-    }
-    
-    /**
-     * Construtor para injeção de dependência (facilita testes).
-     * @param eventoService O serviço de eventos a ser utilizado.
-     */
-    public EventoController(EventoService eventoService) {
-        this.eventoService = eventoService;
     }
 
     /**
@@ -63,11 +52,6 @@ public class EventoController {
         return eventoService.buscarEventosPorUsuario(usuario);
     }
 
-    /**
-     * Busca os detalhes completos de um evento pelo seu ID.
-     * @param id ID do evento a ser buscado.
-     * @return DTO com detalhes completos do evento, ou null se não encontrado.
-     */
     public EventoDTO buscarDtoPorId(Long id) {
         if (id == null) {
             return null;
@@ -75,10 +59,6 @@ public class EventoController {
         return eventoService.buscarDtoPorId(id);
     }
 
-    /**
-     * Lista todos os eventos públicos com status "Ativo" para a home do usuário.
-     * @return Lista de DTOs com informações básicas dos eventos ativos.
-     */
     public List<EventoMinDTO> listarEventosAtivosMin() {
         return eventoService.listarEventosAtivosMin();
     }
@@ -88,6 +68,7 @@ public class EventoController {
      * @param dto Dados atualizados do evento.
      * @param usuarioLogado Usuário que está tentando editar o evento.
      * @return true se a edição foi realizada com sucesso, false caso contrário.
+     * A SER IMPLEMNATDO
      */
     public boolean editarEvento(EditarEventoDTO dto, Usuario usuarioLogado) {
         if (dto == null || usuarioLogado == null) {
@@ -101,6 +82,7 @@ public class EventoController {
      * @param nomeEvento Nome do evento a ser excluído.
      * @param usuarioLogado Usuário que está tentando excluir o evento.
      * @return true se a exclusão foi realizada com sucesso, false caso contrário.
+     * A SER IMPLEMNTADO
      */
     public boolean excluirSolicitacaoEvento(String nomeEvento, Usuario usuarioLogado) {
         if (nomeEvento == null || nomeEvento.trim().isEmpty() || usuarioLogado == null) {
@@ -121,27 +103,12 @@ public class EventoController {
         return eventoService.buscarEventosComFiltro(termoBusca, categoria, departamento, modalidade);
     }
 
-    /**
-     * Busca os detalhes completos de um evento pelo seu nome.
-     * @param nome Nome do evento a ser buscado.
-     * @return DTO com detalhes completos do evento, ou null se não encontrado.
-     */
-    public EventoDTO buscarDtoPorNome(String nome) {
-        if (nome == null || nome.trim().isEmpty()) {
-            return null;
-        }
-        return eventoService.buscarDtoPorNome(nome);
-    }
 
-    /**
-     * Busca um evento pelo seu ID.
-     * @param id ID do evento a ser buscado.
-     * @return O evento encontrado, ou null se não encontrado.
-     */
     public Evento buscarEventoPorId(Long id) {
         if (id == null) {
             return null;
         }
         return eventoService.buscarEventoPorId(id);
     }
+
 }

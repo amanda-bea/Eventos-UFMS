@@ -24,25 +24,6 @@ public class Acao {
     private int capacidade; // Capacidade do evento (opcional)
     private String mensagemRejeicao; // Mensagem de rejeição (opcional)
 
-    public Acao(Evento evento, String nome, LocalDate data, String descricao, String local, LocalTime horarioInicio, LocalTime horarioFim,
-                Departamento departamento, String contato, String modalidade, String imagem, 
-                String link, int capacidade, String status, String mensagemRejeicao) {
-        this.evento = evento;
-        this.nome = nome;
-        this.data = data;
-        this.descricao = descricao;
-        this.local = local;
-        this.horarioInicio = horarioInicio;
-        this.horarioFim = horarioFim;
-        this.departamento = departamento;
-        this.contato = contato;
-        this.modalidade = modalidade;
-        this.link = link;
-        this.capacidade = capacidade;
-        this.status = status;
-        this.mensagemRejeicao = mensagemRejeicao;
-    }
-
     public Acao() {
     }
 
