@@ -215,14 +215,12 @@ O sistema segue uma **arquitetura em camadas** bem definida:
 
 ## 📸 Screenshots
 
-> **Nota**: Adicione screenshots das principais telas do sistema aqui
+![Captura de tela 2025-06-27 183330](https://github.com/user-attachments/assets/a2822b71-f42b-479b-af92-2bf5090a5a91)
+![Captura de tela 2025-06-27 183251](https://github.com/user-attachments/assets/9b29bd52-6b08-4c69-b043-4c0aff8c9f0b)
+![Captura de tela 2025-06-27 183230](https://github.com/user-attachments/assets/1df32de2-9b06-4914-b4f1-06f8e89bae0d)
+![Captura de tela 2025-06-27 183155](https://github.com/user-attachments/assets/83548b5f-e7f2-4e2f-aab8-a3789d65790e)
+![Captura de tela 2025-06-27 183230](https://github.com/user-attachments/assets/c235524b-1ddd-4f32-b2df-e5a8bd3a6669)
 
-```markdown
-![Tela de Login](docs/images/login.png)
-![Dashboard Admin](docs/images/admin-dashboard.png)
-![Criação de Evento](docs/images/criar-evento.png)
-![Lista de Eventos](docs/images/lista-eventos.png)
-```
 
 ---
 
